@@ -1,0 +1,2394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Console | Bentley BoldTrader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.0"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --bentley-black: #0A0A0A;
+            --bentley-dark: #121212;
+            --bentley-gray: #1A1A1A;
+            --bentley-light-gray: #2D2D2D;
+            --bentley-gold: #C9A86A;
+            --bentley-gold-dark: #9C8242;
+            --bentley-gold-light: #E8D9B5;
+            --success: #00C853;
+            --warning: #FF9800;
+            --danger: #FF5252;
+            --info: #2196F3;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --card-bg: #1A1A1A;
+            --border-color: #333333;
+            --live-green: #00FF88;
+            --purple: #9B59B6;
+            --cyan: #00BCD4;
+        }
+
+        body {
+            background-color: var(--bentley-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Live Status Bar */
+        .live-status-bar {
+            background: linear-gradient(90deg, #0A0A0A 0%, #121212 100%);
+            padding: 8px 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--live-green);
+        }
+
+        .live-pulse {
+            width: 10px;
+            height: 10px;
+            background-color: var(--live-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bentley-black) 0%, #151515 100%);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bentley-gold);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            color: var(--bentley-gold);
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, var(--bentley-gold), var(--bentley-gold-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text span {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Risk Dashboard */
+        .risk-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--bentley-gold);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--bentley-gold), var(--bentley-gold-dark));
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(201, 168, 106, 0.1), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--bentley-gold);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Risk Indicators */
+        .risk-indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .indicator-card {
+            background: linear-gradient(135deg, var(--bentley-gray), var(--bentley-light-gray));
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .indicator-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--bentley-gold);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .indicator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--bentley-gold), var(--bentley-gold-light));
+        }
+
+        .indicator-name {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .indicator-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .indicator-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-safe {
+            background-color: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-warning {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .status-danger {
+            background-color: rgba(255, 82, 82, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        /* Risk Gauge */
+        .risk-gauge {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .gauge-circle {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .gauge-background {
+            fill: none;
+            stroke: var(--bentley-light-gray);
+            stroke-width: 10;
+        }
+
+        .gauge-foreground {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dasharray 1s ease;
+        }
+
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+        }
+
+        .gauge-label {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Progress Bars */
+        .progress-container {
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: var(--bentley-light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Risk Controls */
+        .risk-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-group {
+            background-color: var(--bentley-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .control-title {
+            color: var(--bentley-gold-light);
+            font-weight: 600;
+        }
+
+        /* Form Elements */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-control {
+            padding: 0.8rem 1rem;
+            background-color: var(--bentley-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--bentley-gold);
+            box-shadow: 0 0 0 2px rgba(201, 168, 106, 0.2);
+        }
+
+        /* Sliders */
+        .slider-container {
+            margin-bottom: 1rem;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--bentley-light-gray);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--bentley-gold);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: rgba(201, 168, 106, 0.05);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            background-color: var(--bentley-gold);
+            color: var(--bentley-black);
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            background-color: var(--bentley-gold-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--bentley-gold);
+            border: 1px solid var(--bentley-gold);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(201, 168, 106, 0.1);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-info {
+            background-color: var(--info);
+            color: white;
+        }
+
+        .btn-small {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-danger {
+            background-color: rgba(255, 82, 82, 0.1);
+            border-left-color: var(--danger);
+        }
+
+        .alert-warning {
+            background-color: rgba(255, 152, 0, 0.1);
+            border-left-color: var(--warning);
+        }
+
+        .alert-success {
+            background-color: rgba(0, 200, 83, 0.1);
+            border-left-color: var(--success);
+        }
+
+        .alert-info {
+            background-color: rgba(33, 150, 243, 0.1);
+            border-left-color: var(--info);
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .alert-message {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        /* Live Updates */
+        .update-indicator {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--bentley-gold);
+            border-bottom: 2px solid var(--bentley-gold);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: rgba(0, 200, 83, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background-color: rgba(255, 82, 82, 0.2);
+            color: var(--danger);
+        }
+
+        .badge-info {
+            background-color: rgba(33, 150, 243, 0.2);
+            color: var(--info);
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--bentley-black);
+            color: var(--text-primary);
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid var(--bentley-gold);
+            font-size: 0.85rem;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 2px solid var(--bentley-gold);
+            width: 100%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .risk-dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .risk-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .risk-indicators {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .live-status-bar {
+                padding: 8px 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .risk-indicators {
+                grid-template-columns: 1fr;
+            }
+
+            .alert {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Live Status Bar -->
+    <div class="live-status-bar">
+        <div class="live-indicator">
+            <div class="live-pulse"></div>
+            <span>LIVE RISK MONITORING</span>
+        </div>
+        <div class="update-indicator">
+            <i class="fas fa-sync-alt fa-spin"></i>
+            <span>Updated: <span id="lastUpdateTime">17/01/2026 09:45:22</span></span>
+        </div>
+        <div style="color: var(--text-secondary);">
+            Market Volatility: <span style="color: var(--warning); font-weight: 600;">High (VIX: 24.5)</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="logo-text">BENTLEY<span>BOLDTRADER</span></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 20px; border: 1px solid var(--success);">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--success);"></div>
+                <span>RISK SCORE: <span id="overallRiskScore">84</span>/100</span>
+            </div>
+            <div style="color: var(--text-secondary);">
+                Alerts: <span class="badge badge-danger" id="activeAlerts">3</span>
+            </div>
+            <button class="btn-secondary btn-small" onclick="toggleAutoHedge()" id="hedgeToggleBtn">
+                <i class="fas fa-shield-alt"></i> Auto-Hedge: ON
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Risk Console</h1>
+                <p class="page-subtitle">AI-Powered Risk Management | January 17, 2026 | Real-time Monitoring</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn" onclick="runComprehensiveRiskAnalysis()">
+                    <i class="fas fa-brain"></i> AI Analysis
+                </button>
+                <button class="btn-secondary" onclick="generateRiskReport()">
+                    <i class="fas fa-file-export"></i> Export Report
+                </button>
+                <button class="btn-danger" onclick="emergencyStop()">
+                    <i class="fas fa-stop-circle"></i> Emergency Stop
+                </button>
+            </div>
+        </div>
+
+        <!-- Risk Alerts -->
+        <div class="alerts-container fade-in">
+            <div class="alert alert-warning">
+                <div class="alert-content">
+                    <div class="alert-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Portfolio Concentration Alert</span>
+                        <span class="badge badge-warning">HIGH</span>
+                    </div>
+                    <div class="alert-message">
+                        Technology sector exposure at 46.2%, exceeding 40% limit. AI recommends diversification.
+                    </div>
+                </div>
+                <button class="btn-secondary btn-small" onclick="diversifyPortfolio()">
+                    <i class="fas fa-balance-scale"></i> Rebalance
+                </button>
+            </div>
+
+            <div class="alert alert-danger">
+                <div class="alert-content">
+                    <div class="alert-title">
+                        <i class="fas fa-skull-crossbones"></i>
+                        <span>Stop Loss Approaching</span>
+                        <span class="badge badge-danger">CRITICAL</span>
+                    </div>
+                    <div class="alert-message">
+                        TSLA position down 4.2% ($212.10). Stop loss will trigger at $208.50 (-5%).
+                    </div>
+                </div>
+                <button class="btn btn-small" onclick="adjustStopLoss('TSLA')">
+                    <i class="fas fa-edit"></i> Adjust
+                </button>
+            </div>
+
+            <div class="alert alert-info">
+                <div class="alert-content">
+                    <div class="alert-title">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Risk Mitigation Active</span>
+                        <span class="badge badge-info">ACTIVE</span>
+                    </div>
+                    <div class="alert-message">
+                        Quantum AI has implemented 3 hedging positions. Estimated risk reduction: 24%.
+                    </div>
+                </div>
+                <button class="btn-info btn-small" onclick="showHedgingDetails()">
+                    <i class="fas fa-chart-line"></i> Details
+                </button>
+            </div>
+        </div>
+
+        <!-- Risk Indicators -->
+        <div class="risk-indicators fade-in">
+            <div class="indicator-card">
+                <div class="indicator-name">
+                    <i class="fas fa-chart-line"></i>
+                    Value at Risk (95%)
+                </div>
+                <div class="indicator-value" id="varIndicator">$48,200</div>
+                <div class="indicator-status status-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="varStatus">LIMIT: $50K</span>
+                </div>
+            </div>
+
+            <div class="indicator-card">
+                <div class="indicator-name">
+                    <i class="fas fa-wave-square"></i>
+                    Max Drawdown
+                </div>
+                <div class="indicator-value" id="drawdownIndicator">-3.8%</div>
+                <div class="indicator-status status-safe">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="drawdownStatus">WITHIN LIMITS</span>
+                </div>
+            </div>
+
+            <div class="indicator-card">
+                <div class="indicator-name">
+                    <i class="fas fa-chart-bar"></i>
+                    Sharpe Ratio
+                </div>
+                <div class="indicator-value" id="sharpeIndicator">1.94</div>
+                <div class="indicator-status status-safe">
+                    <i class="fas fa-trophy"></i>
+                    <span id="sharpeStatus">EXCELLENT</span>
+                </div>
+            </div>
+
+            <div class="indicator-card">
+                <div class="indicator-name">
+                    <i class="fas fa-balance-scale"></i>
+                    Portfolio Beta
+                </div>
+                <div class="indicator-value" id="betaIndicator">1.18</div>
+                <div class="indicator-status status-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="betaStatus">ABOVE MARKET</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Dashboard -->
+        <div class="risk-dashboard fade-in">
+            <!-- Overall Risk Gauge -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-tachometer-alt"></i> Live Risk Assessment</h3>
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;" id="riskUpdateTime">Updated 2 min ago</span>
+                </div>
+                <div class="card-content">
+                    <div class="risk-gauge">
+                        <svg class="gauge-circle" viewBox="0 0 100 100">
+                            <circle class="gauge-background" cx="50" cy="50" r="45"></circle>
+                            <circle class="gauge-foreground" cx="50" cy="50" r="45"
+                                    stroke-dasharray="283"
+                                    stroke-dashoffset="113.2"
+                                    stroke="#C9A86A"></circle>
+                        </svg>
+                        <div class="gauge-value" id="liveRiskScore">84</div>
+                    </div>
+                    <div class="gauge-label">
+                        <span id="riskLevelText">MODERATE RISK</span>
+                        <div class="update-indicator" style="margin-top: 0.5rem;">
+                            <i class="fas fa-bolt"></i>
+                            <span>Next update: <span id="nextRiskUpdate">45</span>s</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Market Risk</span>
+                                <span id="marketRiskValue">72/100</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="marketRiskBar" style="width: 72%; background-color: var(--warning);"></div>
+                            </div>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Credit Risk</span>
+                                <span id="creditRiskValue">88/100</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="creditRiskBar" style="width: 88%; background-color: var(--success);"></div>
+                            </div>
+                        </div>
+
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Liquidity Risk</span>
+                                <span id="liquidityRiskValue">91/100</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="liquidityRiskBar" style="width: 91%; background-color: var(--success);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Position Risk Analysis -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-pie"></i> Position Risk Heatmap</h3>
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">14 Active Positions</span>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="positionRiskChart"></canvas>
+                    </div>
+
+                    <div style="margin-top: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-secondary);">Highest Risk Position</span>
+                            <span style="color: var(--danger); font-weight: 600;">
+                                TSLA (-4.2%)
+                                <button class="btn-danger btn-small" style="margin-left: 8px;" onclick="managePositionRisk('TSLA')">
+                                    <i class="fas fa-shield-alt"></i>
+                                </button>
+                            </span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-secondary);">Largest Exposure</span>
+                            <span style="color: var(--warning); font-weight: 600;">
+                                NVDA (22.4%)
+                                <button class="btn-secondary btn-small" style="margin-left: 8px;" onclick="adjustPositionSize('NVDA')">
+                                    <i class="fas fa-compress-alt"></i>
+                                </button>
+                            </span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--text-secondary);">Most Stable</span>
+                            <span style="color: var(--success); font-weight: 600;">
+                                JPM (+1.2%)
+                                <button class="btn-success btn-small" style="margin-left: 8px;" onclick="analyzeStability('JPM')">
+                                    <i class="fas fa-chart-line"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Risk Controls -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-sliders-h"></i> Active Risk Controls</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <span class="badge badge-success" id="activeControls">9</span>
+                        <span class="update-indicator">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Auto-Protect</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="risk-controls">
+                        <div class="control-group">
+                            <div class="control-header">
+                                <div class="control-title">Position Limits</div>
+                                <span class="badge badge-success">ACTIVE</span>
+                            </div>
+                            <div class="slider-container">
+                                <div class="slider-label">
+                                    <span>Max Position Size</span>
+                                    <span id="maxPositionSizeValue">$75,000</span>
+                                </div>
+                                <input type="range" min="25000" max="150000" step="5000" value="75000"
+                                       class="slider" id="maxPositionSizeSlider" onchange="updatePositionLimit()">
+                            </div>
+                            <div class="slider-container">
+                                <div class="slider-label">
+                                    <span>Max Positions</span>
+                                    <span id="maxPositionsValue">20</span>
+                                </div>
+                                <input type="range" min="5" max="50" step="5" value="20"
+                                       class="slider" id="maxPositionsSlider" onchange="updatePositionsLimit()">
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <div class="control-header">
+                                <div class="control-title">Loss Limits</div>
+                                <span class="badge badge-success">ACTIVE</span>
+                            </div>
+                            <div class="slider-container">
+                                <div class="slider-label">
+                                    <span>Daily Loss Limit</span>
+                                    <span id="dailyLossValue">-$15,000</span>
+                                </div>
+                                <input type="range" min="5000" max="50000" step="1000" value="15000"
+                                       class="slider" id="dailyLossSlider" onchange="updateLossLimit()">
+                            </div>
+                            <div class="slider-container">
+                                <div class="slider-label">
+                                    <span>Max Drawdown %</span>
+                                    <span id="maxDrawdownValue">6%</span>
+                                </div>
+                                <input type="range" min="2" max="20" step="1" value="6"
+                                       class="slider" id="maxDrawdownSlider" onchange="updateDrawdownLimit()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem; display: grid; gap: 0.5rem;">
+                        <button class="btn-secondary" onclick="configureAdvancedControls()">
+                            <i class="fas fa-cogs"></i> Advanced Controls
+                        </button>
+                        <button class="btn" onclick="saveRiskControls()">
+                            <i class="fas fa-save"></i> Save Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Tabs -->
+        <div class="tabs fade-in">
+            <div class="tab active" onclick="switchRiskTab('exposure')">Risk Exposure</div>
+            <div class="tab" onclick="switchRiskTab('stress')">Stress Testing</div>
+            <div class="tab" onclick="switchRiskTab('correlation')">Correlation Analysis</div>
+            <div class="tab" onclick="switchRiskTab('history')">Risk History</div>
+            <div class="tab" onclick="switchRiskTab('settings')">
+                <i class="fas fa-cog"></i> Settings
+            </div>
+        </div>
+
+        <!-- Risk Exposure Table -->
+        <div class="card fade-in" id="riskExposureTab">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-exclamation-triangle"></i> Live Risk Exposure</h3>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="update-indicator">
+                        <i class="fas fa-sync-alt fa-spin"></i>
+                        <span>Live Updates</span>
+                    </div>
+                    <button class="btn-secondary btn-small" onclick="exportRiskData()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Position</th>
+                                <th>Size</th>
+                                <th>Live P&L</th>
+                                <th>Risk Score</th>
+                                <th>VaR Contribution</th>
+                                <th>Stop Distance</th>
+                                <th>AI Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="riskExposureTable">
+                            <!-- Positions will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stress Test Results -->
+        <div class="card fade-in" id="stressTestTab" style="display: none;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-vial"></i> Advanced Stress Testing</h3>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn" onclick="runAdvancedStressTest()">
+                        <i class="fas fa-play"></i> Run New Test
+                    </button>
+                    <button class="btn-secondary" onclick="compareScenarios()">
+                        <i class="fas fa-balance-scale"></i> Compare
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="text-align: center; padding: 1rem; background: rgba(255, 82, 82, 0.1); border-radius: 8px; border: 1px solid var(--danger);">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--danger);">-$32,500</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Quantum Market Crash</div>
+                        <div style="font-size: 0.8rem; color: var(--danger);">2026 Scenario</div>
+                    </div>
+
+                    <div style="text-align: center; padding: 1rem; background: rgba(255, 152, 0, 0.1); border-radius: 8px; border: 1px solid var(--warning);">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--warning);">-$18,200</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">AI Tech Correction</div>
+                        <div style="font-size: 0.8rem; color: var(--warning);">2026 Scenario</div>
+                    </div>
+
+                    <div style="text-align: center; padding: 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 8px; border: 1px solid var(--success);">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);">-$6,800</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Rate Hike Shock</div>
+                        <div style="font-size: 0.8rem; color: var(--success);">2026 Scenario</div>
+                    </div>
+
+                    <div style="text-align: center; padding: 1rem; background: rgba(33, 150, 243, 0.1); border-radius: 8px; border: 1px solid var(--info);">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--info);">-4.8%</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Max Drawdown</div>
+                        <div style="font-size: 0.8rem; color: var(--info);">All Scenarios</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="stressTestChart"></canvas>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <h4 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">Scenario Analysis</h4>
+                    <div style="display: grid; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--bentley-gray); border-radius: 8px;">
+                            <div>
+                                <div style="font-weight: 600;">Quantum Market Crash Protection</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Recommended hedging: Increase put options by 15%</div>
+                            </div>
+                            <button class="btn-secondary btn-small" onclick="implementHedge('quantum')">
+                                <i class="fas fa-shield-alt"></i> Implement
+                            </button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--bentley-gray); border-radius: 8px;">
+                            <div>
+                                <div style="font-weight: 600;">Portfolio Resilience Score</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Current: 78/100 | Target: 85/100</div>
+                            </div>
+                            <button class="btn btn-small" onclick="improveResilience()">
+                                <i class="fas fa-chart-line"></i> Optimize
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Correlation Analysis -->
+        <div class="card fade-in" id="correlationTab" style="display: none;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-project-diagram"></i> Correlation Matrix</h3>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Portfolio Diversification Analysis</span>
+            </div>
+            <div class="card-content">
+                <div class="chart-container">
+                    <canvas id="correlationChart"></canvas>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <h4 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">AI Recommendations</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                        <div style="padding: 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 8px;">
+                            <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">
+                                <i class="fas fa-check-circle"></i> Well Diversified
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                Portfolio shows good correlation spread. Average correlation: 0.42
+                            </div>
+                        </div>
+
+                        <div style="padding: 1rem; background: rgba(255, 152, 0, 0.1); border-radius: 8px;">
+                            <div style="font-weight: 600; color: var(--warning); margin-bottom: 0.5rem;">
+                                <i class="fas fa-exclamation-triangle"></i> Tech Concentration
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                Tech stocks show high correlation (0.78). Consider adding non-correlated assets.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Risk Advisor -->
+        <div class="card fade-in" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-robot"></i> AI Risk Advisor</h3>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-sync-alt fa-spin" style="color: var(--bentley-gold);"></i>
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">LIVE ANALYSIS</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <div style="color: var(--success); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-thumbs-up"></i>
+                            Strengths
+                        </div>
+                        <ul style="color: var(--text-secondary); list-style: none; padding: 0;">
+                            <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                                <i class="fas fa-check" style="position: absolute; left: 0; color: var(--success);"></i>
+                                Excellent Sharpe ratio (1.94) indicates good risk-adjusted returns
+                            </li>
+                            <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                                <i class="fas fa-check" style="position: absolute; left: 0; color: var(--success);"></i>
+                                Effective stop-loss protection on 92% of positions
+                            </li>
+                            <li style="padding-left: 1.5rem; position: relative;">
+                                <i class="fas fa-check" style="position: absolute; left: 0; color: var(--success);"></i>
+                                Strong liquidity management with 18% cash buffer
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <div style="color: var(--warning); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Recommendations
+                        </div>
+                        <ul style="color: var(--text-secondary); list-style: none; padding: 0;">
+                            <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                                <i class="fas fa-arrow-right" style="position: absolute; left: 0; color: var(--warning);"></i>
+                                Reduce tech concentration from 46% to 35%
+                            </li>
+                            <li style="margin-bottom: 0.5rem; padding-left: 1.5rem; position: relative;">
+                                <i class="fas fa-arrow-right" style="position: absolute; left: 0; color: var(--warning);"></i>
+                                Implement volatility targeting on TSLA position
+                            </li>
+                            <li style="padding-left: 1.5rem; position: relative;">
+                                <i class="fas fa-arrow-right" style="position: absolute; left: 0; color: var(--warning);"></i>
+                                Add quantum computing hedges for 2026 market conditions
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(201, 168, 106, 0.1), rgba(0, 0, 0, 0.2)); border-radius: 8px;">
+                    <div style="display: flex; align-items: start; gap: 12px;">
+                        <i class="fas fa-brain" style="color: var(--bentley-gold); font-size: 1.5rem;"></i>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">
+                                Immediate Action Recommended
+                            </div>
+                            <div style="color: var(--text-secondary); margin-bottom: 1rem;">
+                                Based on current risk metrics and market conditions (VIX: 24.5), AI recommends implementing dynamic hedging strategy to reduce portfolio beta from 1.18 to 0.95.
+                            </div>
+                            <div style="display: flex; gap: 1rem;">
+                                <button class="btn" onclick="implementAIRiskStrategy()">
+                                    <i class="fas fa-bolt"></i> Implement AI Strategy
+                                </button>
+                                <button class="btn-secondary" onclick="simulateStrategy()">
+                                    <i class="fas fa-chart-line"></i> Simulate Results
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Risk Configuration Modal -->
+    <div class="modal" id="riskConfigModal">
+        <div class="modal-content">
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: var(--bentley-gold);" id="modalTitle">Risk Controls Configuration</h3>
+                <button onclick="closeModal()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">×</button>
+            </div>
+            <div style="padding: 1.5rem;" id="modalContent">
+                <!-- Modal content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let riskData = {
+            overallScore: 84,
+            var: 48200,
+            maxDrawdown: -3.8,
+            sharpe: 1.94,
+            beta: 1.18,
+            marketRisk: 72,
+            creditRisk: 88,
+            liquidityRisk: 91,
+            activeAlerts: 3
+        };
+
+        let liveUpdatesActive = true;
+        let autoHedgeActive = true;
+        let riskCharts = {};
+        let updateInterval;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeRiskConsole();
+            startLiveUpdates();
+            populateRiskExposureTable();
+            initializeCharts();
+            updateDateTime();
+        });
+
+        function initializeRiskConsole() {
+            updateRiskGauge();
+            updateRiskIndicators();
+            updateRiskControls();
+        }
+
+        function updateDateTime() {
+            const now = luxon.DateTime.now();
+            const formatted = now.toFormat('dd/MM/yyyy HH:mm:ss');
+            document.getElementById('lastUpdateTime').textContent = formatted;
+
+            document.querySelector('.page-subtitle').textContent =
+                `AI-Powered Risk Management | ${now.toFormat('dd LLLL yyyy')} | Real-time Monitoring`;
+        }
+
+        function updateRiskGauge() {
+            const gauge = document.querySelector('.gauge-foreground');
+            const score = riskData.overallScore;
+            const offset = 283 - (283 * score / 100);
+            gauge.style.strokeDashoffset = offset;
+
+            // Update color based on score
+            let color;
+            let levelText;
+            if (score >= 80) {
+                color = '#00C853';
+                levelText = 'LOW RISK';
+            } else if (score >= 60) {
+                color = '#FF9800';
+                levelText = 'MODERATE RISK';
+            } else {
+                color = '#FF5252';
+                levelText = 'HIGH RISK';
+            }
+
+            gauge.style.stroke = color;
+            document.getElementById('liveRiskScore').textContent = score;
+            document.getElementById('riskLevelText').textContent = levelText;
+            document.getElementById('overallRiskScore').textContent = score;
+        }
+
+        function updateRiskIndicators() {
+            // Update VaR
+            document.getElementById('varIndicator').textContent = '$' + riskData.var.toLocaleString();
+            if (riskData.var > 45000) {
+                document.getElementById('varStatus').textContent = 'LIMIT: $50K';
+                document.getElementById('varStatus').parentElement.className = 'indicator-status status-warning';
+            } else {
+                document.getElementById('varStatus').textContent = 'SAFE';
+                document.getElementById('varStatus').parentElement.className = 'indicator-status status-safe';
+            }
+
+            // Update other indicators
+            document.getElementById('drawdownIndicator').textContent = riskData.maxDrawdown.toFixed(1) + '%';
+            document.getElementById('sharpeIndicator').textContent = riskData.sharpe.toFixed(2);
+            document.getElementById('betaIndicator').textContent = riskData.beta.toFixed(2);
+
+            // Update progress bars
+            document.getElementById('marketRiskValue').textContent = riskData.marketRisk + '/100';
+            document.getElementById('marketRiskBar').style.width = riskData.marketRisk + '%';
+
+            document.getElementById('creditRiskValue').textContent = riskData.creditRisk + '/100';
+            document.getElementById('creditRiskBar').style.width = riskData.creditRisk + '%';
+
+            document.getElementById('liquidityRiskValue').textContent = riskData.liquidityRisk + '/100';
+            document.getElementById('liquidityRiskBar').style.width = riskData.liquidityRisk + '%';
+
+            // Update active alerts
+            document.getElementById('activeAlerts').textContent = riskData.activeAlerts;
+        }
+
+        function updateRiskControls() {
+            // Update slider values display
+            document.getElementById('maxPositionSizeValue').textContent =
+                '$' + document.getElementById('maxPositionSizeSlider').value.toLocaleString();
+            document.getElementById('maxPositionsValue').textContent =
+                document.getElementById('maxPositionsSlider').value;
+            document.getElementById('dailyLossValue').textContent =
+                '-$' + document.getElementById('dailyLossSlider').value.toLocaleString();
+            document.getElementById('maxDrawdownValue').textContent =
+                document.getElementById('maxDrawdownSlider').value + '%';
+
+            // Update active controls count
+            const activeControls = 9; // Hardcoded for now
+            document.getElementById('activeControls').textContent = activeControls;
+        }
+
+        function initializeCharts() {
+            // Position Risk Chart (Heatmap)
+            const positionCtx = document.getElementById('positionRiskChart').getContext('2d');
+            riskCharts.positionRisk = new Chart(positionCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['NVDA', 'AAPL', 'TSLA', 'MSFT', 'GOOGL', 'JPM', 'AMZN', 'BAC'],
+                    datasets: [{
+                        label: 'Risk Score (Lower is Better)',
+                        data: [28, 65, 88, 42, 58, 32, 45, 38],
+                        backgroundColor: 'rgba(201, 168, 106, 0.2)',
+                        borderColor: '#C9A86A',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#C9A86A',
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            angleLines: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            pointLabels: {
+                                color: '#B0B0B0',
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                backdropColor: 'transparent',
+                                stepSize: 25
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#B0B0B0'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 26, 0.9)',
+                            titleColor: '#E8D9B5',
+                            bodyColor: '#B0B0B0',
+                            borderColor: '#C9A86A',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Risk Score: ${context.parsed.r}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Stress Test Chart
+            const stressCtx = document.getElementById('stressTestChart').getContext('2d');
+            riskCharts.stressTest = new Chart(stressCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Quantum Crash', 'AI Correction', 'Rate Shock', 'Flash Crash', 'Oil Crisis', 'Crypto Crash'],
+                    datasets: [{
+                        label: 'Portfolio Impact ($)',
+                        data: [-32500, -18200, -6800, -4200, -3200, -5800],
+                        backgroundColor: [
+                            '#FF5252',
+                            '#FF9800',
+                            '#FFC107',
+                            '#4CAF50',
+                            '#2196F3',
+                            '#9C27B0'
+                        ],
+                        borderColor: [
+                            '#FF5252',
+                            '#FF9800',
+                            '#FFC107',
+                            '#4CAF50',
+                            '#2196F3',
+                            '#9C27B0'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Impact: $${context.parsed.y.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                maxRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Correlation Chart
+            const correlationCtx = document.getElementById('correlationChart').getContext('2d');
+            riskCharts.correlation = new Chart(correlationCtx, {
+                type: 'heatmap',
+                data: {
+                    datasets: [{
+                        label: 'Correlation Matrix',
+                        data: [
+                            {x: 'NVDA', y: 'NVDA', v: 1.0},
+                            {x: 'NVDA', y: 'AAPL', v: 0.78},
+                            {x: 'NVDA', y: 'TSLA', v: 0.65},
+                            {x: 'NVDA', y: 'MSFT', v: 0.82},
+                            {x: 'NVDA', y: 'GOOGL', v: 0.71},
+                            {x: 'NVDA', y: 'JPM', v: 0.28},
+                            {x: 'AAPL', y: 'AAPL', v: 1.0},
+                            {x: 'AAPL', y: 'TSLA', v: 0.58},
+                            {x: 'AAPL', y: 'MSFT', v: 0.75},
+                            {x: 'AAPL', y: 'GOOGL', v: 0.68},
+                            {x: 'AAPL', y: 'JPM', v: 0.32},
+                            {x: 'TSLA', y: 'TSLA', v: 1.0},
+                            {x: 'TSLA', y: 'MSFT', v: 0.45},
+                            {x: 'TSLA', y: 'GOOGL', v: 0.38},
+                            {x: 'TSLA', y: 'JPM', v: 0.22},
+                            {x: 'MSFT', y: 'MSFT', v: 1.0},
+                            {x: 'MSFT', y: 'GOOGL', v: 0.82},
+                            {x: 'MSFT', y: 'JPM', v: 0.35},
+                            {x: 'GOOGL', y: 'GOOGL', v: 1.0},
+                            {x: 'GOOGL', y: 'JPM', v: 0.28},
+                            {x: 'JPM', y: 'JPM', v: 1.0}
+                        ],
+                        backgroundColor: function(context) {
+                            const value = context.dataset.data[context.dataIndex].v;
+                            let alpha = 0.6;
+                            let color;
+
+                            if (value >= 0.8) {
+                                color = '255, 82, 82'; // Red
+                            } else if (value >= 0.6) {
+                                color = '255, 152, 0'; // Orange
+                            } else if (value >= 0.4) {
+                                color = '255, 193, 7'; // Yellow
+                            } else if (value >= 0.2) {
+                                color = '76, 175, 80'; // Green
+                            } else {
+                                color = '33, 150, 243'; // Blue
+                            }
+
+                            return `rgba(${color}, ${alpha})`;
+                        },
+                        borderWidth: 1,
+                        borderColor: '#1A1A1A',
+                        width: 50,
+                        height: 50
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const data = context.dataset.data[context.dataIndex];
+                                    return `${data.x} ↔ ${data.y}: ${data.v.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'category',
+                            labels: ['NVDA', 'AAPL', 'TSLA', 'MSFT', 'GOOGL', 'JPM'],
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        },
+                        y: {
+                            type: 'category',
+                            labels: ['NVDA', 'AAPL', 'TSLA', 'MSFT', 'GOOGL', 'JPM'],
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function populateRiskExposureTable() {
+            const positions = [
+                { symbol: 'TSLA', position: 'LONG', size: '$42,500', pnl: '-$1,820', riskScore: 88, varContribution: '$8,200', stopDistance: '1.8%' },
+                { symbol: 'NVDA', position: 'LONG', size: '$95,200', pnl: '+$2,450', riskScore: 28, varContribution: '$12,800', stopDistance: '8.5%' },
+                { symbol: 'AAPL', position: 'LONG', size: '$78,200', pnl: '+$1,250', riskScore: 65, varContribution: '$9,500', stopDistance: '4.2%' },
+                { symbol: 'MSFT', position: 'LONG', size: '$68,400', pnl: '+$2,150', riskScore: 42, varContribution: '$7,200', stopDistance: '5.8%' },
+                { symbol: 'GOOGL', position: 'LONG', size: '$48,500', pnl: '+$850', riskScore: 58, varContribution: '$5,600', stopDistance: '3.4%' },
+                { symbol: 'JPM', position: 'LONG', size: '$32,800', pnl: '+$420', riskScore: 32, varContribution: '$2,800', stopDistance: '6.2%' },
+                { symbol: 'AMZN', position: 'SHORT', size: '$28,400', pnl: '+$1,250', riskScore: 45, varContribution: '$3,100', stopDistance: '7.5%' }
+            ];
+
+            const tableBody = document.getElementById('riskExposureTable');
+            tableBody.innerHTML = '';
+
+            positions.forEach(pos => {
+                const riskColor = pos.riskScore >= 80 ? 'var(--danger)' :
+                                 pos.riskScore >= 60 ? 'var(--warning)' : 'var(--success)';
+                const pnlColor = pos.pnl.startsWith('+') ? 'var(--success)' : 'var(--danger)';
+                const positionColor = pos.position === 'LONG' ? 'var(--success)' : 'var(--danger)';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${pos.symbol}</strong></td>
+                    <td style="color: ${positionColor}; font-weight: 600;">${pos.position}</td>
+                    <td>${pos.size}</td>
+                    <td style="color: ${pnlColor}; font-weight: 600;">${pos.pnl}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 60px; height: 6px; background-color: var(--bentley-light-gray); border-radius: 3px; overflow: hidden;">
+                                <div style="width: ${pos.riskScore}%; height: 100%; background-color: ${riskColor};"></div>
+                            </div>
+                            <span style="color: ${riskColor}; font-weight: 600;">${pos.riskScore}</span>
+                        </div>
+                    </td>
+                    <td>${pos.varContribution}</td>
+                    <td>${pos.stopDistance}</td>
+                    <td>
+                        <div style="display: flex; gap: 0.3rem;">
+                            <button class="btn-secondary btn-small" onclick="adjustStopLoss('${pos.symbol}')" title="Adjust Stop Loss">
+                                <i class="fas fa-sliders-h"></i>
+                            </button>
+                            <button class="btn-info btn-small" onclick="hedgePosition('${pos.symbol}')" title="Hedge Position">
+                                <i class="fas fa-shield-alt"></i>
+                            </button>
+                            <button class="btn-danger btn-small" onclick="closeRiskyPosition('${pos.symbol}')" title="Close Position">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function startLiveUpdates() {
+            let countdown = 45;
+            updateInterval = setInterval(() => {
+                if (liveUpdatesActive) {
+                    countdown--;
+                    document.getElementById('nextRiskUpdate').textContent = countdown;
+
+                    if (countdown <= 0) {
+                        updateLiveRiskData();
+                        countdown = 45;
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateLiveRiskData() {
+            if (!liveUpdatesActive) return;
+
+            // Simulate live risk data changes
+            riskData.var += (Math.random() - 0.5) * 500;
+            riskData.maxDrawdown += (Math.random() - 0.5) * 0.1;
+            riskData.sharpe += (Math.random() - 0.5) * 0.02;
+            riskData.beta += (Math.random() - 0.5) * 0.01;
+            riskData.overallScore = Math.max(0, Math.min(100, riskData.overallScore + (Math.random() - 0.5) * 2));
+
+            // Update sub-scores with some randomness
+            riskData.marketRisk = Math.max(0, Math.min(100, riskData.marketRisk + (Math.random() - 0.5) * 3));
+            riskData.creditRisk = Math.max(0, Math.min(100, riskData.creditRisk + (Math.random() - 0.5) * 2));
+            riskData.liquidityRisk = Math.max(0, Math.min(100, riskData.liquidityRisk + (Math.random() - 0.5) * 1));
+
+            updateDateTime();
+            updateRiskGauge();
+            updateRiskIndicators();
+
+            // Update risk update time
+            const now = luxon.DateTime.now();
+            const relative = now.toRelative();
+            document.getElementById('riskUpdateTime').textContent = `Updated ${relative}`;
+
+            showNotification('Risk metrics updated', 'info');
+        }
+
+        // Control Functions
+        function updatePositionLimit() {
+            const value = document.getElementById('maxPositionSizeSlider').value;
+            document.getElementById('maxPositionSizeValue').textContent = '$' + parseInt(value).toLocaleString();
+            showNotification(`Max position size updated to $${parseInt(value).toLocaleString()}`, 'success');
+        }
+
+        function updatePositionsLimit() {
+            const value = document.getElementById('maxPositionsSlider').value;
+            document.getElementById('maxPositionsValue').textContent = value;
+            showNotification(`Max positions updated to ${value}`, 'success');
+        }
+
+        function updateLossLimit() {
+            const value = document.getElementById('dailyLossSlider').value;
+            document.getElementById('dailyLossValue').textContent = '-$' + parseInt(value).toLocaleString();
+            showNotification(`Daily loss limit updated to -$${parseInt(value).toLocaleString()}`, 'success');
+        }
+
+        function updateDrawdownLimit() {
+            const value = document.getElementById('maxDrawdownSlider').value;
+            document.getElementById('maxDrawdownValue').textContent = value + '%';
+            showNotification(`Max drawdown limit updated to ${value}%`, 'success');
+        }
+
+        function toggleAutoHedge() {
+            autoHedgeActive = !autoHedgeActive;
+            const button = document.getElementById('hedgeToggleBtn');
+
+            if (autoHedgeActive) {
+                button.innerHTML = '<i class="fas fa-shield-alt"></i> Auto-Hedge: ON';
+                button.className = 'btn-secondary btn-small';
+                showNotification('Auto-hedging enabled', 'success');
+            } else {
+                button.innerHTML = '<i class="fas fa-shield-alt"></i> Auto-Hedge: OFF';
+                button.className = 'btn-danger btn-small';
+                showNotification('Auto-hedging disabled', 'warning');
+            }
+        }
+
+        function runComprehensiveRiskAnalysis() {
+            showNotification('Running comprehensive AI risk analysis...', 'info');
+
+            // Simulate analysis
+            setTimeout(() => {
+                const recommendations = [
+                    'Reduce tech concentration from 46% to 35%',
+                    'Implement dynamic hedging strategy',
+                    'Increase cash buffer to 20%',
+                    'Add non-correlated assets'
+                ];
+
+                const modal = document.getElementById('riskConfigModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalContent = document.getElementById('modalContent');
+
+                modalTitle.textContent = 'AI Risk Analysis Results';
+                modalContent.innerHTML = `
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="color: var(--success); font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-check-circle"></i>
+                            Analysis Complete
+                        </div>
+                        <div style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                            AI has analyzed current portfolio risk and identified optimization opportunities.
+                        </div>
+
+                        <div style="background: rgba(201, 168, 106, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <div style="font-weight: 600; color: var(--bentley-gold); margin-bottom: 0.5rem;">Key Findings:</div>
+                            <ul style="color: var(--text-secondary); padding-left: 1.5rem;">
+                                ${recommendations.map(rec => `<li style="margin-bottom: 0.5rem;">${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Current Risk Score</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--bentley-gold);">${riskData.overallScore}/100</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Target Risk Score</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);">92/100</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button class="btn-secondary" onclick="closeModal()">
+                            Close
+                        </button>
+                        <button class="btn" onclick="implementAllRecommendations()">
+                            <i class="fas fa-bolt"></i> Implement All
+                        </button>
+                    </div>
+                `;
+
+                modal.style.display = 'flex';
+                showNotification('Risk analysis complete', 'success');
+            }, 2500);
+        }
+
+        function configureAdvancedControls() {
+            const modal = document.getElementById('riskConfigModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = 'Advanced Risk Controls';
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">Volatility Controls</h4>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Max Portfolio Volatility</span>
+                            <span id="volatilityValue">18%</span>
+                        </label>
+                        <input type="range" min="5" max="40" step="1" value="18"
+                               class="slider" id="volatilitySlider" onchange="updateVolatilityControl()">
+                    </div>
+
+                    <h4 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">Correlation Limits</h4>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Max Position Correlation</span>
+                            <span id="correlationValue">0.75</span>
+                        </label>
+                        <input type="range" min="0" max="1" step="0.05" value="0.75"
+                               class="slider" id="correlationSlider" onchange="updateCorrelationControl()">
+                    </div>
+
+                    <h4 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">AI Risk Management</h4>
+                    <div style="display: grid; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: var(--text-secondary);">Auto-Hedging Sensitivity</span>
+                            <select class="form-control" style="width: 120px;">
+                                <option>Low</option>
+                                <option selected>Medium</option>
+                                <option>High</option>
+                                <option>Aggressive</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: var(--text-secondary);">Stop-Loss Strategy</span>
+                            <select class="form-control" style="width: 120px;">
+                                <option>Trailing</option>
+                                <option selected>Dynamic</option>
+                                <option>Fixed</option>
+                                <option>AI-Optimized</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn-secondary" onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button class="btn" onclick="saveAdvancedControls()">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function saveRiskControls() {
+            showNotification('Risk controls saved successfully', 'success');
+        }
+
+        function saveAdvancedControls() {
+            showNotification('Advanced controls saved successfully', 'success');
+            closeModal();
+        }
+
+        function updateVolatilityControl() {
+            const value = document.getElementById('volatilitySlider').value;
+            document.getElementById('volatilityValue').textContent = value + '%';
+        }
+
+        function updateCorrelationControl() {
+            const value = document.getElementById('correlationSlider').value;
+            document.getElementById('correlationValue').textContent = parseFloat(value).toFixed(2);
+        }
+
+        function closeModal() {
+            document.getElementById('riskConfigModal').style.display = 'none';
+        }
+
+        function switchRiskTab(tabName) {
+            // Hide all tabs
+            document.getElementById('riskExposureTab').style.display = 'none';
+            document.getElementById('stressTestTab').style.display = 'none';
+            document.getElementById('correlationTab').style.display = 'none';
+
+            // Update tab styles
+            document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show selected tab
+            switch(tabName) {
+                case 'exposure':
+                    document.getElementById('riskExposureTab').style.display = 'block';
+                    break;
+                case 'stress':
+                    document.getElementById('stressTestTab').style.display = 'block';
+                    break;
+                case 'correlation':
+                    document.getElementById('correlationTab').style.display = 'block';
+                    break;
+            }
+
+            showNotification(`Switched to ${tabName} view`, 'info');
+        }
+
+        // Action Functions
+        function diversifyPortfolio() {
+            showNotification('Rebalancing portfolio to reduce concentration...', 'info');
+
+            setTimeout(() => {
+                showNotification('Portfolio rebalanced successfully. Tech exposure reduced to 38%', 'success');
+                riskData.activeAlerts = Math.max(0, riskData.activeAlerts - 1);
+                updateRiskIndicators();
+            }, 2000);
+        }
+
+        function adjustStopLoss(symbol) {
+            showNotification(`Adjusting stop loss for ${symbol}...`, 'info');
+
+            const modal = document.getElementById('riskConfigModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = `Adjust Stop Loss - ${symbol}`;
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                        <div style="text-align: center; padding: 1rem; background: var(--bentley-gray); border-radius: 8px;">
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Current Price</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--bentley-gold);">$212.10</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--bentley-gray); border-radius: 8px;">
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Current Stop</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--danger);">$208.50</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">New Stop Loss (% from current)</label>
+                        <input type="range" min="1" max="20" step="0.5" value="5"
+                               class="slider" id="stopLossSlider" onchange="updateStopLossValue()">
+                        <div style="text-align: center; margin-top: 0.5rem;">
+                            <span id="stopLossValue" style="font-size: 1.2rem; font-weight: bold; color: var(--bentley-gold);">5%</span>
+                            <span id="stopLossPrice" style="color: var(--text-secondary); margin-left: 0.5rem;">($208.50)</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <label style="color: var(--text-secondary); font-size: 0.9rem;">Stop Loss Type</label>
+                        <select class="form-control">
+                            <option>Fixed Stop</option>
+                            <option selected>Trailing Stop</option>
+                            <option>Dynamic Stop (AI)</option>
+                            <option>Volatility Adjusted</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn-secondary" onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button class="btn" onclick="saveStopLoss('${symbol}')">
+                        <i class="fas fa-save"></i> Save Stop Loss
+                    </button>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function updateStopLossValue() {
+            const percent = document.getElementById('stopLossSlider').value;
+            const currentPrice = 212.10;
+            const stopPrice = currentPrice * (1 - percent / 100);
+
+            document.getElementById('stopLossValue').textContent = percent + '%';
+            document.getElementById('stopLossPrice').textContent = `($${stopPrice.toFixed(2)})`;
+        }
+
+        function saveStopLoss(symbol) {
+            showNotification(`Stop loss updated for ${symbol}`, 'success');
+            closeModal();
+        }
+
+        function showHedgingDetails() {
+            showNotification('Displaying hedging position details...', 'info');
+
+            const modal = document.getElementById('riskConfigModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = 'Active Hedging Positions';
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        AI has implemented the following hedging positions to mitigate portfolio risk:
+                    </div>
+
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 0.5rem; color: var(--text-secondary);">Hedge Type</th>
+                                    <th style="padding: 0.5rem; color: var(--text-secondary);">Position</th>
+                                    <th style="padding: 0.5rem; color: var(--text-secondary);">Size</th>
+                                    <th style="padding: 0.5rem; color: var(--text-secondary);">Risk Reduction</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 0.5rem;">SPY Put Options</td>
+                                    <td style="padding: 0.5rem; color: var(--danger);">SHORT</td>
+                                    <td style="padding: 0.5rem;">$25,000</td>
+                                    <td style="padding: 0.5rem; color: var(--success);">-12% VaR</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.5rem;">VIX Futures</td>
+                                    <td style="padding: 0.5rem; color: var(--danger);">SHORT</td>
+                                    <td style="padding: 0.5rem;">$18,000</td>
+                                    <td style="padding: 0.5rem; color: var(--success);">-8% Beta</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0.5rem;">Gold Futures</td>
+                                    <td style="padding: 0.5rem; color: var(--success);">LONG</td>
+                                    <td style="padding: 0.5rem;">$12,000</td>
+                                    <td style="padding: 0.5rem; color: var(--success);">-4% Volatility</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 8px;">
+                        <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">Overall Impact</div>
+                        <div style="color: var(--text-secondary);">
+                            Current hedges reduce portfolio VaR by $9,800 (24%) and portfolio beta by 0.18 points.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn-secondary" onclick="closeModal()">
+                        Close
+                    </button>
+                    <button class="btn" onclick="adjustHedging()">
+                        <i class="fas fa-edit"></i> Adjust Hedging
+                    </button>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function adjustHedging() {
+            showNotification('Adjusting hedging positions...', 'info');
+            closeModal();
+        }
+
+        function emergencyStop() {
+            const confirmed = confirm('EMERGENCY STOP: This will close all positions and activate maximum risk protection. Continue?');
+            if (confirmed) {
+                showNotification('Emergency stop activated! Closing all positions...', 'danger');
+
+                setTimeout(() => {
+                    showNotification('All positions closed. Portfolio in maximum protection mode.', 'success');
+                    riskData.activeAlerts = 0;
+                    riskData.overallScore = 95;
+                    updateRiskIndicators();
+                    updateRiskGauge();
+                }, 3000);
+            }
+        }
+
+        function generateRiskReport() {
+            showNotification('Generating comprehensive risk report for 17/01/2026...', 'info');
+
+            setTimeout(() => {
+                showNotification('Risk report generated and downloaded', 'success');
+
+                // Simulate file download
+                const link = document.createElement('a');
+                link.download = `BentleyBoldTrader_Risk_Report_20260117.pdf`;
+                link.href = '#';
+                link.click();
+            }, 2000);
+        }
+
+        function exportRiskData() {
+            showNotification('Exporting risk exposure data...', 'info');
+
+            setTimeout(() => {
+                showNotification('Risk data exported as CSV', 'success');
+            }, 1500);
+        }
+
+        function runAdvancedStressTest() {
+            showNotification('Running advanced stress test scenarios...', 'info');
+
+            setTimeout(() => {
+                showNotification('Stress test complete. Results updated.', 'success');
+                // Update stress test chart with new data
+                riskCharts.stressTest.data.datasets[0].data = riskCharts.stressTest.data.datasets[0].data.map(
+                    value => value * (0.9 + Math.random() * 0.2)
+                );
+                riskCharts.stressTest.update();
+            }, 3000);
+        }
+
+        function compareScenarios() {
+            showNotification('Comparing stress test scenarios...', 'info');
+        }
+
+        function implementHedge(strategy) {
+            showNotification(`Implementing ${strategy} hedging strategy...`, 'info');
+
+            setTimeout(() => {
+                showNotification('Hedging strategy implemented successfully', 'success');
+            }, 2000);
+        }
+
+        function improveResilience() {
+            showNotification('Optimizing portfolio resilience...', 'info');
+
+            setTimeout(() => {
+                showNotification('Portfolio resilience improved to 82/100', 'success');
+            }, 2500);
+        }
+
+        function managePositionRisk(symbol) {
+            showNotification(`Managing risk for ${symbol} position...`, 'info');
+        }
+
+        function adjustPositionSize(symbol) {
+            showNotification(`Adjusting position size for ${symbol}...`, 'info');
+        }
+
+        function analyzeStability(symbol) {
+            showNotification(`Analyzing stability of ${symbol}...`, 'info');
+        }
+
+        function hedgePosition(symbol) {
+            showNotification(`Setting up hedge for ${symbol}...`, 'info');
+        }
+
+        function closeRiskyPosition(symbol) {
+            const confirmed = confirm(`Close ${symbol} position due to high risk?`);
+            if (confirmed) {
+                showNotification(`${symbol} position closed`, 'success');
+                riskData.activeAlerts = Math.max(0, riskData.activeAlerts - 1);
+                updateRiskIndicators();
+            }
+        }
+
+        function implementAIRiskStrategy() {
+            showNotification('Implementing AI risk mitigation strategy...', 'info');
+
+            setTimeout(() => {
+                showNotification('AI strategy implemented. Portfolio beta reduced to 0.98', 'success');
+                riskData.beta = 0.98;
+                riskData.overallScore = 89;
+                updateRiskIndicators();
+                updateRiskGauge();
+            }, 3000);
+        }
+
+        function simulateStrategy() {
+            showNotification('Simulating AI strategy results...', 'info');
+
+            setTimeout(() => {
+                const modal = document.getElementById('riskConfigModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalContent = document.getElementById('modalContent');
+
+                modalTitle.textContent = 'Strategy Simulation Results';
+                modalContent.innerHTML = `
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="color: var(--success); font-weight: 600; margin-bottom: 1rem;">
+                            <i class="fas fa-chart-line"></i> Simulation Complete
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                            <div style="text-align: center; padding: 1rem; background: var(--bentley-gray); border-radius: 8px;">
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Current VaR</div>
+                                <div style="font-size: 1.2rem; font-weight: bold; color: var(--warning);">$${riskData.var.toLocaleString()}</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background: var(--bentley-gray); border-radius: 8px;">
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Projected VaR</div>
+                                <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);">$${(riskData.var * 0.76).toLocaleString()}</div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(0, 200, 83, 0.1); padding: 1rem; border-radius: 8px;">
+                            <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">Expected Improvements:</div>
+                            <ul style="color: var(--text-secondary); padding-left: 1.5rem;">
+                                <li>24% reduction in Value at Risk</li>
+                                <li>Portfolio beta reduced from 1.18 to 0.95</li>
+                                <li>Sharpe ratio improved from 1.94 to 2.15</li>
+                                <li>Risk score increased from 84 to 92</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button class="btn-secondary" onclick="closeModal()">
+                            Close
+                        </button>
+                        <button class="btn" onclick="implementAIRiskStrategy()">
+                            <i class="fas fa-bolt"></i> Implement Strategy
+                        </button>
+                    </div>
+                `;
+
+                modal.style.display = 'flex';
+            }, 2000);
+        }
+
+        function implementAllRecommendations() {
+            showNotification('Implementing all AI recommendations...', 'info');
+
+            setTimeout(() => {
+                showNotification('All recommendations implemented successfully', 'success');
+                closeModal();
+                riskData.overallScore = 92;
+                riskData.beta = 0.95;
+                updateRiskIndicators();
+                updateRiskGauge();
+            }, 3000);
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? 'rgba(0, 200, 83, 0.9)' :
+                           type === 'warning' ? 'rgba(255, 152, 0, 0.9)' :
+                           type === 'danger' ? 'rgba(255, 82, 82, 0.9)' :
+                           'rgba(33, 150, 243, 0.9)'};
+                color: white;
+                border-radius: 6px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                max-width: 300px;
+            `;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialize live updates every 30 seconds
+        setInterval(() => {
+            if (liveUpdatesActive) {
+                updateLiveRiskData();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

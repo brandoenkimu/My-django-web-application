@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Monitor | Bentley BoldTrader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --bentley-black: #0A0A0A;
+            --bentley-dark: #121212;
+            --bentley-gray: #1A1A1A;
+            --bentley-light-gray: #2D2D2D;
+            --bentley-gold: #C9A86A;
+            --bentley-gold-dark: #9C8242;
+            --bentley-gold-light: #E8D9B5;
+            --success: #00C853;
+            --warning: #FF9800;
+            --danger: #FF5252;
+            --info: #2196F3;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --card-bg: #1A1A1A;
+            --border-color: #333333;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            background-color: var(--bentley-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bentley-black) 0%, #151515 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bentley-gold);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .logo-icon {
+            color: var(--bentley-gold);
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, var(--bentley-gold), var(--bentley-gold-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text span {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--bentley-gold);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Market Overview */
+        .market-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--bentley-gold), var(--bentley-gold-light));
+            transform: scaleX(0);
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--bentley-gold);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(201, 168, 106, 0.1), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--bentley-gold);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Market Indices */
+        .indices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .index-card {
+            background: linear-gradient(135deg, var(--bentley-gray), var(--bentley-light-gray));
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .index-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent, rgba(201, 168, 106, 0.05));
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .index-card:hover::before {
+            opacity: 1;
+        }
+
+        .index-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--bentley-gold);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .index-name {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .index-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-family: 'Source Code Pro', monospace;
+            position: relative;
+        }
+
+        .index-change {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: transform var(--transition-speed) ease;
+            position: relative;
+        }
+
+        .index-change:hover {
+            transform: scale(1.05);
+        }
+
+        .change-positive {
+            background-color: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .change-negative {
+            background-color: rgba(255, 82, 82, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        /* Heat Map */
+        .heatmap-container {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: border-color var(--transition-speed) ease;
+        }
+
+        .heatmap-container:hover {
+            border-color: var(--bentley-gold);
+        }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .heatmap-item {
+            padding: 1rem;
+            text-align: center;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .heatmap-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.05));
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .heatmap-item:hover::before {
+            opacity: 1;
+        }
+
+        .heatmap-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+
+        .heatmap-symbol {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            position: relative;
+        }
+
+        .heatmap-price {
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+            position: relative;
+        }
+
+        .heatmap-change {
+            font-size: 0.8rem;
+            font-weight: 600;
+            position: relative;
+        }
+
+        /* Sector Performance */
+        .sector-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .sector-card {
+            background-color: var(--bentley-gray);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+        }
+
+        .sector-card:hover {
+            border-color: var(--bentley-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .sector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .sector-name {
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+        }
+
+        .sector-performance {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .performance-bar {
+            height: 6px;
+            background-color: var(--bentley-light-gray);
+            border-radius: 3px;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .performance-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease-in-out;
+        }
+
+        /* Top Movers */
+        .movers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            transition: all var(--transition-speed) ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(201, 168, 106, 0.05);
+            color: var(--text-primary);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--bentley-gold);
+            border-bottom: 2px solid var(--bentley-gold);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--bentley-gold);
+        }
+
+        /* Search and Filter */
+        .search-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-box {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            background-color: var(--bentley-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--bentley-gold);
+            box-shadow: 0 0 0 2px rgba(201, 168, 106, 0.1);
+        }
+
+        .filter-select {
+            padding: 0.8rem 1rem;
+            background-color: var(--bentley-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            min-width: 150px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23C9A86A' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px;
+            padding-right: 2.5rem;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--bentley-gold);
+            box-shadow: 0 0 0 2px rgba(201, 168, 106, 0.1);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        @keyframes priceUp {
+            0% { color: var(--success); }
+            50% { color: white; }
+            100% { color: var(--success); }
+        }
+
+        @keyframes priceDown {
+            0% { color: var(--danger); }
+            50% { color: white; }
+            100% { color: var(--danger); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .price-up {
+            animation: priceUp 1s ease-in-out;
+        }
+
+        .price-down {
+            animation: priceDown 1s ease-in-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .market-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .movers-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .indices-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .sector-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .indices-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .heatmap-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .tab {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo" onclick="window.location.href='/'">
+            <div class="logo-icon">
+                <i class="fas fa-chart-network"></i>
+            </div>
+            <div class="logo-text">BENTLEY<span>BOLDTRADER</span></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(33, 150, 243, 0.1); border-radius: 20px; border: 1px solid var(--info); transition: all var(--transition-speed) ease; cursor: pointer;"
+                 onclick="toggleLiveUpdates()"
+                 id="liveUpdateIndicator">
+                <div id="liveUpdateDot" style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--info); animation: pulse 2s infinite;"></div>
+                <span id="liveUpdateText">LIVE UPDATES: ON</span>
+            </div>
+            <div style="color: var(--text-secondary); font-family: 'Source Code Pro', monospace;">
+                <span id="currentDateTime">January 17, 2026 10:30:45</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Market Monitor</h1>
+                <p class="page-subtitle">Real-time market data, heat maps, and sector analysis for 2026</p>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn-refresh" onclick="refreshMarketData()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <button class="btn-refresh" onclick="toggleDataStream()">
+                        <i class="fas fa-bolt"></i> Stream
+                    </button>
+                </div>
+                <select class="filter-select" onchange="filterMarkets(this.value)" id="marketFilter">
+                    <option value="all">All Markets</option>
+                    <option value="stocks">Stocks Only</option>
+                    <option value="crypto">Crypto Only</option>
+                    <option value="forex">Forex Only</option>
+                    <option value="commodities">Commodities</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Market Indices - Updated for 2026 -->
+        <div class="indices-grid fade-in" id="indicesGrid">
+            <!-- Indices will be populated dynamically -->
+        </div>
+
+        <!-- Market Overview -->
+        <div class="market-overview fade-in">
+            <!-- Heat Map -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-fire"></i> Market Heat Map</h3>
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchHeatMap('stocks')" data-tab="stocks">Stocks</div>
+                        <div class="tab" onclick="switchHeatMap('crypto')" data-tab="crypto">Crypto</div>
+                        <div class="tab" onclick="switchHeatMap('global')" data-tab="global">Global</div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="heatmap-grid" id="heatMapContainer">
+                        <!-- Heat map items will be populated by JavaScript -->
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 0.3rem;">
+                                <div style="width: 12px; height: 12px; background: rgba(0, 200, 83, 0.1); border: 1px solid var(--success);"></div>
+                                <span style="color: var(--text-secondary); font-size: 0.8rem;">Bullish</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.3rem;">
+                                <div style="width: 12px; height: 12px; background: rgba(255, 82, 82, 0.1); border: 1px solid var(--danger);"></div>
+                                <span style="color: var(--text-secondary); font-size: 0.8rem;">Bearish</span>
+                            </div>
+                        </div>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;" id="heatMapStatus">Auto-updating every 10s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sector Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-pie"></i> Sector Performance</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">YTD 2026</span>
+                        <i class="fas fa-calendar-alt" style="color: var(--bentley-gold); cursor: pointer;" onclick="toggleYearView()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="sector-grid" id="sectorGrid">
+                        <!-- Sectors will be populated dynamically -->
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="sectorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Movers -->
+        <div class="movers-grid">
+            <!-- Gainers -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-arrow-up"></i> Top Gainers</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <button class="btn-view-all" onclick="viewAllGainers()">View All</button>
+                        <i class="fas fa-chart-line" style="color: var(--bentley-gold); cursor: pointer;" onclick="showGainersChart()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Price</th>
+                                    <th>Change</th>
+                                    <th>% Change</th>
+                                    <th>Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gainersTable">
+                                <!-- Gainers will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Losers -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-arrow-down"></i> Top Losers</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <button class="btn-view-all" onclick="viewAllLosers()">View All</button>
+                        <i class="fas fa-chart-line" style="color: var(--bentley-gold); cursor: pointer;" onclick="showLosersChart()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Price</th>
+                                    <th>Change</th>
+                                    <th>% Change</th>
+                                    <th>Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody id="losersTable">
+                                <!-- Losers will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market News & Sentiment -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-newspaper"></i> Market News & Sentiment</h3>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;" id="sentimentScore">Sentiment: 72% Positive</span>
+                    <div style="width: 60px; height: 6px; background: var(--bentley-light-gray); border-radius: 3px; overflow: hidden;">
+                        <div style="width: 72%; height: 100%; background: linear-gradient(90deg, var(--success), var(--warning));"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-content">
+                <div id="marketNews">
+                    <!-- News items will be populated by JavaScript -->
+                </div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn-load-more" onclick="loadMoreNews()">
+                        <i class="fas fa-sync-alt"></i> Load More News
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Metrics -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chart-bar"></i> Advanced Market Metrics</h3>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Real-time Analysis</span>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                    <div class="metric-card">
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Market Breadth</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">62%</div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Advancers vs Decliners</div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Put/Call Ratio</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning);">0.85</div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Options Sentiment</div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">VIX (Fear Index)</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--info);">16.8</div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Market Volatility</div>
+                    </div>
+                    <div class="metric-card">
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Volume Ratio</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">1.42</div>
+                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Buy vs Sell Volume</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Styles for buttons -->
+    <style>
+        .btn-refresh, .btn-view-all, .btn-load-more {
+            padding: 0.6rem 1.2rem;
+            background-color: var(--bentley-gold);
+            color: var(--bentley-black);
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-refresh:hover, .btn-view-all:hover, .btn-load-more:hover {
+            background-color: var(--bentley-gold-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 106, 0.3);
+        }
+
+        .btn-view-all, .btn-load-more {
+            background-color: transparent;
+            color: var(--bentley-gold);
+            border: 1px solid var(--bentley-gold);
+        }
+
+        .btn-view-all:hover, .btn-load-more:hover {
+            background-color: rgba(201, 168, 106, 0.1);
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, var(--bentley-gray), var(--bentley-light-gray));
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+        }
+
+        .metric-card:hover {
+            border-color: var(--bentley-gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+
+    <script>
+        // Global variables
+        let liveUpdatesEnabled = true;
+        let dataStreamInterval = null;
+        let heatMapInterval = null;
+        let currentHeatMapType = 'stocks';
+        let sectorChart = null;
+        let lastUpdateTime = Date.now();
+
+        // 2026 Market Data
+        const MARKET_DATA_2026 = {
+            indices: [
+                { name: 'S&P 500', value: 5820.45, change: 28.12, changePercent: 0.48 },
+                { name: 'NASDAQ', value: 18542.80, change: 124.65, changePercent: 0.68 },
+                { name: 'DOW JONES', value: 42850.20, change: 185.42, changePercent: 0.43 },
+                { name: 'RUSSELL 2000', value: 2150.30, change: 32.15, changePercent: 1.52 },
+                { name: 'BITCOIN', value: 92542.50, change: 2450.80, changePercent: 2.72 },
+                { name: 'CRYPTO 100', value: 4580.25, change: 85.42, changePercent: 1.90 }
+            ],
+
+            sectors: [
+                { name: 'AI Technology', performance: 2.8, trend: 'up' },
+                { name: 'Quantum Computing', performance: 3.2, trend: 'up' },
+                { name: 'Green Energy', performance: 1.5, trend: 'up' },
+                { name: 'Space Exploration', performance: 4.1, trend: 'up' },
+                { name: 'Biotech & Genomics', performance: 0.8, trend: 'up' },
+                { name: 'Traditional Energy', performance: -0.5, trend: 'down' }
+            ],
+
+            topStocks2026: [
+                { symbol: 'AAPL', name: 'Apple Inc.', price: 245.80, change: 2.45, changePercent: 1.01, volume: '85.2M' },
+                { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 825.40, change: 28.45, changePercent: 3.57, volume: '125.4M' },
+                { symbol: 'TSLA', price: 385.20, change: 12.80, changePercent: 3.44, volume: '95.6M' },
+                { symbol: 'MSFT', price: 485.30, change: 8.95, changePercent: 1.88, volume: '42.8M' },
+                { symbol: 'GOOGL', price: 195.45, change: 3.20, changePercent: 1.66, volume: '28.9M' },
+                { symbol: 'META', price: 425.80, change: 15.40, changePercent: 3.75, volume: '52.1M' },
+                { symbol: 'AMD', price: 185.30, change: 9.25, changePercent: 5.26, volume: '88.5M' },
+                { symbol: 'QCOM', price: 165.40, change: 7.85, changePercent: 4.99, volume: '32.4M' },
+                { symbol: 'SPACEX', price: 425.60, change: 25.80, changePercent: 6.45, volume: '45.2M' },
+                { symbol: 'NVIDIA', price: 825.40, change: 28.45, changePercent: 3.57, volume: '125.4M' }
+            ],
+
+            crypto2026: [
+                { symbol: 'BTC', name: 'Bitcoin', price: 92542.50, change: 2450.80, changePercent: 2.72, volume: '45.2B' },
+                { symbol: 'ETH', name: 'Ethereum', price: 7850.40, change: 245.20, changePercent: 3.23, volume: '28.5B' },
+                { symbol: 'SOL', name: 'Solana', price: 325.80, change: 15.45, changePercent: 4.99, volume: '12.8B' },
+                { symbol: 'ADA', name: 'Cardano', price: 3.45, change: 0.15, changePercent: 4.55, volume: '8.9B' },
+                { symbol: 'DOT', name: 'Polkadot', price: 42.80, change: 1.85, changePercent: 4.52, volume: '6.5B' }
+            ],
+
+            marketNews2026: [
+                {
+                    title: "Quantum Computing Breakthrough Boosts Tech Sector",
+                    summary: "Major advances in quantum computing technology spark rally across AI and tech stocks.",
+                    impact: "positive",
+                    time: "10:45 AM",
+                    source: "TechCrunch",
+                    sentiment: 85
+                },
+                {
+                    title: "Fed Maintains Rates Amid Strong Economic Growth",
+                    summary: "Federal Reserve holds steady on interest rates as 2026 economic indicators show robust expansion.",
+                    impact: "positive",
+                    time: "10:30 AM",
+                    source: "Bloomberg",
+                    sentiment: 78
+                },
+                {
+                    title: "Space Tourism Revenue Exceeds Expectations",
+                    summary: "Commercial space tourism sector reports record Q1 2026 revenues, beating analyst forecasts.",
+                    impact: "positive",
+                    time: "10:15 AM",
+                    source: "SpaceNews",
+                    sentiment: 92
+                },
+                {
+                    title: "Renewable Energy Stocks Rise on Climate Accord",
+                    summary: "Global climate agreement boosts green energy stocks across all major markets.",
+                    impact: "positive",
+                    time: "9:45 AM",
+                    source: "Reuters",
+                    sentiment: 88
+                },
+                {
+                    title: "AI Regulation Discussions Cause Minor Tech Dip",
+                    summary: "Potential AI regulations under discussion in Congress cause slight pullback in AI-focused stocks.",
+                    impact: "neutral",
+                    time: "9:30 AM",
+                    source: "Wall Street Journal",
+                    sentiment: 65
+                }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMarketMonitor();
+            startDateTimeUpdates();
+            if (liveUpdatesEnabled) {
+                startDataStream();
+            }
+        });
+
+        function initializeMarketMonitor() {
+            // Initialize indices with 2026 data
+            updateIndices();
+
+            // Initialize heat map
+            generateHeatMap();
+
+            // Initialize sectors with 2026 data
+            updateSectors();
+
+            // Initialize top movers
+            generateTopMovers();
+
+            // Initialize market news with 2026 data
+            generateMarketNews();
+
+            // Initialize sector chart
+            initializeSectorChart();
+
+            // Set up auto-refresh
+            heatMapInterval = setInterval(() => {
+                if (liveUpdatesEnabled) {
+                    updateMarketData();
+                }
+            }, 10000); // Update every 10 seconds
+        }
+
+        function startDateTimeUpdates() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        }
+
+        function updateDateTime() {
+            const now = luxon.DateTime.now();
+            const dateTimeString = now.toFormat('MMMM dd, yyyy HH:mm:ss');
+            document.getElementById('currentDateTime').textContent = dateTimeString;
+        }
+
+        function updateIndices() {
+            const indicesGrid = document.getElementById('indicesGrid');
+            indicesGrid.innerHTML = '';
+
+            MARKET_DATA_2026.indices.forEach(index => {
+                const isPositive = index.changePercent >= 0;
+
+                const indexCard = document.createElement('div');
+                indexCard.className = 'index-card';
+                indexCard.onclick = () => showMarketDetail(index.name);
+
+                indexCard.innerHTML = `
+                    <div class="index-name">${index.name}</div>
+                    <div class="index-value" id="value-${index.name.replace(/\s+/g, '-')}">${formatNumber(index.value)}</div>
+                    <div class="index-change ${isPositive ? 'change-positive' : 'change-negative'}">
+                        ${isPositive ? '+' : ''}${index.change.toFixed(2)} (${isPositive ? '+' : ''}${index.changePercent.toFixed(2)}%)
+                    </div>
+                `;
+
+                indicesGrid.appendChild(indexCard);
+            });
+        }
+
+        function generateHeatMap() {
+            const container = document.getElementById('heatMapContainer');
+            container.innerHTML = '';
+
+            let dataSource = currentHeatMapType === 'crypto' ? MARKET_DATA_2026.crypto2026 : MARKET_DATA_2026.topStocks2026;
+
+            dataSource.forEach(item => {
+                const changePercent = item.changePercent;
+                const isPositive = changePercent >= 0;
+
+                // Calculate intensity based on percentage change
+                const intensity = Math.min(Math.abs(changePercent) * 15, 85);
+                const backgroundColor = isPositive ?
+                    `rgba(0, 200, 83, ${0.1 + intensity/100})` :
+                    `rgba(255, 82, 82, ${0.1 + intensity/100})`;
+
+                const heatmapItem = document.createElement('div');
+                heatmapItem.className = 'heatmap-item';
+                heatmapItem.style.backgroundColor = backgroundColor;
+                heatmapItem.onclick = () => showStockDetail(item.symbol);
+                heatmapItem.setAttribute('data-symbol', item.symbol);
+                heatmapItem.setAttribute('data-price', item.price);
+
+                heatmapItem.innerHTML = `
+                    <div class="heatmap-symbol">${item.symbol}</div>
+                    <div class="heatmap-price">${formatPrice(item.price)}</div>
+                    <div class="heatmap-change" style="color: ${isPositive ? 'var(--success)' : 'var(--danger)'}">
+                        ${isPositive ? '+' : ''}${changePercent.toFixed(2)}%
+                    </div>
+                `;
+
+                container.appendChild(heatmapItem);
+            });
+        }
+
+        function updateSectors() {
+            const sectorGrid = document.getElementById('sectorGrid');
+            sectorGrid.innerHTML = '';
+
+            MARKET_DATA_2026.sectors.forEach(sector => {
+                const isPositive = sector.trend === 'up';
+
+                const sectorCard = document.createElement('div');
+                sectorCard.className = 'sector-card';
+                sectorCard.onclick = () => showSectorDetail(sector.name);
+
+                sectorCard.innerHTML = `
+                    <div class="sector-header">
+                        <span class="sector-name">${sector.name}</span>
+                        <span style="color: ${isPositive ? 'var(--success)' : 'var(--danger)'}; font-weight: 600;">
+                            ${isPositive ? '+' : ''}${sector.performance.toFixed(1)}%
+                        </span>
+                    </div>
+                    <div class="sector-performance">
+                        <div class="performance-bar">
+                            <div class="performance-fill" style="width: ${Math.min(Math.abs(sector.performance) * 30, 100)}%;
+                                 background-color: ${isPositive ? 'var(--success)' : 'var(--danger)'};">
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                sectorGrid.appendChild(sectorCard);
+            });
+        }
+
+        function generateTopMovers() {
+            // Sort stocks by performance for 2026
+            const allStocks = [...MARKET_DATA_2026.topStocks2026];
+            const gainers = allStocks
+                .filter(stock => stock.changePercent > 0)
+                .sort((a, b) => b.changePercent - a.changePercent)
+                .slice(0, 5);
+
+            const losers = allStocks
+                .filter(stock => stock.changePercent < 0)
+                .sort((a, b) => a.changePercent - b.changePercent)
+                .slice(0, 5);
+
+            const gainersTable = document.getElementById('gainersTable');
+            const losersTable = document.getElementById('losersTable');
+
+            gainersTable.innerHTML = '';
+            losersTable.innerHTML = '';
+
+            // Populate gainers table with 2026 data
+            gainers.forEach(stock => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${stock.symbol}</strong></td>
+                    <td id="price-${stock.symbol}">${formatPrice(stock.price)}</td>
+                    <td style="color: var(--success);">+${formatPrice(stock.change)}</td>
+                    <td style="color: var(--success);">+${stock.changePercent.toFixed(2)}%</td>
+                    <td>${stock.volume}</td>
+                `;
+                row.onclick = () => showStockDetail(stock.symbol);
+                gainersTable.appendChild(row);
+            });
+
+            // Populate losers table with 2026 data
+            if (losers.length > 0) {
+                losers.forEach(stock => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${stock.symbol}</strong></td>
+                        <td id="price-${stock.symbol}">${formatPrice(stock.price)}</td>
+                        <td style="color: var(--danger);">-${formatPrice(Math.abs(stock.change))}</td>
+                        <td style="color: var(--danger);">${stock.changePercent.toFixed(2)}%</td>
+                        <td>${stock.volume}</td>
+                    `;
+                    row.onclick = () => showStockDetail(stock.symbol);
+                    losersTable.appendChild(row);
+                });
+            } else {
+                // If no losers, show message
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="5" style="text-align: center; color: var(--text-secondary);">
+                        All major stocks are up today!
+                    </td>
+                `;
+                losersTable.appendChild(row);
+            }
+        }
+
+        function generateMarketNews() {
+            const newsContainer = document.getElementById('marketNews');
+            newsContainer.innerHTML = '';
+
+            MARKET_DATA_2026.marketNews2026.forEach(item => {
+                const newsItem = document.createElement('div');
+                newsItem.className = 'news-item';
+                newsItem.style.cssText = `
+                    padding: 1rem;
+                    border-bottom: 1px solid var(--border-color);
+                    cursor: pointer;
+                    transition: all var(--transition-speed) ease;
+                `;
+                newsItem.onmouseenter = () => newsItem.style.backgroundColor = 'rgba(201, 168, 106, 0.05)';
+                newsItem.onmouseleave = () => newsItem.style.backgroundColor = 'transparent';
+                newsItem.onclick = () => showNewsDetail(item);
+
+                const impactColor = item.impact === 'positive' ? 'var(--success)' :
+                                  item.impact === 'negative' ? 'var(--danger)' : 'var(--warning)';
+
+                newsItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <h4 style="font-weight: 600; color: var(--text-primary); flex: 1;">${item.title}</h4>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">${item.time}</span>
+                            <div style="width: 30px; height: 6px; background: var(--bentley-light-gray); border-radius: 3px; overflow: hidden;">
+                                <div style="width: ${item.sentiment}%; height: 100%; background: linear-gradient(90deg, var(--success), var(--warning));"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">${item.summary}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="color: var(--bentley-gold); font-size: 0.8rem;">Source: ${item.source}</div>
+                        <span style="font-size: 0.8rem; color: ${impactColor};">
+                            ${item.impact.toUpperCase()} SENTIMENT
+                        </span>
+                    </div>
+                `;
+
+                newsContainer.appendChild(newsItem);
+            });
+
+            // Update sentiment score
+            const avgSentiment = MARKET_DATA_2026.marketNews2026.reduce((sum, item) => sum + item.sentiment, 0) / MARKET_DATA_2026.marketNews2026.length;
+            document.getElementById('sentimentScore').textContent = `Sentiment: ${Math.round(avgSentiment)}% Positive`;
+        }
+
+        function initializeSectorChart() {
+            const ctx = document.getElementById('sectorChart').getContext('2d');
+
+            // Destroy existing chart if it exists
+            if (sectorChart) {
+                sectorChart.destroy();
+            }
+
+            const sectorData = MARKET_DATA_2026.sectors;
+
+            sectorChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sectorData.map(s => s.name),
+                    datasets: [{
+                        label: 'Performance (%)',
+                        data: sectorData.map(s => s.performance),
+                        backgroundColor: sectorData.map(s =>
+                            s.trend === 'up' ? 'rgba(0, 200, 83, 0.8)' : 'rgba(255, 82, 82, 0.8)'
+                        ),
+                        borderColor: sectorData.map(s =>
+                            s.trend === 'up' ? 'var(--success)' : 'var(--danger)'
+                        ),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 26, 0.9)',
+                            titleColor: 'var(--bentley-gold)',
+                            bodyColor: 'var(--text-primary)',
+                            borderColor: 'var(--bentley-gold)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        function updateMarketData() {
+            if (!liveUpdatesEnabled) return;
+
+            // Simulate real-time updates with small random changes
+            MARKET_DATA_2026.indices.forEach(index => {
+                const randomChange = (Math.random() - 0.5) * 0.2; // Random change between -0.1% and +0.1%
+                index.changePercent += randomChange;
+                index.change = (index.value * index.changePercent) / 100;
+
+                // Update display with animation
+                const valueElement = document.getElementById(`value-${index.name.replace(/\s+/g, '-')}`);
+                if (valueElement) {
+                    valueElement.textContent = formatNumber(index.value + index.change);
+                    valueElement.classList.add(randomChange >= 0 ? 'price-up' : 'price-down');
+                    setTimeout(() => valueElement.classList.remove('price-up', 'price-down'), 1000);
+                }
+            });
+
+            // Update stocks with random fluctuations
+            MARKET_DATA_2026.topStocks2026.forEach(stock => {
+                const randomChange = (Math.random() - 0.5) * 0.3;
+                stock.changePercent += randomChange;
+                stock.change = (stock.price * stock.changePercent) / 100;
+
+                // Update price display
+                const priceElement = document.getElementById(`price-${stock.symbol}`);
+                if (priceElement) {
+                    priceElement.textContent = formatPrice(stock.price + stock.change);
+                }
+            });
+
+            // Update heat map and tables
+            generateHeatMap();
+            generateTopMovers();
+
+            // Update last update time
+            lastUpdateTime = Date.now();
+        }
+
+        function refreshMarketData() {
+            showNotification('Refreshing market data...', 'info');
+
+            // Reset to original data with some variation
+            MARKET_DATA_2026.indices.forEach(index => {
+                index.changePercent = (Math.random() - 0.5) * 1;
+                index.change = (index.value * index.changePercent) / 100;
+            });
+
+            MARKET_DATA_2026.topStocks2026.forEach(stock => {
+                stock.changePercent = (Math.random() - 0.5) * 2;
+                stock.change = (stock.price * stock.changePercent) / 100;
+            });
+
+            updateIndices();
+            generateHeatMap();
+            generateTopMovers();
+            updateSectors();
+
+            // Update chart
+            sectorChart.data.datasets[0].data = MARKET_DATA_2026.sectors.map(s => s.performance);
+            sectorChart.update();
+
+            showNotification('Market data refreshed for 2026', 'success');
+        }
+
+        function toggleLiveUpdates() {
+            liveUpdatesEnabled = !liveUpdatesEnabled;
+
+            const indicator = document.getElementById('liveUpdateIndicator');
+            const dot = document.getElementById('liveUpdateDot');
+            const text = document.getElementById('liveUpdateText');
+
+            if (liveUpdatesEnabled) {
+                indicator.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
+                indicator.style.borderColor = 'var(--info)';
+                dot.style.backgroundColor = 'var(--info)';
+                dot.style.animation = 'pulse 2s infinite';
+                text.textContent = 'LIVE UPDATES: ON';
+                startDataStream();
+                showNotification('Live updates enabled', 'success');
+            } else {
+                indicator.style.backgroundColor = 'rgba(158, 158, 158, 0.1)';
+                indicator.style.borderColor = 'var(--text-secondary)';
+                dot.style.backgroundColor = 'var(--text-secondary)';
+                dot.style.animation = 'none';
+                text.textContent = 'LIVE UPDATES: OFF';
+                stopDataStream();
+                showNotification('Live updates disabled', 'warning');
+            }
+        }
+
+        function startDataStream() {
+            if (dataStreamInterval) clearInterval(dataStreamInterval);
+            dataStreamInterval = setInterval(updateMarketData, 5000); // Update every 5 seconds
+        }
+
+        function stopDataStream() {
+            if (dataStreamInterval) {
+                clearInterval(dataStreamInterval);
+                dataStreamInterval = null;
+            }
+        }
+
+        function toggleDataStream() {
+            if (dataStreamInterval) {
+                stopDataStream();
+                showNotification('Data streaming stopped', 'warning');
+            } else {
+                startDataStream();
+                showNotification('Data streaming started', 'success');
+            }
+        }
+
+        function switchHeatMap(type) {
+            currentHeatMapType = type;
+
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            const activeTab = document.querySelector(`.tab[data-tab="${type}"]`);
+            if (activeTab) activeTab.classList.add('active');
+
+            // Update heat map
+            generateHeatMap();
+
+            // Update status text
+            document.getElementById('heatMapStatus').textContent =
+                `Showing ${type === 'stocks' ? 'AI & Tech Stocks' : type === 'crypto' ? 'Cryptocurrencies' : 'Global Markets'}`;
+
+            showNotification(`Switched to ${type} heat map`, 'info');
+        }
+
+        function filterMarkets(filter) {
+            showNotification(`Filtering ${filter} markets...`, 'info');
+
+            // In a real application, this would filter the data
+            setTimeout(() => {
+                showNotification(`Showing ${filter} markets for 2026`, 'success');
+            }, 500);
+        }
+
+        function toggleYearView() {
+            showNotification('Switching between YTD and 2025 performance views', 'info');
+            // In a full implementation, this would toggle between different time periods
+        }
+
+        function showGainersChart() {
+            showNotification('Opening gainers performance chart', 'info');
+        }
+
+        function showLosersChart() {
+            showNotification('Opening losers performance chart', 'info');
+        }
+
+        function showMarketDetail(market) {
+            const marketData = MARKET_DATA_2026.indices.find(m => m.name === market);
+            if (!marketData) return;
+
+            const detailContent = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.3s ease;">
+                    <div style="background: var(--card-bg); padding: 2rem; border-radius: 10px; border: 2px solid var(--bentley-gold); max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; animation: slideInRight 0.3s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2 style="color: var(--bentley-gold);">${market} - 2026 Analysis</h2>
+                            <button onclick="this.closest('div').remove()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; transition: color 0.3s ease;"
+                                    onmouseover="this.style.color='var(--bentley-gold)'" onmouseout="this.style.color='var(--text-secondary)'">×</button>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <div style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem; color: ${marketData.changePercent >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                                ${formatNumber(marketData.value)}
+                            </div>
+                            <div style="color: ${marketData.changePercent >= 0 ? 'var(--success)' : 'var(--danger)'}; font-weight: 600;">
+                                ${marketData.changePercent >= 0 ? '+' : ''}${marketData.change.toFixed(2)} (${marketData.changePercent >= 0 ? '+' : ''}${marketData.changePercent.toFixed(2)}%)
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">2026 Performance</h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                <div>
+                                    <div style="color: var(--text-secondary);">YTD Change</div>
+                                    <div style="font-weight: 600; color: var(--success);">+${(Math.random() * 15 + 5).toFixed(1)}%</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--text-secondary);">52W High (2026)</div>
+                                    <div style="font-weight: 600;">${formatNumber(marketData.value * 1.1)}</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--text-secondary);">52W Low (2026)</div>
+                                    <div style="font-weight: 600;">${formatNumber(marketData.value * 0.85)}</div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--text-secondary);">Avg Volume</div>
+                                    <div style="font-weight: 600;">${(Math.random() * 5 + 2).toFixed(1)}B</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">Market Outlook</h3>
+                            <div style="color: var(--text-secondary); padding: 1rem; background: rgba(201, 168, 106, 0.05); border-radius: 6px;">
+                                Based on 2026 projections, ${market} shows strong momentum with AI and technology sectors driving growth. Analysts remain bullish with a 12-month target of ${formatNumber(marketData.value * 1.15)}.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modal = document.createElement('div');
+            modal.innerHTML = detailContent;
+            document.body.appendChild(modal);
+        }
+
+        function showStockDetail(symbol) {
+            showNotification(`Loading ${symbol} details for 2026...`, 'info');
+            // Implementation would show detailed stock view
+        }
+
+        function showSectorDetail(sectorName) {
+            showNotification(`Opening ${sectorName} sector analysis`, 'info');
+            // Implementation would show detailed sector view
+        }
+
+        function showNewsDetail(newsItem) {
+            const detailContent = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                    <div style="background: var(--card-bg); padding: 2rem; border-radius: 10px; border: 2px solid var(--bentley-gold); max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2 style="color: var(--bentley-gold); flex: 1;">${newsItem.title}</h2>
+                            <button onclick="this.closest('div').remove()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">×</button>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                            <div style="color: var(--text-secondary);">${newsItem.source} • ${newsItem.time}</div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--text-secondary);">Sentiment:</span>
+                                <span style="color: ${newsItem.sentiment > 70 ? 'var(--success)' : newsItem.sentiment > 50 ? 'var(--warning)' : 'var(--danger)'}; font-weight: 600;">
+                                    ${newsItem.sentiment}%
+                                </span>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">Summary</h3>
+                            <p style="color: var(--text-primary); line-height: 1.6;">${newsItem.summary}</p>
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                            Full article content would appear here in a real implementation. This is a preview of the market news for 2026.
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modal = document.createElement('div');
+            modal.innerHTML = detailContent;
+            document.body.appendChild(modal);
+        }
+
+        function viewAllGainers() {
+            showNotification('Loading all gainers for 2026...', 'info');
+        }
+
+        function viewAllLosers() {
+            showNotification('Loading all losers for 2026...', 'info');
+        }
+
+        function loadMoreNews() {
+            showNotification('Loading more 2026 market news...', 'info');
+            setTimeout(() => {
+                showNotification('Additional news loaded', 'success');
+            }, 1000);
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatPrice(price) {
+            if (price >= 1000) {
+                return '$' + price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            return '$' + price.toFixed(2);
+        }
+
+        function showNotification(message, type) {
+            // Remove existing notifications
+            document.querySelectorAll('.notification').forEach(n => n.remove());
+
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background-color: ${type === 'success' ? 'rgba(0, 200, 83, 0.9)' :
+                                  type === 'warning' ? 'rgba(255, 152, 0, 0.9)' :
+                                  type === 'danger' ? 'rgba(255, 82, 82, 0.9)' :
+                                  'rgba(33, 150, 243, 0.9)'};
+                color: white;
+                border-radius: 6px;
+                z-index: 1000;
+                animation: slideInRight 0.3s ease-out;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                max-width: 400px;
+                word-wrap: break-word;
+            `;
+
+            // Add icon based on type
+            const icon = type === 'success' ? 'check-circle' :
+                        type === 'warning' ? 'exclamation-triangle' :
+                        type === 'danger' ? 'exclamation-circle' : 'info-circle';
+
+            notification.innerHTML = `
+                <i class="fas fa-${icon}" style="font-size: 1.2rem;"></i>
+                <span>${message}</span>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+
+            // Click to dismiss
+            notification.addEventListener('click', () => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            });
+        }
+
+        // Clean up intervals when page is hidden
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopDataStream();
+            } else if (liveUpdatesEnabled) {
+                startDataStream();
+            }
+        });
+    </script>
+</body>
+</html>

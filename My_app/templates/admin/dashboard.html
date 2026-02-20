@@ -1,0 +1,544 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Bold Trading Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --admin-gradient: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+            --danger-gradient: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            --chat-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --dark-bg: #1a1f36;
+            --light-bg: #f8fafc;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --hover-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light-bg);
+            color: #374151;
+        }
+
+        .admin-sidebar {
+            background: white;
+            min-height: 100vh;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.05);
+            border-right: 1px solid #e5e7eb;
+            position: fixed;
+            width: 250px;
+        }
+
+        .admin-main {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .admin-nav-link {
+            color: #4b5563;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin: 5px 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .admin-nav-link:hover, .admin-nav-link.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+        }
+
+        .admin-nav-link.active {
+            font-weight: 600;
+            border-left: 3px solid #667eea;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .stat-icon.users {
+            background: var(--primary-gradient);
+        }
+
+        .stat-icon.transactions {
+            background: var(--success-gradient);
+        }
+
+        .stat-icon.kyc {
+            background: var(--admin-gradient);
+        }
+
+        .stat-icon.revenue {
+            background: var(--warning-gradient);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quick-action-btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .quick-action-btn:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: #667eea;
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .alert-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger-gradient);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 70px;
+            }
+            .admin-main {
+                margin-left: 70px;
+            }
+            .admin-nav-link span {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Sidebar -->
+    <div class="admin-sidebar">
+        <div class="p-3">
+            <h4 class="text-center mb-4">
+                <i class="fas fa-user-shield me-2"></i>
+                <span class="d-none d-md-inline">Admin Panel</span>
+            </h4>
+
+            <div class="admin-nav-menu">
+                <a href="{% url 'admin_dashboard' %}" class="admin-nav-link active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="{% url 'admin_transactions' %}" class="admin-nav-link">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Transactions</span>
+                    {% if pending_transactions > 0 %}
+                    <span class="badge bg-warning ms-auto">{{ pending_transactions }}</span>
+                    {% endif %}
+                </a>
+
+                <a href="{% url 'admin_users' %}" class="admin-nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                    <span class="badge bg-info ms-auto">{{ total_users }}</span>
+                </a>
+
+                <a href="{% url 'admin_kyc' %}" class="admin-nav-link">
+                    <i class="fas fa-id-card"></i>
+                    <span>KYC Verifications</span>
+                    {% if kyc_pending > 0 %}
+                    <span class="badge bg-danger ms-auto">{{ kyc_pending }}</span>
+                    {% endif %}
+                </a>
+
+                <a href="/admin/" class="admin-nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Django Admin</span>
+                </a>
+
+                <div class="mt-4 p-3">
+                    <h6 class="text-muted mb-3">Quick Actions</h6>
+
+                    <button class="quick-action-btn" onclick="window.location.href='{% url 'admin_transactions' %}?status=PENDING'">
+                        <i class="fas fa-clock"></i>
+                        <span>Review Pending</span>
+                        {% if pending_transactions > 0 %}
+                        <span class="badge bg-warning ms-auto">{{ pending_transactions }}</span>
+                        {% endif %}
+                    </button>
+
+                    <button class="quick-action-btn" onclick="window.location.href='{% url 'admin_kyc' %}?status=PENDING'">
+                        <i class="fas fa-id-card"></i>
+                        <span>Review KYC</span>
+                        {% if kyc_pending > 0 %}
+                        <span class="badge bg-danger ms-auto">{{ kyc_pending }}</span>
+                        {% endif %}
+                    </button>
+
+                    <button class="quick-action-btn" onclick="window.location.href='{% url 'admin_transactions' %}?type=WITHDRAW&status=PENDING'">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Pending Withdrawals</span>
+                        {% if pending_approvals > 0 %}
+                        <span class="badge bg-warning ms-auto">{{ pending_approvals }}</span>
+                        {% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="admin-main">
+        <!-- Header -->
+        <div class="admin-header mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="mb-0">Admin Dashboard</h3>
+                    <p class="text-muted mb-0">Welcome back, {{ request.user.username }}!</p>
+                </div>
+                <div>
+                    <span class="badge bg-primary me-2">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ today|date:"F d, Y" }}
+                    </span>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="row">
+            <!-- Users -->
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon users">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">{{ total_users }}</div>
+                    <div class="stat-label">Total Users</div>
+                    <div class="mt-3">
+                        <small class="text-success">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            {{ new_users_today }} new today
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions -->
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon transactions">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <div class="stat-number">{{ total_transactions }}</div>
+                    <div class="stat-label">Total Transactions</div>
+                    <div class="mt-3">
+                        <small class="text-warning">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ pending_transactions }} pending
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KYC -->
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon kyc">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="stat-number">{{ kyc_approved }}</div>
+                    <div class="stat-label">KYC Approved</div>
+                    <div class="mt-3">
+                        <small class="text-danger">
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            {{ kyc_pending }} pending review
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue -->
+            <div class="col-md-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon revenue">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-number">${{ total_deposits|floatformat:0 }}</div>
+                    <div class="stat-label">Total Deposits</div>
+                    <div class="mt-3">
+                        <small class="text-info">
+                            <i class="fas fa-money-bill-wave me-1"></i>
+                            ${{ total_withdrawals|floatformat:0 }} withdrawals
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="row">
+            <!-- Recent Transactions -->
+            <div class="col-lg-8">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5>Recent Transactions</h5>
+                        <a href="{% url 'admin_transactions' %}" class="btn btn-sm btn-outline-primary">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for txn in recent_transactions %}
+                                <tr onclick="window.location.href='{% url 'admin_transaction_detail' txn.transaction_id %}'" style="cursor: pointer;">
+                                    <td>
+                                        <small class="text-muted">{{ txn.reference|truncatechars:8 }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center"
+                                                 style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                                {{ txn.user.username|first|upper }}
+                                            </div>
+                                            <div class="ms-2">
+                                                <small class="fw-bold">{{ txn.user.username }}</small>
+                                                <br>
+                                                <small class="text-muted">{{ txn.user.email|truncatechars:15 }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if txn.txn_type == 'DEPOSIT' %}success{% elif txn.txn_type == 'WITHDRAW' %}danger{% else %}info{% endif %}">
+                                            {{ txn.get_txn_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong class="{% if txn.txn_type == 'DEPOSIT' %}text-success{% elif txn.txn_type == 'WITHDRAW' %}text-danger{% endif %}">
+                                            ${{ txn.amount|floatformat:2 }}
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ txn.display_status }}">
+                                            {{ txn.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ txn.created_at|timesince }} ago</small>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <i class="fas fa-exchange-alt fa-2x text-muted mb-3"></i>
+                                        <p class="text-muted">No transactions yet</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent KYC -->
+            <div class="col-lg-4">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5>Recent KYC Applications</h5>
+                        <a href="{% url 'admin_kyc' %}" class="btn btn-sm btn-outline-primary">
+                            View All <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+
+                    <div class="list-group">
+                        {% for kyc in recent_kyc %}
+                        <a href="{% url 'admin_kyc_detail' kyc.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">{{ kyc.user.username }}</h6>
+                                    <small class="text-muted">{{ kyc.document_type }} • {{ kyc.country }}</small>
+                                </div>
+                                <span class="badge bg-{% if kyc.status == 'APPROVED' %}success{% elif kyc.status == 'REJECTED' %}danger{% else %}warning{% endif %}">
+                                    {{ kyc.get_status_display }}
+                                </span>
+                            </div>
+                            <small class="text-muted">
+                                Submitted {{ kyc.submitted_at|timesince }} ago
+                            </small>
+                        </a>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-id-card fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">No KYC applications</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- System Alerts -->
+                <div class="stat-card mt-3">
+                    <h5 class="mb-3">System Alerts</h5>
+
+                    {% if flagged_transactions > 0 %}
+                    <div class="alert alert-warning d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                        <div>
+                            <strong>{{ flagged_transactions }} Flagged Transactions</strong>
+                            <p class="mb-0 small">Review flagged transactions for suspicious activity</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if pending_approvals > 0 %}
+                    <div class="alert alert-info d-flex align-items-center">
+                        <i class="fas fa-clock fa-2x me-3"></i>
+                        <div>
+                            <strong>{{ pending_approvals }} Pending Approvals</strong>
+                            <p class="mb-0 small">Transactions waiting for admin approval</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if kyc_pending > 0 %}
+                    <div class="alert alert-danger d-flex align-items-center">
+                        <i class="fas fa-id-card fa-2x me-3"></i>
+                        <div>
+                            <strong>{{ kyc_pending }} Pending KYC</strong>
+                            <p class="mb-0 small">KYC applications need review</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>Completed Transactions</h6>
+                            <h3 class="text-success">{{ completed_transactions }}</h3>
+                        </div>
+                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>Failed Transactions</h6>
+                            <h3 class="text-danger">{{ failed_transactions }}</h3>
+                        </div>
+                        <i class="fas fa-times-circle fa-3x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>Active Users (24h)</h6>
+                            <h3 class="text-primary">{{ active_users }}</h3>
+                        </div>
+                        <i class="fas fa-user-clock fa-3x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-refresh dashboard every 60 seconds
+        setTimeout(function() {
+            window.location.reload();
+        }, 60000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!-- templates/community/group_chat.html -->
+{% extends 'polls/base.html' %}
+
+{% block title %}{{ group_chat.name }} - TradingHub{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Left sidebar - Group info -->
+        <div class="col-lg-3">
+            <div class="card sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <!-- Group header -->
+                    <div class="text-center mb-4">
+                        <div class="group-avatar mb-3">
+                            {% if group_chat.avatar %}
+                            <img src="{{ group_chat.avatar.url }}"
+                                 class="rounded-circle"
+                                 width="100"
+                                 height="100">
+                            {% else %}
+                            <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto"
+                                 style="width: 100px; height: 100px;">
+                                <i class="fas fa-users fa-2x text-white"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <h4 class="card-title">{{ group_chat.name }}</h4>
+                        <p class="text-muted">{{ group_chat.description|default:"No description" }}</p>
+
+                        <!-- Group stats -->
+                        <div class="d-flex justify-content-center gap-3 mb-3">
+                            <div class="text-center">
+                                <div class="fw-bold">{{ group_chat.members.count }}</div>
+                                <small class="text-muted">Members</small>
+                            </div>
+                            <div class="text-center">
+                                <div class="fw-bold">{{ group_chat.message_count }}</div>
+                                <small class="text-muted">Messages</small>
+                            </div>
+                        </div>
+
+                        <!-- Group actions -->
+                        {% if is_group_admin %}
+                        <div class="btn-group w-100" role="group">
+                            <button class="btn btn-outline-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editGroupModal">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#leaveGroupModal">
+                                <i class="fas fa-sign-out-alt"></i> Leave
+                            </button>
+                        </div>
+                        {% else %}
+                        <button class="btn btn-outline-danger btn-sm w-100"
+                                data-bs-toggle="modal"
+                                data-bs-target="#leaveGroupModal">
+                            <i class="fas fa-sign-out-alt"></i> Leave Group
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Members list -->
+                    <h6 class="border-bottom pb-2">Members ({{ group_chat.members.count }})</h6>
+                    <div class="members-list" style="max-height: 300px; overflow-y: auto;">
+                        {% for member in members %}
+                        <div class="d-flex align-items-center mb-2">
+                            <img src="{{ member.profile.get_avatar_url }}"
+                                 class="rounded-circle me-2"
+                                 width="32"
+                                 height="32">
+                            <div style="flex: 1;">
+                                <div class="fw-bold">{{ member.username }}</div>
+                                <small class="text-muted">
+                                    {% if member == group_chat.created_by %}
+                                    <span class="badge bg-primary">Admin</span>
+                                    {% endif %}
+                                    {% if member.profile.is_online %}
+                                    <span class="text-success">● Online</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main chat area -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <div class="d-flex align-items-center">
+                        <h5 class="mb-0">Group Chat</h5>
+                        <div class="ms-auto">
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    onclick="location.reload()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages container -->
+                <div class="card-body p-0">
+                    <div id="messages-container"
+                         style="height: 600px; overflow-y: auto; padding: 20px;">
+
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="message {% if message.sender == request.user %}message-sent{% else %}message-received{% endif %} mb-3">
+                            {% if message.sender != request.user %}
+                            <div class="message-sender mb-1">
+                                <img src="{{ message.sender.profile.get_avatar_url }}"
+                                     class="rounded-circle me-2"
+                                     width="24"
+                                     height="24">
+                                <strong>{{ message.sender.username }}</strong>
+                                <small class="text-muted ms-2">
+                                    {{ message.created_at|date:"g:i A" }}
+                                </small>
+                            </div>
+                            {% endif %}
+
+                            <div class="message-content p-3 rounded">
+                                {% if message.is_system %}
+                                <div class="text-center text-muted">
+                                    <i>{{ message.content }}</i>
+                                </div>
+                                {% else %}
+                                {{ message.content|linebreaks }}
+                                {% endif %}
+
+                                {% if message.sender == request.user %}
+                                <div class="text-end mt-1">
+                                    <small class="text-muted">
+                                        {{ message.created_at|date:"g:i A" }}
+                                        {% if message.read %}
+                                        <i class="fas fa-check-double text-primary ms-1"></i>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-comments fa-3x mb-3"></i>
+                            <h5>No messages yet</h5>
+                            <p>Start the conversation!</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Message input -->
+                <div class="card-footer">
+                    <form method="POST" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="text"
+                               name="content"
+                               class="form-control"
+                               placeholder="Type your message..."
+                               required
+                               autocomplete="off">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right sidebar - Group details -->
+        <div class="col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="border-bottom pb-2">Group Details</h6>
+
+                    <!-- Created info -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Created by</small>
+                        <div class="d-flex align-items-center">
+                            <img src="{{ group_chat.created_by.profile.get_avatar_url }}"
+                                 class="rounded-circle me-2"
+                                 width="32"
+                                 height="32">
+                            <span>{{ group_chat.created_by.username }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Created on</small>
+                        <span>{{ group_chat.created_at|date:"F j, Y" }}</span>
+                    </div>
+
+                    <!-- Invite link -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Invite Link</small>
+                        <div class="input-group input-group-sm">
+                            <input type="text"
+                                   class="form-control"
+                                   id="invite-link"
+                                   value="{{ request.build_absolute_uri }}join/{{ group_chat.invite_code }}/"
+                                   readonly>
+                            <button class="btn btn-outline-primary"
+                                    onclick="copyInviteLink()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Group settings -->
+                    <h6 class="border-top pt-3 mt-3">Group Settings</h6>
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="mute-notifications"
+                               {% if group_chat.muted_by.filter(id=request.user.id).exists %}checked{% endif %}>
+                        <label class="form-check-label" for="mute-notifications">
+                            Mute notifications
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Group Modal -->
+<div class="modal fade" id="editGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Group</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'edit_group_chat' group_chat.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Group Name</label>
+                        <input type="text"
+                               name="name"
+                               class="form-control"
+                               value="{{ group_chat.name }}"
+                               required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description"
+                                  class="form-control"
+                                  rows="3">{{ group_chat.description }}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Group Modal -->
+<div class="modal fade" id="leaveGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Leave Group</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to leave "{{ group_chat.name }}"?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    You will no longer receive messages from this group.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{% url 'leave_group_chat' group_chat.id %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Leave Group</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Scroll to bottom of messages
+    const messagesContainer = document.getElementById('messages-container');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    // Copy invite link
+    function copyInviteLink() {
+        const linkInput = document.getElementById('invite-link');
+        linkInput.select();
+        linkInput.setSelectionRange(0, 99999);
+        document.execCommand('copy');
+
+        // Show toast
+        const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+        toast.show();
+    }
+
+    // Auto-refresh messages every 30 seconds
+    setInterval(() => {
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                // Update messages (simplified - in real app you'd use WebSockets)
+                console.log('Refreshing messages...');
+            });
+    }, 30000);
+
+    // Mute notifications toggle
+    document.getElementById('mute-notifications').addEventListener('change', function() {
+        const isMuted = this.checked;
+        fetch('{% url "toggle_group_mute" group_chat.id %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ muted: isMuted })
+        });
+    });
+</script>
+
+<!-- Toast for copy confirmation -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="copyToast" class="toast" role="alert">
+        <div class="toast-body">
+            <i class="fas fa-check-circle text-success me-2"></i>
+            Invite link copied to clipboard!
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% endblock %}

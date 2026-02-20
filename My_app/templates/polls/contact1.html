@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Bentely| Brand</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .legal-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .legal-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 10px;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .nav-link.active {
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .contact-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .legal-content {
+                padding: 1.5rem;
+            }
+            .legal-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'base' %}">
+                <i class="bi bi-graph-up me-2"></i>Bentely-Brand-Dev
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'market_research' %}">Trading Platform</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'privacy_policy' %}">Privacy Policy</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'terms_of_service' %}">Terms of Service</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'contact1' %}">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'risk_disclosure' %}">Risk Disclosure</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="container py-5">
+        <div class="legal-header text-center">
+            <h1 class="display-5 fw-bold">Contact Us</h1>
+            <p class="lead">Get in touch with our support team</p>
+        </div>
+
+        <div class="legal-content">
+            <div class="row">
+                <div class="col-md-8">
+                    <h3 class="section-title">Send Us a Message</h3>
+                    <form id="contactForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="firstName" class="form-label">First Name *</label>
+                                <input type="text" class="form-control" id="firstName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="lastName" class="form-label">Last Name *</label>
+                                <input type="text" class="form-control" id="lastName" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject *</label>
+                            <select class="form-select" id="subject" required>
+                                <option value="" selected disabled>Select a subject</option>
+                                <option value="account">Account Issues</option>
+                                <option value="trading">Trading Questions</option>
+                                <option value="technical">Technical Support</option>
+                                <option value="billing">Billing Questions</option>
+                                <option value="legal">Legal Inquiries</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message *</label>
+                            <textarea class="form-control" id="message" rows="5" required></textarea>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="consent" required>
+                            <label class="form-check-label" for="consent">I agree to the processing of my personal data for the purpose of handling my inquiry *</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+                    </form>
+                </div>
+
+                <div class="col-md-4">
+                    <h3 class="section-title">Contact Information</h3>
+
+                    <div class="text-center mb-4">
+                        <div class="contact-icon">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <h5>Office Address</h5>
+                        <p>Bentely Brand~Bold Trading Inc.<br>
+                        254 Financial District<br>
+                        Nairobi, SB 10005<br>
+                        Kenya</p>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <div class="contact-icon">
+                            <i class="bi bi-telephone-fill"></i>
+                        </div>
+                        <h5>Phone Numbers</h5>
+                        <p>Customer Support: +(254) 745870406<br>
+                        Technical Support: +(254) 116747630<br>
+                        Emergency Line: +1 (800) 555-7880</p>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <div class="contact-icon">
+                            <i class="bi bi-envelope-fill"></i>
+                        </div>
+                        <h5>Email Addresses</h5>
+                        <p>General: info@brandboldtrading.com<br>
+                        Support: support@brandboldtrading.com<br>
+                        Compliance: compliance@brandboldtrading.com</p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="contact-icon">
+                            <i class="bi bi-clock-fill"></i>
+                        </div>
+                        <h5>Business Hours</h5>
+                        <p>Monday - Friday: 8:00 AM - 8:00 PM EST<br>
+                        Saturday: 9:00 AM - 5:00 PM EST<br>
+                        Sunday: Closed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Bentely Brand Dev</h5>
+                    <p>A professional trading platform for serious investors.</p>
+                </div>
+                <div class="col-md-2">
+                    <h5>Legal</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'privacy_policy' %}" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
+                        <li><a href="{% url 'terms_of_service' %}" class="text-white-50 text-decoration-none">Terms of Service</a></li>
+                        <li><a href="{% url 'risk_disclosure' %}" class="text-white-50 text-decoration-none">Risk Disclosure</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none">Cookie Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="contact1.html" class="text-white-50 text-decoration-none">Support Center</a></li>
+                        <li><a href="contact1.html" class="text-white-50 text-decoration-none">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-4 mb-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">© 2026 Boldtrading. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">Trade responsibly. Trading involves risk of loss.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <a href="#" class="back-to-top">
+        <i class="bi bi-arrow-up"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+
+            alert(`Thank you ${firstName} ${lastName}! Your message has been received. We'll respond to you at ${email} regarding "${subject}" within 24 hours.`);
+
+            document.getElementById('contactForm').reset();
+        });
+
+        const backToTopButton = document.querySelector('.back-to-top');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopButton.style.display = 'flex';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+        backToTopButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

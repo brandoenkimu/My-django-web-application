@@ -1,0 +1,1679 @@
+{% load static %}
+{% load my_filters %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ profile_user.profile.get_display_name }} - TradingHub</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Custom CSS - Advanced Theme Support -->
+    <style>
+        :root {
+            --primary: #1877f2;
+            --primary-light: #4599ff;
+            --primary-dark: #166fe5;
+            --secondary: #65676b;
+            --success: #42b72a;
+            --danger: #fa383e;
+            --warning: #f7b928;
+            --info: #54c7ec;
+
+            /* Light Theme */
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e4e6eb;
+            --bg-hover: #f2f2f2;
+            --bg-card: #ffffff;
+
+            --text-primary: #050505;
+            --text-secondary: #65676b;
+            --text-muted: #8a8d91;
+            --text-light: #b0b3b8;
+
+            --border-light: #ced0d4;
+            --border-medium: #dadde1;
+            --border-dark: #ccd0d5;
+
+            --shadow-color: rgba(0,0,0,0.1);
+
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-full: 50px;
+
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #18191a;
+            --bg-secondary: #242526;
+            --bg-tertiary: #3a3b3c;
+            --bg-hover: #3a3b3c;
+            --bg-card: #242526;
+
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --text-muted: #8a8d91;
+            --text-light: #65676b;
+
+            --border-light: #3e4042;
+            --border-medium: #3e4042;
+            --border-dark: #2d2d2d;
+
+            --shadow-color: rgba(0,0,0,0.3);
+        }
+
+        body {
+            background: var(--bg-primary);
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+            color: var(--text-primary);
+            line-height: 1.34;
+            padding-top: 56px;
+            transition: background-color var(--transition-normal), color var(--transition-normal);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            transition: all var(--transition-normal);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-medium);
+            height: 56px;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: background-color var(--transition-normal), border-color var(--transition-normal);
+        }
+
+        .navbar-brand {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 24px;
+        }
+
+        /* Advanced Search Modal */
+        .search-modal {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-medium);
+            padding: 16px;
+            z-index: 999;
+            display: none;
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .search-modal.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 16px;
+            padding: 8px;
+        }
+
+        .search-user-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .search-user-card:hover {
+            background: var(--bg-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        /* Profile Header */
+        .profile-header-section {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-medium);
+            padding-bottom: 20px;
+            transition: background-color var(--transition-normal), border-color var(--transition-normal);
+        }
+
+        .profile-cover-container {
+            position: relative;
+            height: 350px;
+            overflow: hidden;
+        }
+
+        .profile-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .profile-info-container {
+            padding: 0 32px;
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .avatar-container {
+            position: absolute;
+            left: 32px;
+            bottom: -20px;
+            z-index: 2;
+        }
+
+        .avatar-wrapper {
+            width: 168px;
+            height: 168px;
+            border-radius: 50%;
+            border: 4px solid var(--bg-secondary);
+            background: var(--bg-secondary);
+            padding: 4px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            position: relative;
+            transition: border-color var(--transition-normal);
+        }
+
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .profile-details {
+            padding-left: 220px;
+            padding-top: 20px;
+            padding-right: 20px;
+        }
+
+        .profile-display-name {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Professional Tags from Bio */
+        .bio-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .bio-tag {
+            padding: 4px 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-radius: var(--radius-full);
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            border: none;
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            height: 36px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border-medium);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-light);
+            transform: translateY(-2px);
+        }
+
+        /* Post Composer Modal */
+        .post-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .post-modal.show {
+            display: flex;
+        }
+
+        .post-modal-content {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 8px 32px var(--shadow-color);
+        }
+
+        /* Content Layout */
+        .profile-content-container {
+            max-width: 1200px;
+            margin: 24px auto;
+            padding: 0 32px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 1100px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Sidebar Cards */
+        .sidebar-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-medium);
+            overflow: hidden;
+            transition: all var(--transition-normal);
+            margin-bottom: 16px;
+        }
+
+        .sidebar-card:hover {
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .card-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-medium);
+            background: var(--bg-card);
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        /* About Section */
+        .about-section {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-medium);
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .about-item {
+            margin-bottom: 20px;
+        }
+
+        .about-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .about-value {
+            font-size: 15px;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-medium);
+            margin-bottom: 24px;
+        }
+
+        .tabs-nav {
+            display: flex;
+            border-bottom: 1px solid var(--border-medium);
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Posts */
+        .posts-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .post-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .post-card:hover {
+            box-shadow: 0 4px 12px var(--shadow-color);
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-cover-container {
+                height: 250px;
+            }
+
+            .avatar-wrapper {
+                width: 120px;
+                height: 120px;
+            }
+
+            .avatar-container {
+                left: 16px;
+                bottom: -15px;
+            }
+
+            .profile-details {
+                padding-left: 140px;
+                padding-top: 10px;
+            }
+
+            .profile-display-name {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-btn {
+                justify-content: center;
+            }
+
+            .profile-details {
+                padding-left: 0;
+                padding-top: 60px;
+                text-align: center;
+            }
+
+            .avatar-container {
+                position: relative;
+                left: 0;
+                bottom: 0;
+                margin: 0 auto;
+                text-align: center;
+            }
+
+            .bio-tags {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon" id="themeIcon"></i>
+    </button>
+
+    <!-- Navbar -->
+    <nav class="navbar-custom">
+        <div class="container-fluid d-flex align-items-center justify-content-between h-100">
+            <a class="navbar-brand" href="{% url 'community_feed' %}">
+                <i class="fas fa-chart-line me-2"></i>Bold~TradingHub
+            </a>
+
+            <div class="d-flex align-items-center gap-3">
+                <!-- Advanced Search Button -->
+                <button class="btn btn-outline-secondary btn-sm" id="searchButton">
+                    <i class="fas fa-search me-2"></i>Search Traders
+                </button>
+
+                <!-- Notifications -->
+                <a href="{% url 'notifications' %}" class="btn btn-light btn-sm position-relative">
+                    <i class="fas fa-bell"></i>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ unread_notifications_count }}
+                    </span>
+                    {% endif %}
+                </a>
+
+                <!-- Messages -->
+                <a href="{% url 'messages' %}" class="btn btn-light btn-sm position-relative">
+                    <i class="fas fa-envelope"></i>
+                    {% if unread_messages_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ unread_messages_count }}
+                    </span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Advanced Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h4 class="mb-0">Search Traders</h4>
+                <button class="btn btn-sm btn-outline-secondary" id="closeSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text bg-transparent border-end-0">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text"
+                       class="form-control border-start-0"
+                       id="advancedSearchInput"
+                       placeholder="Search by username, name, trading style..."
+                       autocomplete="off">
+                <button class="btn btn-primary" onclick="performAdvancedSearch()">
+                    <i class="fas fa-search me-1"></i> Search
+                </button>
+            </div>
+
+            <!-- Search Filters -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm" id="filterPlan">
+                        <option value="">All Plans</option>
+                        <option value="Starter">Starter</option>
+                        <option value="Pro">Pro</option>
+                        <option value="Elite">Elite</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm" id="filterCountry">
+                        <option value="">All Countries</option>
+                        <!-- This would be populated dynamically -->
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm" id="filterWinRate">
+                        <option value="">Win Rate</option>
+                        <option value="90">90%+</option>
+                        <option value="80">80%+</option>
+                        <option value="70">70%+</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select form-select-sm" id="filterExperience">
+                        <option value="">Experience</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div id="searchResultsContainer">
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                    <p>Search for traders to discover new strategies and insights</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Header -->
+    <section class="profile-header-section">
+        <div class="profile-cover-container">
+            <div class="profile-cover"></div>
+        </div>
+
+        <div class="profile-info-container">
+            <div class="avatar-container">
+                <div class="avatar-wrapper">
+                    <img src="{{ profile_user.profile.get_avatar_url }}"
+                         alt="{{ profile_user.username }}"
+                         class="profile-avatar"
+                         onerror="this.src='https://ui-avatars.com/api/?name={{ profile_user.username }}&background=667eea&color=fff&size=160'">
+                </div>
+            </div>
+
+            <div class="profile-details">
+                <div class="profile-name-section">
+                    <h1 class="profile-display-name">
+                        {{ profile_user.profile.get_display_name }}
+
+                        {% if profile_user.profile.kyc_verified %}
+                        <span class="badge bg-success" style="padding: 4px 8px; font-size: 12px;">
+                            <i class="fas fa-shield-check me-1"></i>
+                            Verified
+                        </span>
+                        {% endif %}
+
+                        {% if profile_user.profile.plan != 'Starter' %}
+                        <span class="badge bg-warning text-dark" style="padding: 4px 8px; font-size: 12px;">
+                            <i class="fas fa-crown me-1"></i>
+                            {{ profile_user.profile.plan }}
+                        </span>
+                        {% endif %}
+                    </h1>
+
+                    <div class="d-flex align-items-center gap-3 flex-wrap mb-3">
+                        <span class="text-muted">
+                            <i class="fas fa-users me-1"></i>
+                            {{ profile_user.profile.followers_count|format_large_number }} followers
+                        </span>
+                        <span class="text-muted">
+                            <i class="fas fa-user-friends me-1"></i>
+                            {{ profile_user.profile.following_count|format_large_number }} following
+                        </span>
+                        <span class="text-muted">
+                            <i class="fas fa-chart-line me-1"></i>
+                            {{ profile_user.profile.total_posts|format_large_number }} posts
+                        </span>
+                    </div>
+
+                    <!-- Bio Tags from Bio Content -->
+                    {% if profile_user.profile.bio %}
+                    <div class="bio-tags" id="bioTagsContainer">
+                        <!-- Tags will be extracted from bio dynamically -->
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    {% if profile_user == request.user %}
+                    <button class="action-btn btn-primary" onclick="openPostModal()">
+                        <i class="fas fa-plus"></i> Create Post
+                    </button>
+                    <button class="action-btn btn-outline" onclick="editProfile()">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
+                    <button class="action-btn btn-outline" onclick="shareProfile()">
+                        <i class="fas fa-share-alt"></i> Share Profile
+                    </button>
+                    {% else %}
+                    <button class="action-btn btn-primary" id="followBtn" data-user-id="{{ profile_user.id }}">
+                        {% if is_following %}
+                        <i class="fas fa-check"></i> Following
+                        {% else %}
+                        <i class="fas fa-user-plus"></i> Follow
+                        {% endif %}
+                    </button>
+                    <button class="action-btn btn-outline" id="messageBtn">
+                        <i class="fas fa-paper-plane"></i> Message
+                    </button>
+                    <button class="action-btn btn-outline" onclick="shareProfile()">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                    <button class="action-btn btn-outline" onclick="reportUser('{{ profile_user.id }}')">
+                        <i class="fas fa-flag"></i> Report
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="profile-content-container">
+        <div class="content-grid">
+            <!-- Left Sidebar -->
+            <aside class="profile-sidebar">
+                <!-- Trading Stats -->
+                <div class="sidebar-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Trading Performance</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Win Rate</span>
+                            <span class="fw-bold text-success">{{ profile_user.wallet.get_win_rate|default:"0"|floatformat:1 }}%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Total Trades</span>
+                            <span class="fw-bold">{{ profile_user.wallet.total_trades|default:"0" }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">Profit/Loss</span>
+                            <span class="fw-bold {% if profile_user.wallet.get_net_profit_loss|default:0 > 0 %}text-success{% else %}text-danger{% endif %}">
+                                ${{ profile_user.wallet.get_net_profit_loss|default:"0"|floatformat:2 }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Trading Days</span>
+                            <span class="fw-bold">{{ profile_user.profile.trading_days|default:"0" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Preferences -->
+                <div class="sidebar-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Trading Profile</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Trading Style</small>
+                            <span>{{ profile_user.profile.get_trading_style_display|default:"Not specified" }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Experience Level</small>
+                            <span>{{ profile_user.profile.trading_experience|default:"Not specified" }}</span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Risk Tolerance</small>
+                            <span>{{ profile_user.profile.risk_tolerance|default:"Medium" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Favorite Markets -->
+                <div class="sidebar-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Favorite Markets</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for symbol in profile_user.profile.favorite_symbols|slice:":8" %}
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary" style="font-size: 13px; padding: 4px 10px;">
+                                {{ symbol }}
+                            </span>
+                            {% empty %}
+                            <span class="text-muted">No favorite markets</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="profile-main-content">
+                <!-- Tabs Navigation -->
+                <div class="tabs-container">
+                    <nav class="tabs-nav">
+                        <button class="tab-btn active" data-tab="posts">
+                            <i class="fas fa-newspaper me-2"></i>
+                            Posts
+                            {% if profile_user.profile.total_posts %}
+                            <span class="badge bg-secondary ms-2">{{ profile_user.profile.total_posts }}</span>
+                            {% endif %}
+                        </button>
+                        <button class="tab-btn" data-tab="trades">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Trades
+                            {% if profile_user.wallet.total_trades %}
+                            <span class="badge bg-secondary ms-2">{{ profile_user.wallet.total_trades }}</span>
+                            {% endif %}
+                        </button>
+                        <button class="tab-btn" data-tab="analytics">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Analytics
+                        </button>
+                        <button class="tab-btn" data-tab="about">
+                            <i class="fas fa-info-circle me-2"></i>
+                            About
+                        </button>
+                    </nav>
+
+                    <!-- Posts Tab -->
+                    <div class="tab-content active" id="postsTab">
+                        <!-- Post Composer -->
+                        {% if profile_user == request.user %}
+                        <div class="card mb-4" style="background: var(--bg-card); border: 1px solid var(--border-medium);">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <img src="{{ request.user.profile.get_avatar_url }}"
+                                         alt="{{ request.user.username }}"
+                                         class="rounded-circle"
+                                         style="width: 40px; height: 40px; object-fit: cover;"
+                                         onerror="this.src='https://ui-avatars.com/api/?name={{ request.user.username }}&background=667eea'">
+                                    <button class="btn btn-outline flex-grow-1 text-start text-muted"
+                                            onclick="openPostModal()"
+                                            style="border: 1px solid var(--border-medium); padding: 12px 16px; border-radius: var(--radius-full);">
+                                        What's on your mind?
+                                    </button>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-danger btn-sm" onclick="openPostModal('video')">
+                                        <i class="fas fa-video me-1"></i> Live Video
+                                    </button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="openPostModal('photo')">
+                                        <i class="fas fa-photo-video me-1"></i> Photo/Video
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" onclick="openPostModal('reel')">
+                                        <i class="fas fa-film me-1"></i> Reel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Posts List -->
+                        <div id="postsContainer">
+                            {% if posts %}
+                                {% for post in posts %}
+                                {% include 'posts/_post_card.html' with post=post %}
+                                {% endfor %}
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-newspaper fa-4x text-muted mb-3"></i>
+                                <h4 class="mb-3">No Posts Yet</h4>
+                                <p class="text-muted">
+                                    {% if profile_user == request.user %}
+                                    Share your first trading insight or market analysis!
+                                    {% else %}
+                                    {{ profile_user.username }} hasn't posted anything yet.
+                                    {% endif %}
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Trades Tab -->
+                    <div class="tab-content" id="tradesTab">
+                        <div id="tradesContainer">
+                            <!-- Loading -->
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Tab -->
+                    <div class="tab-content" id="analyticsTab">
+                        <div id="analyticsContainer">
+                            <!-- Placeholder for analytics charts -->
+                            <div class="text-center py-5">
+                                <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
+                                <h4 class="mb-3">Analytics Dashboard</h4>
+                                <p class="text-muted">Trading performance analytics will be displayed here</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- About Tab -->
+                    <div class="tab-content" id="aboutTab">
+                        <div class="about-section">
+                            <h4 class="mb-4">About {{ profile_user.profile.get_display_name }}</h4>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="about-item">
+                                        <div class="about-label">
+                                            <i class="fas fa-user"></i>
+                                            Basic Information
+                                        </div>
+                                        <div class="about-value">
+                                            <div class="mb-2">
+                                                <strong>Username:</strong> @{{ profile_user.username }}
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Member Since:</strong> {{ profile_user.date_joined|date:"F j, Y" }}
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Last Active:</strong> {{ profile_user.last_login|timesince }} ago
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="about-item">
+                                        <div class="about-label">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            Location
+                                        </div>
+                                        <div class="about-value">
+                                            {% if profile_user.profile.country %}
+                                            <div class="mb-2">
+                                                <strong>Country:</strong> {{ profile_user.profile.country }}
+                                            </div>
+                                            {% endif %}
+                                            {% if profile_user.profile.city %}
+                                            <div>
+                                                <strong>City:</strong> {{ profile_user.profile.city }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="about-item">
+                                        <div class="about-label">
+                                            <i class="fas fa-chart-line"></i>
+                                            Trading Information
+                                        </div>
+                                        <div class="about-value">
+                                            <div class="mb-2">
+                                                <strong>Experience:</strong> {{ profile_user.profile.trading_experience|default:"Not specified" }}
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Preferred Markets:</strong>
+                                                {{ profile_user.profile.preferred_markets|default:"Not specified" }}
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Trading Hours:</strong>
+                                                {{ profile_user.profile.trading_hours|default:"Not specified" }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="about-item">
+                                        <div class="about-label">
+                                            <i class="fas fa-cog"></i>
+                                            Account Settings
+                                        </div>
+                                        <div class="about-value">
+                                            <div class="mb-2">
+                                                <strong>Plan:</strong> {{ profile_user.profile.plan }}
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>KYC Status:</strong>
+                                                {% if profile_user.profile.kyc_verified %}
+                                                <span class="badge bg-success">Verified</span>
+                                                {% else %}
+                                                <span class="badge bg-warning">Pending</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="mb-2">
+                                                <strong>Account Privacy:</strong>
+                                                {{ profile_user.profile.privacy_level|default:"Public" }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Post Creation Modal -->
+    <div class="post-modal" id="postModal">
+        <div class="post-modal-content">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Create Post</h5>
+                <button type="button" class="btn-close" onclick="closePostModal()"></button>
+            </div>
+            <form id="postForm" method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="card-body">
+                    <div class="mb-3">
+                        <input type="text"
+                               class="form-control"
+                               id="postTitle"
+                               name="title"
+                               placeholder="Title (optional)"
+                               maxlength="200">
+                    </div>
+
+                    <div class="mb-3">
+                        <textarea class="form-control"
+                                  id="postContent"
+                                  name="content"
+                                  rows="5"
+                                  placeholder="What's on your mind?"
+                                  required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="postTags" class="form-label">Tags (comma separated)</label>
+                        <input type="text"
+                               class="form-control"
+                               id="postTags"
+                               name="tags"
+                               placeholder="trading, forex, analysis">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="postImage" class="form-label">Add Image/Video</label>
+                        <input type="file"
+                               class="form-control"
+                               id="postImage"
+                               name="image"
+                               accept="image/*,video/*">
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="postPrivate"
+                               name="is_private">
+                        <label class="form-check-label" for="postPrivate">
+                            Make this post private (only followers can see)
+                        </label>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="postTrade"
+                               name="include_trade">
+                        <label class="form-check-label" for="postTrade">
+                            Include trade information
+                        </label>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary" onclick="closePostModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitPost">
+                        <i class="fas fa-paper-plane me-2"></i> Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true
+        });
+
+        // Get CSRF Token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        const csrftoken = getCookie('csrftoken');
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+
+        // Check for saved theme or prefer-color-scheme
+        const savedTheme = localStorage.getItem('theme') ||
+                          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        html.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            themeIcon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Extract Bio Tags
+        function extractBioTags() {
+            const bioText = `{{ profile_user.profile.bio|default:""|escapejs }}`;
+            const bioTagsContainer = document.getElementById('bioTagsContainer');
+
+            if (!bioText || !bioTagsContainer) return;
+
+            // Common professional tags to extract
+            const professionalTags = [
+                'Software Engineer', 'Developer', 'Trader', 'Investor',
+                'Analyst', 'Digital Creator', 'Content Creator', 'Trading',
+                'Forex', 'Stocks', 'Crypto', 'Algorithmic', 'Quant'
+            ];
+
+            let foundTags = [];
+
+            // Check for each tag in bio
+            professionalTags.forEach(tag => {
+                if (bioText.toLowerCase().includes(tag.toLowerCase())) {
+                    foundTags.push(tag);
+                }
+            });
+
+            // Display tags if found
+            if (foundTags.length > 0) {
+                bioTagsContainer.innerHTML = foundTags.map(tag => `
+                    <span class="bio-tag">
+                        <i class="fas fa-tag"></i>
+                        ${tag}
+                    </span>
+                `).join('');
+            } else {
+                bioTagsContainer.style.display = 'none';
+            }
+        }
+
+        // Search Functionality
+        const searchModal = document.getElementById('searchModal');
+        const searchButton = document.getElementById('searchButton');
+        const closeSearch = document.getElementById('closeSearch');
+        const advancedSearchInput = document.getElementById('advancedSearchInput');
+        let searchTimeout;
+
+        searchButton.addEventListener('click', () => {
+            searchModal.classList.add('show');
+            advancedSearchInput.focus();
+        });
+
+        closeSearch.addEventListener('click', () => {
+            searchModal.classList.remove('show');
+        });
+
+        advancedSearchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+
+            if (query.length >= 2) {
+                searchTimeout = setTimeout(() => {
+                    performAdvancedSearch(query);
+                }, 500);
+            }
+        });
+
+        async function performAdvancedSearch(query = null) {
+            const searchQuery = query || advancedSearchInput.value.trim();
+            if (searchQuery.length < 2) return;
+
+            const resultsContainer = document.getElementById('searchResultsContainer');
+            resultsContainer.innerHTML = `
+                <div class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `;
+
+            try {
+                // Get filter values
+                const plan = document.getElementById('filterPlan').value;
+                const winRate = document.getElementById('filterWinRate').value;
+                const experience = document.getElementById('filterExperience').value;
+
+                // Build query parameters
+                const params = new URLSearchParams({
+                    q: searchQuery,
+                    plan: plan,
+                    win_rate: winRate,
+                    experience: experience
+                });
+
+                const response = await fetch(`/api/search/traders/?${params}`);
+                const data = await response.json();
+
+                if (data.users && data.users.length > 0) {
+                    displaySearchResults(data.users);
+                } else {
+                    resultsContainer.innerHTML = `
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-users fa-3x mb-3"></i>
+                            <p>No traders found matching your criteria</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                resultsContainer.innerHTML = `
+                    <div class="text-center py-5 text-danger">
+                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                        <p>Failed to search. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displaySearchResults(users) {
+            const resultsContainer = document.getElementById('searchResultsContainer');
+
+            resultsContainer.innerHTML = `
+                <div class="search-results-grid">
+                    ${users.map(user => `
+                        <div class="search-user-card" data-user-id="${user.id}">
+                            <img src="${user.avatar_url || 'https://ui-avatars.com/api/?name=' + user.username + '&background=667eea&color=fff'}"
+                                 class="rounded-circle"
+                                 style="width: 50px; height: 50px; object-fit: cover;">
+                            <div style="flex: 1;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">${user.display_name}</h6>
+                                        <small class="text-muted">@${user.username}</small>
+                                    </div>
+                                    <button class="btn btn-sm ${user.is_following ? 'btn-outline-secondary' : 'btn-primary'}"
+                                            onclick="toggleFollow(${user.id}, this)">
+                                        ${user.is_following ? 'Following' : 'Follow'}
+                                    </button>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted me-3">
+                                        <i class="fas fa-chart-line"></i> ${user.win_rate || '0'}% Win Rate
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="fas fa-users"></i> ${user.followers_count || '0'} followers
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            // Add click events to user cards
+            document.querySelectorAll('.search-user-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (!e.target.closest('button')) {
+                        const userId = card.dataset.userId;
+                        const user = users.find(u => u.id == userId);
+                        if (user) {
+                            window.location.href = `/profile/${user.username}/`;
+                        }
+                    }
+                });
+            });
+        }
+
+        // Follow/Unfollow Functionality
+        async function toggleFollow(userId, button) {
+            try {
+                const response = await fetch('/api/follow/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.action === 'followed') {
+                        button.textContent = 'Following';
+                        button.classList.remove('btn-primary');
+                        button.classList.add('btn-outline-secondary');
+                        showToast(`You are now following ${data.username}`, 'success');
+                    } else {
+                        button.textContent = 'Follow';
+                        button.classList.remove('btn-outline-secondary');
+                        button.classList.add('btn-primary');
+                        showToast(`You unfollowed ${data.username}`, 'info');
+                    }
+                }
+            } catch (error) {
+                console.error('Follow error:', error);
+                showToast('Failed to update follow status', 'error');
+            }
+        }
+
+        // Post Creation Modal
+        const postModal = document.getElementById('postModal');
+        const postForm = document.getElementById('postForm');
+
+        function openPostModal(type = 'text') {
+            postModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            // Set focus based on type
+            if (type === 'photo') {
+                document.getElementById('postImage').focus();
+            } else if (type === 'video') {
+                // Handle video post
+            } else {
+                document.getElementById('postContent').focus();
+            }
+        }
+
+        function closePostModal() {
+            postModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            postForm.reset();
+        }
+
+        // Handle post submission
+        postForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitPost');
+            const originalText = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Posting...
+            `;
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(postForm);
+
+                const response = await fetch(postForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.success) {
+                        showToast('Post created successfully!', 'success');
+                        closePostModal();
+
+                        // Reload posts or add new post dynamically
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        showToast(data.error || 'Failed to create post', 'error');
+                    }
+                } else {
+                    showToast('Failed to create post', 'error');
+                }
+            } catch (error) {
+                console.error('Post creation error:', error);
+                showToast('Network error. Please try again.', 'error');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Tab Switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const tabId = this.dataset.tab;
+
+                // Update active tab
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                // Show selected tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                const tabContent = document.getElementById(tabId + 'Tab');
+                tabContent.classList.add('active');
+
+                // Load content for dynamic tabs
+                if (tabId === 'trades') {
+                    loadTrades();
+                } else if (tabId === 'analytics') {
+                    loadAnalytics();
+                }
+            });
+        });
+
+        // Load Trades
+        async function loadTrades() {
+            const container = document.getElementById('tradesContainer');
+
+            try {
+                const response = await fetch(`/api/profile/{{ profile_user.id }}/trades/`);
+                const data = await response.json();
+
+                if (data.trades && data.trades.length > 0) {
+                    container.innerHTML = `
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Symbol</th>
+                                        <th>Type</th>
+                                        <th>Entry</th>
+                                        <th>Exit</th>
+                                        <th>P/L</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.trades.map(trade => `
+                                        <tr>
+                                            <td><strong>${trade.symbol}</strong></td>
+                                            <td>
+                                                <span class="badge ${trade.direction === 'long' ? 'bg-success' : 'bg-danger'}">
+                                                    ${trade.direction}
+                                                </span>
+                                            </td>
+                                            <td>$${trade.entry_price}</td>
+                                            <td>$${trade.exit_price}</td>
+                                            <td class="${trade.pnl >= 0 ? 'text-success' : 'text-danger'}">
+                                                <strong>${trade.pnl >= 0 ? '+' : ''}${trade.pnl}%</strong>
+                                            </td>
+                                            <td>${new Date(trade.date).toLocaleDateString()}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+                            <p class="text-muted">No trades shared yet</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading trades:', error);
+                container.innerHTML = `
+                    <div class="text-center py-5 text-danger">
+                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                        <p>Failed to load trades</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Load Analytics
+        async function loadAnalytics() {
+            const container = document.getElementById('analyticsContainer');
+
+            try {
+                const response = await fetch(`/api/profile/{{ profile_user.id }}/analytics/`);
+                const data = await response.json();
+
+                container.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Monthly Performance</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="monthlyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Win Rate Distribution</h6>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="winRateChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Initialize charts
+                initializeCharts(data);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <p class="text-muted">Analytics data not available</p>
+                    </div>
+                `;
+            }
+        }
+
+        function initializeCharts(data) {
+            // Monthly performance chart
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            new Chart(monthlyCtx, {
+                type: 'line',
+                data: {
+                    labels: data.months || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Monthly Return (%)',
+                        data: data.returns || [5, 8, 3, 12, 7, 10],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+        }
+
+        // Toast Notification
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 1000;';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+
+            toast.addEventListener('hidden.bs.toast', () => toast.remove());
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            extractBioTags();
+
+            // Close search modal on escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    searchModal.classList.remove('show');
+                    closePostModal();
+                }
+            });
+
+            // Close modals on outside click
+            document.addEventListener('click', (e) => {
+                if (e.target === searchModal) {
+                    searchModal.classList.remove('show');
+                }
+                if (e.target === postModal) {
+                    closePostModal();
+                }
+            });
+
+            // Initialize main follow button
+            const followBtn = document.getElementById('followBtn');
+            if (followBtn) {
+                followBtn.addEventListener('click', () => {
+                    const userId = followBtn.dataset.userId;
+                    toggleFollow(userId, followBtn);
+                });
+            }
+        });
+
+        // Navigation functions
+        function editProfile() {
+            window.location.href = '{% url "profile" %}';
+        }
+
+        function shareProfile() {
+            const profileUrl = window.location.href;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ profile_user.username }} - TradingHub Profile',
+                    text: 'Check out this trader on TradingHub',
+                    url: profileUrl
+                });
+            } else {
+                navigator.clipboard.writeText(profileUrl);
+                showToast('Profile link copied to clipboard!', 'success');
+            }
+        }
+
+        function reportUser(userId) {
+            if (confirm('Report this user for inappropriate content?')) {
+                // Implement report functionality
+                showToast('Report submitted. Our team will review it.', 'info');
+            }
+        }
+    </script>
+</body>
+</html>

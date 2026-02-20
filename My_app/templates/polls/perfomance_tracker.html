@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Tracker | Bentley BoldTrader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.0"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --bentley-black: #0A0A0A;
+            --bentley-dark: #121212;
+            --bentley-gray: #1A1A1A;
+            --bentley-light-gray: #2D2D2D;
+            --bentley-gold: #C9A86A;
+            --bentley-gold-dark: #9C8242;
+            --bentley-gold-light: #E8D9B5;
+            --success: #00C853;
+            --warning: #FF9800;
+            --danger: #FF5252;
+            --info: #2196F3;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --card-bg: #1A1A1A;
+            --border-color: #333333;
+            --live-green: #00FF88;
+        }
+
+        body {
+            background-color: var(--bentley-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Live Status Bar */
+        .live-status-bar {
+            background: linear-gradient(90deg, #0A0A0A 0%, #121212 100%);
+            padding: 8px 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--live-green);
+        }
+
+        .live-pulse {
+            width: 10px;
+            height: 10px;
+            background-color: var(--live-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bentley-black) 0%, #151515 100%);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bentley-gold);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            color: var(--bentley-gold);
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, var(--bentley-gold), var(--bentley-gold-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text span {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Performance Overview */
+        .performance-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--bentley-gold);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(201, 168, 106, 0.1), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--bentley-gold);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Performance Metrics */
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, var(--bentley-gray), var(--bentley-light-gray));
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--bentley-gold);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--bentley-gold), var(--bentley-gold-light));
+        }
+
+        .metric-name {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .metric-change {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .change-positive {
+            background-color: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+        }
+
+        .change-negative {
+            background-color: rgba(255, 82, 82, 0.1);
+            color: var(--danger);
+        }
+
+        /* Real-time Updates */
+        .update-indicator {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            height: 400px;
+            margin-top: 1rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--bentley-gold);
+            border-bottom: 2px solid var(--bentley-gold);
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: rgba(201, 168, 106, 0.05);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            background-color: var(--bentley-gold);
+            color: var(--bentley-black);
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            background-color: var(--bentley-gold-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--bentley-gold);
+            border: 1px solid var(--bentley-gold);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(201, 168, 106, 0.1);
+        }
+
+        .btn-small {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        /* Time Period Selector */
+        .period-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .period-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--bentley-gray);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .period-btn:hover {
+            background-color: rgba(201, 168, 106, 0.1);
+            color: var(--bentley-gold);
+        }
+
+        .period-btn.active {
+            background-color: var(--bentley-gold);
+            color: var(--bentley-black);
+            border-color: var(--bentley-gold);
+        }
+
+        /* Live Market Ticker */
+        .market-ticker {
+            background: linear-gradient(90deg, #151515 0%, #1A1A1A 100%);
+            padding: 0.8rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .ticker-content {
+            display: inline-block;
+            animation: ticker 30s linear infinite;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .ticker-item {
+            display: inline-block;
+            margin: 0 2rem;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: rgba(26, 26, 26, 0.95);
+            border: 1px solid var(--bentley-gold);
+            border-radius: 8px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .performance-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-widget {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .performance-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .performance-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Live Status Bar -->
+    <div class="live-status-bar">
+        <div class="live-indicator">
+            <div class="live-pulse"></div>
+            <span>LIVE DATA STREAMING</span>
+        </div>
+        <div class="update-indicator">
+            <i class="fas fa-sync-alt fa-spin"></i>
+            <span>Last updated: <span id="lastUpdateTime">17/01/2026 09:30:15</span></span>
+        </div>
+        <div style="color: var(--text-secondary);">
+            Market Status: <span style="color: var(--success); font-weight: 600;">OPEN</span>
+        </div>
+    </div>
+
+    <!-- Market Ticker -->
+    <div class="market-ticker">
+        <div class="ticker-content" id="marketTicker">
+            <!-- Ticker items will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="logo-text">BENTLEY<span>BOLDTRADER</span></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 20px; border: 1px solid var(--success);">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--success);"></div>
+                <span>YTD: <span id="ytdPerformance">+5.8%</span></span>
+            </div>
+            <div style="color: var(--text-secondary);">
+                Rank: <span style="color: var(--success); font-weight: 600;" id="currentRank">Top 14%</span>
+            </div>
+            <button class="btn-secondary btn-small" onclick="toggleLiveUpdates()" id="liveToggleBtn">
+                <i class="fas fa-pause"></i> Pause Live
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Performance Tracker</h1>
+                <p class="page-subtitle">Real-time performance analytics | January 17, 2026 | Live Market Data</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn" onclick="generateReport()">
+                    <i class="fas fa-file-pdf"></i> Export Report
+                </button>
+                <button class="btn-secondary" onclick="openMarketScanner()">
+                    <i class="fas fa-search-dollar"></i> Market Scanner
+                </button>
+                <button class="btn" onclick="executeAIRecommendation()" style="background: linear-gradient(135deg, var(--info), #1E88E5);">
+                    <i class="fas fa-robot"></i> AI Trade
+                </button>
+            </div>
+        </div>
+
+        <!-- Time Period Selector -->
+        <div class="period-selector fade-in">
+            <button class="period-btn active" onclick="switchPeriod('today')">Today</button>
+            <button class="period-btn" onclick="switchPeriod('week')">This Week</button>
+            <button class="period-btn" onclick="switchPeriod('month')">MTD</button>
+            <button class="period-btn" onclick="switchPeriod('quarter')">QTD</button>
+            <button class="period-btn" onclick="switchPeriod('year')">YTD</button>
+            <button class="period-btn" onclick="switchPeriod('custom')">
+                <i class="far fa-calendar"></i> Custom
+            </button>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="performance-metrics fade-in">
+            <div class="metric-card">
+                <div class="metric-name">Daily Return</div>
+                <div class="metric-value" id="dailyReturn" style="color: var(--success);">+1.42%</div>
+                <div class="metric-change change-positive" id="dailyVsMarket">+0.68% vs Market</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-name">Sharpe Ratio</div>
+                <div class="metric-value" id="sharpeRatio" style="color: var(--success);">1.92</div>
+                <div class="metric-change change-positive" id="sharpeChange">+0.15 (24h)</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-name">Win Rate</div>
+                <div class="metric-value" id="winRate" style="color: var(--success);">73.6%</div>
+                <div class="metric-change change-positive" id="winRateChange">+1.2% (7d)</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-name">Max Drawdown</div>
+                <div class="metric-value" id="maxDrawdown" style="color: var(--danger);">-2.8%</div>
+                <div class="metric-change change-positive" id="drawdownChange">-0.4% Improvement</div>
+            </div>
+        </div>
+
+        <!-- Performance Overview -->
+        <div class="performance-overview fade-in">
+            <!-- Main Performance Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-line"></i> Portfolio Performance (January 2026)</h3>
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchChart('value')">Value</div>
+                        <div class="tab" onclick="switchChart('returns')">Returns</div>
+                        <div class="tab" onclick="switchChart('drawdown')">Drawdown</div>
+                        <div class="tab" onclick="switchChart('live')">Live</div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="mainPerformanceChart"></canvas>
+                    </div>
+                    <div class="update-indicator" style="margin-top: 1rem; justify-content: flex-end;">
+                        <i class="fas fa-clock"></i>
+                        <span>Next update in: <span id="nextUpdateCountdown">30</span>s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-time Market Data -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-bolt"></i> Real-time Positions</h3>
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Live P&L</span>
+                </div>
+                <div class="card-content">
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Position</th>
+                                    <th>Live Price</th>
+                                    <th>P&L</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="livePositionsTable">
+                                <!-- Live positions will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(201, 168, 106, 0.1); border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">Total Live P&L</div>
+                                <div id="totalLivePL" style="font-size: 1.5rem; font-weight: bold; color: var(--success);">+$2,840</div>
+                            </div>
+                            <button class="btn-secondary btn-small" onclick="refreshLiveData()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Overview -->
+        <div class="card fade-in" style="margin-bottom: 2rem;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-globe-americas"></i> Market Overview (17/01/2026)</h3>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">9:30 AM EST</span>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="text-align: center; padding: 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 8px;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);" id="sp500">+0.74%</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">S&P 500</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);" id="sp500Price">4,825.42</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: rgba(33, 150, 243, 0.1); border-radius: 8px;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--info);" id="nasdaq">+1.12%</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">NASDAQ</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);" id="nasdaqPrice">16,842.31</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: rgba(255, 152, 0, 0.1); border-radius: 8px;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--warning);" id="dow">+0.42%</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">DOW JONES</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);" id="dowPrice">38,456.78</div>
+                    </div>
+                    <div style="text-align: center; padding: 1rem; background: rgba(155, 89, 182, 0.1); border-radius: 8px;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: var(--purple);" id="vix">-2.8%</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">VIX</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);" id="vixPrice">14.82</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Tabs -->
+        <div class="tabs fade-in">
+            <div class="tab active" onclick="switchPerformanceTab('detailed')">Detailed Metrics</div>
+            <div class="tab" onclick="switchPerformanceTab('positions')">Position Analysis</div>
+            <div class="tab" onclick="switchPerformanceTab('strategy')">Strategy Performance</div>
+            <div class="tab" onclick="switchPerformanceTab('risk')">Risk Analysis</div>
+            <div class="tab" onclick="switchPerformanceTab('alerts')">
+                <i class="fas fa-bell"></i> Alerts (3)
+            </div>
+        </div>
+
+        <!-- Detailed Metrics Table -->
+        <div class="card fade-in" id="detailedMetrics">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-table"></i> Performance Metrics (17/01/2026)</h3>
+                <div style="display: flex; gap: 0.5rem;">
+                    <span class="update-indicator">
+                        <i class="fas fa-database"></i>
+                        <span>Live Database</span>
+                    </span>
+                    <button class="btn-secondary btn-small" onclick="exportMetricsCSV()">
+                        <i class="fas fa-download"></i> CSV
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Today</th>
+                                <th>Week</th>
+                                <th>MTD</th>
+                                <th>YTD</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performanceTable">
+                            <!-- Performance data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Position Analysis -->
+        <div class="card fade-in" id="positionAnalysis" style="display: none;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chart-pie"></i> Position Analysis</h3>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="btn-secondary btn-small" onclick="rebalancePortfolio()">
+                        <i class="fas fa-balance-scale"></i> Rebalance
+                    </div>
+                    <div class="btn-secondary btn-small" onclick="autoHedge()">
+                        <i class="fas fa-shield-alt"></i> Auto-Hedge
+                    </div>
+                </div>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="sectorAllocationChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="positionContributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Panel -->
+        <div class="card fade-in" id="alertsPanel" style="display: none;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-bell"></i> Active Alerts & Signals</h3>
+                <span class="badge" style="background: var(--danger); color: white; padding: 4px 8px; border-radius: 12px;">3 New</span>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; gap: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: rgba(255, 82, 82, 0.1); border-radius: 8px; border-left: 4px solid var(--danger);">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary);">Stop Loss Triggered</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">TSLA hit stop loss at $212.40</div>
+                        </div>
+                        <button class="btn-small" onclick="handleAlert('stopLoss')">
+                            <i class="fas fa-check"></i> Acknowledge
+                        </button>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 8px; border-left: 4px solid var(--success);">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary);">Buy Signal Generated</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">NVDA showing strong momentum</div>
+                        </div>
+                        <button class="btn" onclick="executeTrade('NVDA', 'BUY')">
+                            <i class="fas fa-bolt"></i> Execute
+                        </button>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: rgba(255, 152, 0, 0.1); border-radius: 8px; border-left: 4px solid var(--warning);">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-primary);">Portfolio Rebalance Due</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Tech allocation exceeds target</div>
+                        </div>
+                        <button class="btn-secondary" onclick="showRebalanceModal()">
+                            <i class="fas fa-cog"></i> Review
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Recommendations -->
+        <div class="card fade-in" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-robot"></i> AI Trading Recommendations</h3>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">Powered by Quantum AI</span>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <div style="padding: 1.5rem; background: rgba(0, 212, 170, 0.1); border-radius: 8px; border: 1px solid rgba(0, 212, 170, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary);">Buy Recommendation</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">High Confidence (92%)</div>
+                            </div>
+                            <span class="badge" style="background: var(--success); color: white; padding: 4px 8px; border-radius: 12px;">STRONG BUY</span>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);">NVDA</div>
+                            <div style="color: var(--text-secondary);">NVIDIA Corp</div>
+                        </div>
+                        <button class="btn" style="width: 100%;" onclick="executeAITrade('NVDA', 'BUY')">
+                            <i class="fas fa-bolt"></i> Execute AI Trade
+                        </button>
+                    </div>
+
+                    <div style="padding: 1.5rem; background: rgba(255, 107, 107, 0.1); border-radius: 8px; border: 1px solid rgba(255, 107, 107, 0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary);">Reduce Position</div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Medium Confidence (76%)</div>
+                            </div>
+                            <span class="badge" style="background: var(--warning); color: white; padding: 4px 8px; border-radius: 12px;">SELL</span>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--warning);">TSLA</div>
+                            <div style="color: var(--text-secondary);">Tesla Inc</div>
+                        </div>
+                        <button class="btn-secondary" style="width: 100%;" onclick="executeAITrade('TSLA', 'SELL')">
+                            <i class="fas fa-chart-line"></i> Review Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Trading Modal -->
+    <div id="tradeModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center;">
+        <div style="background: var(--card-bg); width: 90%; max-width: 500px; border-radius: 10px; border: 2px solid var(--bentley-gold); overflow: hidden;">
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: var(--bentley-gold);" id="modalTitle">Execute Trade</h3>
+                <button onclick="closeModal()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">×</button>
+            </div>
+            <div style="padding: 1.5rem;" id="modalContent">
+                <!-- Modal content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let liveUpdatesActive = true;
+        let updateInterval;
+        let performanceChart;
+        let sectorChart;
+        let contributionChart;
+        let marketData = {
+            sp500: { price: 4825.42, change: 0.74 },
+            nasdaq: { price: 16842.31, change: 1.12 },
+            dow: { price: 38456.78, change: 0.42 },
+            vix: { price: 14.82, change: -2.8 }
+        };
+
+        // Portfolio data for January 17, 2026
+        let portfolioData = {
+            ytdReturn: 5.8,
+            dailyReturn: 1.42,
+            sharpeRatio: 1.92,
+            winRate: 73.6,
+            maxDrawdown: -2.8,
+            totalValue: 1245000,
+            cashBalance: 125000,
+            positions: [
+                { symbol: 'NVDA', name: 'NVIDIA Corp', shares: 150, avgPrice: 285.20, currentPrice: 312.80, sector: 'Technology' },
+                { symbol: 'MSFT', name: 'Microsoft', shares: 200, avgPrice: 328.90, currentPrice: 452.30, sector: 'Technology' },
+                { symbol: 'AAPL', name: 'Apple Inc', shares: 100, avgPrice: 172.45, currentPrice: 175.20, sector: 'Technology' },
+                { symbol: 'GOOGL', name: 'Alphabet', shares: 80, avgPrice: 136.20, currentPrice: 185.40, sector: 'Communication' },
+                { symbol: 'AMZN', name: 'Amazon', shares: 120, avgPrice: 128.75, currentPrice: 180.60, sector: 'Consumer' },
+                { symbol: 'JPM', name: 'JPMorgan', shares: 75, avgPrice: 145.30, currentPrice: 148.20, sector: 'Financial' }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            startLiveUpdates();
+            populateMarketTicker();
+            updateLivePositions();
+            populatePerformanceTable();
+        });
+
+        function initializeDashboard() {
+            updateDateTime();
+            initializeCharts();
+            updateMarketData();
+            updateMetrics();
+        }
+
+        function updateDateTime() {
+            const now = luxon.DateTime.now();
+            const formatted = now.toFormat('dd/MM/yyyy HH:mm:ss');
+            document.getElementById('lastUpdateTime').textContent = formatted;
+
+            // Update page subtitle with current date
+            document.querySelector('.page-subtitle').textContent =
+                `Real-time performance analytics | ${now.toFormat('dd LLLL yyyy')} | Live Market Data`;
+        }
+
+        function initializeCharts() {
+            const mainCtx = document.getElementById('mainPerformanceChart').getContext('2d');
+
+            // January 2026 data (up to Jan 17)
+            const janDates = [
+                '2026-01-02', '2026-01-03', '2026-01-06', '2026-01-07', '2026-01-08',
+                '2026-01-09', '2026-01-10', '2026-01-13', '2026-01-14', '2026-01-15',
+                '2026-01-16', '2026-01-17'
+            ];
+
+            const portfolioValues = [
+                1200000, 1205000, 1212000, 1220000, 1215000,
+                1225000, 1232000, 1238000, 1241000, 1243000,
+                1242000, 1245000
+            ];
+
+            performanceChart = new Chart(mainCtx, {
+                type: 'line',
+                data: {
+                    labels: janDates,
+                    datasets: [{
+                        label: 'Portfolio Value ($)',
+                        data: portfolioValues,
+                        borderColor: '#C9A86A',
+                        backgroundColor: 'rgba(201, 168, 106, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#C9A86A'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#B0B0B0',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(26, 26, 26, 0.9)',
+                            titleColor: '#E8D9B5',
+                            bodyColor: '#B0B0B0',
+                            borderColor: '#C9A86A',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `$${context.parsed.y.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                callback: function(value) {
+                                    return '$' + (value/1000).toFixed(0) + 'K';
+                                }
+                            }
+                        },
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'MMM dd'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                maxRotation: 0
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    }
+                }
+            });
+
+            // Initialize other charts
+            initializeSectorChart();
+            initializeContributionChart();
+        }
+
+        function initializeSectorChart() {
+            const sectorCtx = document.getElementById('sectorAllocationChart').getContext('2d');
+
+            // Calculate sector allocations
+            const sectors = {};
+            portfolioData.positions.forEach(position => {
+                if (!sectors[position.sector]) {
+                    sectors[position.sector] = 0;
+                }
+                sectors[position.sector] += position.shares * position.currentPrice;
+            });
+
+            const sectorLabels = Object.keys(sectors);
+            const sectorValues = Object.values(sectors);
+
+            sectorChart = new Chart(sectorCtx, {
+                type: 'pie',
+                data: {
+                    labels: sectorLabels,
+                    datasets: [{
+                        data: sectorValues,
+                        backgroundColor: [
+                            '#C9A86A',
+                            '#2196F3',
+                            '#00C853',
+                            '#FF9800',
+                            '#9C27B0',
+                            '#FF5252'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#1A1A1A'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#B0B0B0',
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${context.label}: $${value.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initializeContributionChart() {
+            const contributionCtx = document.getElementById('positionContributionChart').getContext('2d');
+
+            // Calculate position contributions to YTD return
+            const contributions = portfolioData.positions.map(pos => {
+                const investment = pos.shares * pos.avgPrice;
+                const currentValue = pos.shares * pos.currentPrice;
+                const profit = currentValue - investment;
+                return {
+                    symbol: pos.symbol,
+                    contribution: (profit / portfolioData.totalValue) * 100
+                };
+            });
+
+            contributions.sort((a, b) => b.contribution - a.contribution);
+
+            contributionChart = new Chart(contributionCtx, {
+                type: 'bar',
+                data: {
+                    labels: contributions.map(c => c.symbol),
+                    datasets: [{
+                        label: 'Contribution to YTD Return (%)',
+                        data: contributions.map(c => c.contribution),
+                        backgroundColor: contributions.map(c =>
+                            c.contribution >= 0 ? 'rgba(0, 200, 83, 0.7)' : 'rgba(255, 82, 82, 0.7)'
+                        ),
+                        borderColor: contributions.map(c =>
+                            c.contribution >= 0 ? '#00C853' : '#FF5252'
+                        ),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                callback: function(value) {
+                                    return value.toFixed(1) + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function startLiveUpdates() {
+            // Update countdown timer
+            let countdown = 30;
+            updateInterval = setInterval(() => {
+                if (liveUpdatesActive) {
+                    countdown--;
+                    document.getElementById('nextUpdateCountdown').textContent = countdown;
+
+                    if (countdown <= 0) {
+                        updateLiveData();
+                        countdown = 30;
+                    }
+                }
+            }, 1000);
+
+            // Initial update
+            updateLiveData();
+        }
+
+        function updateLiveData() {
+            if (!liveUpdatesActive) return;
+
+            // Simulate market movements
+            marketData.sp500.change += (Math.random() - 0.5) * 0.1;
+            marketData.nasdaq.change += (Math.random() - 0.5) * 0.15;
+            marketData.dow.change += (Math.random() - 0.5) * 0.08;
+            marketData.vix.change += (Math.random() - 0.5) * 0.5;
+
+            // Update portfolio prices
+            portfolioData.positions.forEach(position => {
+                const movement = (Math.random() - 0.5) * 0.5;
+                position.currentPrice *= (1 + movement / 100);
+            });
+
+            updateDateTime();
+            updateMarketData();
+            updateMetrics();
+            updateLivePositions();
+            updatePerformanceChart();
+
+            showNotification('Live data updated successfully', 'success');
+        }
+
+        function updateMarketData() {
+            // Update market indices
+            document.getElementById('sp500').textContent = `${marketData.sp500.change > 0 ? '+' : ''}${marketData.sp500.change.toFixed(2)}%`;
+            document.getElementById('sp500Price').textContent = marketData.sp500.price.toFixed(2);
+
+            document.getElementById('nasdaq').textContent = `${marketData.nasdaq.change > 0 ? '+' : ''}${marketData.nasdaq.change.toFixed(2)}%`;
+            document.getElementById('nasdaqPrice').textContent = marketData.nasdaq.price.toFixed(2);
+
+            document.getElementById('dow').textContent = `${marketData.dow.change > 0 ? '+' : ''}${marketData.dow.change.toFixed(2)}%`;
+            document.getElementById('dowPrice').textContent = marketData.dow.price.toFixed(2);
+
+            document.getElementById('vix').textContent = `${marketData.vix.change > 0 ? '+' : ''}${marketData.vix.change.toFixed(2)}%`;
+            document.getElementById('vixPrice').textContent = marketData.vix.price.toFixed(2);
+        }
+
+        function updateMetrics() {
+            // Update daily return with some randomness
+            const dailyChange = 1.42 + (Math.random() - 0.5) * 0.1;
+            portfolioData.dailyReturn = dailyChange;
+
+            document.getElementById('dailyReturn').textContent = `${dailyChange > 0 ? '+' : ''}${dailyChange.toFixed(2)}%`;
+            document.getElementById('dailyReturn').style.color = dailyChange >= 0 ? 'var(--success)' : 'var(--danger)';
+
+            document.getElementById('dailyVsMarket').textContent = `${(dailyChange - marketData.sp500.change).toFixed(2)}% vs Market`;
+
+            // Update other metrics
+            document.getElementById('sharpeRatio').textContent = (1.92 + (Math.random() - 0.5) * 0.02).toFixed(2);
+            document.getElementById('winRate').textContent = (73.6 + (Math.random() - 0.5) * 0.2).toFixed(1) + '%';
+            document.getElementById('maxDrawdown').textContent = (-2.8 + (Math.random() - 0.5) * 0.1).toFixed(1) + '%';
+
+            // Update YTD performance
+            portfolioData.ytdReturn += (Math.random() - 0.5) * 0.05;
+            document.getElementById('ytdPerformance').textContent = `${portfolioData.ytdReturn > 0 ? '+' : ''}${portfolioData.ytdReturn.toFixed(1)}%`;
+        }
+
+        function updateLivePositions() {
+            const tableBody = document.getElementById('livePositionsTable');
+            tableBody.innerHTML = '';
+
+            let totalPL = 0;
+
+            portfolioData.positions.forEach(position => {
+                const marketValue = position.shares * position.currentPrice;
+                const costBasis = position.shares * position.avgPrice;
+                const pl = marketValue - costBasis;
+                const plPercent = (pl / costBasis) * 100;
+
+                totalPL += pl;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${position.symbol}</strong></td>
+                    <td>${position.shares} shares</td>
+                    <td>$${position.currentPrice.toFixed(2)}</td>
+                    <td style="color: ${pl >= 0 ? 'var(--success)' : 'var(--danger)'}; font-weight: 600;">
+                        ${pl >= 0 ? '+' : ''}$${pl.toFixed(0)} (${pl >= 0 ? '+' : ''}${plPercent.toFixed(1)}%)
+                    </td>
+                    <td>
+                        <button class="btn-small" onclick="quickTrade('${position.symbol}')" style="margin-right: 5px;">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                        <button class="btn-secondary btn-small" onclick="analyzePosition('${position.symbol}')">
+                            <i class="fas fa-chart-bar"></i>
+                        </button>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            // Update total live P&L
+            document.getElementById('totalLivePL').textContent = `${totalPL >= 0 ? '+' : ''}$${totalPL.toFixed(0)}`;
+            document.getElementById('totalLivePL').style.color = totalPL >= 0 ? 'var(--success)' : 'var(--danger)';
+        }
+
+        function updatePerformanceChart() {
+            // Add new data point to chart
+            const chart = performanceChart;
+            const newValue = portfolioData.totalValue * (1 + (Math.random() - 0.5) * 0.002);
+
+            chart.data.labels.push(luxon.DateTime.now().toISODate());
+            chart.data.datasets[0].data.push(newValue);
+
+            // Keep only last 20 points
+            if (chart.data.labels.length > 20) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+            }
+
+            chart.update('none');
+        }
+
+        function populateMarketTicker() {
+            const tickerItems = [
+                'NVDA: $312.80 (+1.8%)',
+                'AAPL: $175.20 (+0.4%)',
+                'MSFT: $452.30 (+0.9%)',
+                'GOOGL: $185.40 (+1.2%)',
+                'AMZN: $180.60 (+0.8%)',
+                'TSLA: $212.40 (-2.1%)',
+                'BTC: $82,450 (+3.2%)',
+                'ETH: $5,820 (+1.8%)',
+                'GOLD: $2,480 (+0.3%)',
+                'OIL: $78.20 (-0.5%)'
+            ];
+
+            const tickerContent = document.getElementById('marketTicker');
+            tickerContent.innerHTML = '';
+
+            // Duplicate items for seamless scrolling
+            [...tickerItems, ...tickerItems].forEach(item => {
+                const span = document.createElement('span');
+                span.className = 'ticker-item';
+                span.textContent = item;
+                tickerContent.appendChild(span);
+            });
+        }
+
+        function populatePerformanceTable() {
+            const tableBody = document.getElementById('performanceTable');
+            const metrics = [
+                { name: 'Total Return', today: '+1.42%', week: '+3.8%', mtd: '+4.2%', ytd: '+5.8%', trend: '↗' },
+                { name: 'Alpha vs S&P', today: '+0.68%', week: '+1.2%', mtd: '+2.4%', ytd: '+3.6%', trend: '↗' },
+                { name: 'Beta', today: '0.85', week: '0.82', mtd: '0.84', ytd: '0.86', trend: '→' },
+                { name: 'Volatility', today: '14.2%', week: '14.8%', mtd: '15.2%', ytd: '16.4%', trend: '↘' },
+                { name: 'Sharpe Ratio', today: '1.92', week: '1.85', mtd: '1.78', ytd: '1.82', trend: '↗' },
+                { name: 'Sortino Ratio', today: '2.42', week: '2.35', mtd: '2.28', ytd: '2.32', trend: '↗' },
+                { name: 'Max Drawdown', today: '-0.4%', week: '-1.2%', mtd: '-2.4%', ytd: '-2.8%', trend: '↘' },
+                { name: 'Win Rate', today: '65.4%', week: '68.2%', mtd: '70.8%', ytd: '73.6%', trend: '↗' },
+                { name: 'Profit Factor', today: '2.15', week: '2.08', mtd: '2.12', ytd: '2.18', trend: '↗' }
+            ];
+
+            tableBody.innerHTML = '';
+
+            metrics.forEach(metric => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${metric.name}</strong></td>
+                    <td style="color: ${metric.today.includes('+') ? 'var(--success)' : metric.today.includes('-') ? 'var(--danger)' : 'var(--text-primary)'}">
+                        ${metric.today}
+                    </td>
+                    <td style="color: ${metric.week.includes('+') ? 'var(--success)' : metric.week.includes('-') ? 'var(--danger)' : 'var(--text-primary)'}">
+                        ${metric.week}
+                    </td>
+                    <td style="color: ${metric.mtd.includes('+') ? 'var(--success)' : metric.mtd.includes('-') ? 'var(--danger)' : 'var(--text-primary)'}">
+                        ${metric.mtd}
+                    </td>
+                    <td style="color: ${metric.ytd.includes('+') ? 'var(--success)' : metric.ytd.includes('-') ? 'var(--danger)' : 'var(--text-primary)'}">
+                        ${metric.ytd}
+                    </td>
+                    <td style="color: ${metric.trend === '↗' ? 'var(--success)' : metric.trend === '↘' ? 'var(--danger)' : 'var(--warning)'}; font-size: 1.2rem;">
+                        ${metric.trend}
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // UI Interaction Functions
+        function toggleLiveUpdates() {
+            liveUpdatesActive = !liveUpdatesActive;
+            const button = document.getElementById('liveToggleBtn');
+
+            if (liveUpdatesActive) {
+                button.innerHTML = '<i class="fas fa-pause"></i> Pause Live';
+                showNotification('Live updates resumed', 'success');
+            } else {
+                button.innerHTML = '<i class="fas fa-play"></i> Resume Live';
+                showNotification('Live updates paused', 'warning');
+            }
+        }
+
+        function switchPeriod(period) {
+            document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            showNotification(`Loading ${period} performance data...`, 'info');
+
+            // Simulate data loading
+            setTimeout(() => {
+                showNotification(`${period} data loaded successfully`, 'success');
+
+                // Update metrics based on period
+                const metrics = {
+                    today: { return: '+1.42%', sharpe: '1.92', winRate: '73.6%', drawdown: '-2.8%' },
+                    week: { return: '+3.8%', sharpe: '1.85', winRate: '68.2%', drawdown: '-1.2%' },
+                    month: { return: '+4.2%', sharpe: '1.78', winRate: '70.8%', drawdown: '-2.4%' },
+                    quarter: { return: '+4.8%', sharpe: '1.82', winRate: '72.4%', drawdown: '-2.6%' },
+                    year: { return: '+5.8%', sharpe: '1.82', winRate: '73.6%', drawdown: '-2.8%' }
+                };
+
+                const data = metrics[period] || metrics.today;
+
+                document.getElementById('dailyReturn').textContent = data.return;
+                document.getElementById('sharpeRatio').textContent = data.sharpe;
+                document.getElementById('winRate').textContent = data.winRate;
+                document.getElementById('maxDrawdown').textContent = data.drawdown;
+            }, 800);
+        }
+
+        function switchChart(type) {
+            document.querySelectorAll('.card:first-child .tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            showNotification(`Switched to ${type} chart view`, 'info');
+        }
+
+        function switchPerformanceTab(tab) {
+            // Hide all tab contents
+            document.getElementById('detailedMetrics').style.display = 'none';
+            document.getElementById('positionAnalysis').style.display = 'none';
+            document.getElementById('alertsPanel').style.display = 'none';
+
+            // Update tab styles
+            document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show selected tab content
+            switch(tab) {
+                case 'detailed':
+                    document.getElementById('detailedMetrics').style.display = 'block';
+                    break;
+                case 'positions':
+                    document.getElementById('positionAnalysis').style.display = 'block';
+                    break;
+                case 'alerts':
+                    document.getElementById('alertsPanel').style.display = 'block';
+                    break;
+            }
+        }
+
+        // Trading Functions
+        function quickTrade(symbol) {
+            const position = portfolioData.positions.find(p => p.symbol === symbol);
+            if (!position) return;
+
+            const modal = document.getElementById('tradeModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = `Trade ${symbol}`;
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Current Price</div>
+                            <div style="font-size: 1.5rem; font-weight: bold;">$${position.currentPrice.toFixed(2)}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Your Position</div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">${position.shares} shares</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                            <input type="number" id="tradeShares" placeholder="Shares" style="flex: 1; padding: 0.5rem; background: var(--bentley-gray); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary);">
+                            <select id="tradeAction" style="padding: 0.5rem; background: var(--bentley-gray); border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-primary);">
+                                <option value="BUY">BUY</option>
+                                <option value="SELL">SELL</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn" style="flex: 1;" onclick="executeQuickTrade('${symbol}')">
+                                <i class="fas fa-bolt"></i> Execute Trade
+                            </button>
+                            <button class="btn-secondary" onclick="closeModal()" style="flex: 1;">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function executeQuickTrade(symbol) {
+            const shares = parseInt(document.getElementById('tradeShares').value);
+            const action = document.getElementById('tradeAction').value;
+
+            if (!shares || shares <= 0) {
+                showNotification('Please enter a valid number of shares', 'warning');
+                return;
+            }
+
+            const position = portfolioData.positions.find(p => p.symbol === symbol);
+            const price = position.currentPrice;
+            const cost = shares * price;
+
+            // Simulate trade execution
+            showNotification(`Executing ${action} order for ${shares} shares of ${symbol} at $${price.toFixed(2)}`, 'info');
+
+            setTimeout(() => {
+                showNotification(`Trade executed successfully! Total: $${cost.toFixed(2)}`, 'success');
+                closeModal();
+                updateLivePositions();
+            }, 1500);
+        }
+
+        function executeAITrade(symbol, action) {
+            const recommendation = action === 'BUY' ? 'buy' : 'sell';
+            showNotification(`AI executing ${recommendation} recommendation for ${symbol}...`, 'info');
+
+            setTimeout(() => {
+                showNotification(`AI trade executed: ${action} ${symbol}`, 'success');
+                updateLivePositions();
+            }, 2000);
+        }
+
+        function analyzePosition(symbol) {
+            const position = portfolioData.positions.find(p => p.symbol === symbol);
+            if (!position) return;
+
+            showNotification(`Analyzing ${symbol} position...`, 'info');
+
+            // Show analysis modal
+            const modal = document.getElementById('tradeModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = `${symbol} Analysis`;
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Current Value</div>
+                            <div style="font-size: 1.2rem; font-weight: bold;">$${(position.shares * position.currentPrice).toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Unrealized P&L</div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);">
+                                +$${((position.currentPrice - position.avgPrice) * position.shares).toFixed(0)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(201, 168, 106, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div style="color: var(--bentley-gold); font-weight: 600; margin-bottom: 0.5rem;">AI Analysis</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                            ${symbol} shows strong momentum with positive technical indicators.
+                            Recommend holding position with trailing stop at $${(position.currentPrice * 0.95).toFixed(2)}.
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn" style="flex: 1;" onclick="setStopLoss('${symbol}')">
+                            <i class="fas fa-shield-alt"></i> Set Stop Loss
+                        </button>
+                        <button class="btn-secondary" onclick="closeModal()" style="flex: 1;">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        // Utility Functions
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+
+            const icon = type === 'success' ? 'fa-check-circle' :
+                        type === 'warning' ? 'fa-exclamation-triangle' :
+                        type === 'danger' ? 'fa-times-circle' : 'fa-info-circle';
+
+            const color = type === 'success' ? 'var(--success)' :
+                         type === 'warning' ? 'var(--warning)' :
+                         type === 'danger' ? 'var(--danger)' : 'var(--info)';
+
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas ${icon}" style="color: ${color};"></i>
+                    <div>${message}</div>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        function closeModal() {
+            document.getElementById('tradeModal').style.display = 'none';
+        }
+
+        function refreshLiveData() {
+            updateLiveData();
+            showNotification('Live data refreshed', 'success');
+        }
+
+        function generateReport() {
+            showNotification('Generating performance report for 17/01/2026...', 'info');
+
+            setTimeout(() => {
+                showNotification('Report generated and downloaded as PDF', 'success');
+
+                // Simulate file download
+                const link = document.createElement('a');
+                link.download = `BentleyBoldTrader_Report_20260117.pdf`;
+                link.href = '#';
+                link.click();
+            }, 2000);
+        }
+
+        function openMarketScanner() {
+            showNotification('Opening market scanner...', 'info');
+
+            const modal = document.getElementById('tradeModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = 'Market Scanner';
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        Scanning for trading opportunities based on current market conditions...
+                    </div>
+
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Symbol</th>
+                                    <th>Signal</th>
+                                    <th>Confidence</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>NVDA</strong></td>
+                                    <td><span style="color: var(--success);">STRONG BUY</span></td>
+                                    <td>92%</td>
+                                    <td><button class="btn-small" onclick="quickTrade('NVDA')">Trade</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>MSFT</strong></td>
+                                    <td><span style="color: var(--success);">BUY</span></td>
+                                    <td>85%</td>
+                                    <td><button class="btn-small" onclick="quickTrade('MSFT')">Trade</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>TSLA</strong></td>
+                                    <td><span style="color: var(--danger);">SELL</span></td>
+                                    <td>78%</td>
+                                    <td><button class="btn-small" onclick="quickTrade('TSLA')">Trade</button></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>AMD</strong></td>
+                                    <td><span style="color: var(--success);">BUY</span></td>
+                                    <td>82%</td>
+                                    <td><button class="btn-small" onclick="quickTrade('AMD')">Trade</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+                        <button class="btn-secondary" onclick="closeModal()">
+                            Close Scanner
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function executeAIRecommendation() {
+            showNotification('Executing AI trading recommendations...', 'info');
+
+            setTimeout(() => {
+                showNotification('AI has executed 3 trades based on market analysis', 'success');
+                updateLivePositions();
+            }, 2500);
+        }
+
+        function exportMetricsCSV() {
+            showNotification('Exporting metrics to CSV...', 'info');
+
+            setTimeout(() => {
+                showNotification('Metrics exported successfully', 'success');
+
+                // Simulate file download
+                const link = document.createElement('a');
+                link.download = `BentleyBoldTrader_Metrics_20260117.csv`;
+                link.href = '#';
+                link.click();
+            }, 1500);
+        }
+
+        function rebalancePortfolio() {
+            showNotification('Rebalancing portfolio based on optimal allocations...', 'info');
+
+            setTimeout(() => {
+                showNotification('Portfolio rebalanced successfully', 'success');
+                initializeSectorChart(); // Refresh chart
+            }, 2000);
+        }
+
+        function autoHedge() {
+            showNotification('Setting up automatic hedging positions...', 'info');
+
+            setTimeout(() => {
+                showNotification('Hedging positions established', 'success');
+            }, 1800);
+        }
+
+        function setStopLoss(symbol) {
+            const position = portfolioData.positions.find(p => p.symbol === symbol);
+            const stopPrice = (position.currentPrice * 0.95).toFixed(2);
+
+            showNotification(`Stop loss set for ${symbol} at $${stopPrice}`, 'success');
+            closeModal();
+        }
+
+        function handleAlert(alertType) {
+            showNotification('Alert acknowledged and resolved', 'success');
+            // In a real application, this would update the alert status
+        }
+
+        // Initialize market data updates every 30 seconds
+        setInterval(() => {
+            if (liveUpdatesActive) {
+                updateLiveData();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

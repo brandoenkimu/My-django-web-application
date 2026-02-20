@@ -1,0 +1,291 @@
+<!-- templates/community/follow_list.html -->
+{% extends 'polls/base.html' %}
+
+{% block title %}
+{% if list_type == 'following' %}Following - {% else %}Followers - {% endif %}TradingHub
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <nav>
+                        <div class="nav nav-tabs card-header-tabs">
+                            <a class="nav-link {% if list_type == 'following' %}active{% endif %}"
+                               href="{% url 'following_list' %}">
+                                <i class="fas fa-user-friends me-2"></i>
+                                Following
+                                <span class="badge bg-primary rounded-pill ms-2">{{ following_count }}</span>
+                            </a>
+                            <a class="nav-link {% if list_type == 'followers' %}active{% endif %}"
+                               href="{% url 'followers_list' %}">
+                                <i class="fas fa-users me-2"></i>
+                                Followers
+                                <span class="badge bg-primary rounded-pill ms-2">{{ followers_count }}</span>
+                            </a>
+                        </div>
+                    </nav>
+                </div>
+                <div class="card-body">
+                    {% if list_type == 'following' %}
+                    <h4 class="card-title mb-4">People You Follow</h4>
+                    {% else %}
+                    <h4 class="card-title mb-4">Your Followers</h4>
+                    {% endif %}
+
+                    {% if page_obj %}
+                    <div class="list-group">
+                        {% for relationship in page_obj %}
+                        {% with user=relationship.following if list_type == 'following' else relationship.follower %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex align-items-center">
+                                <!-- Avatar -->
+                                <a href="{% url 'user_profile' user.username %}" class="text-decoration-none">
+                                    <img src="{{ user.profile.get_avatar_url }}"
+                                         class="rounded-circle me-3"
+                                         width="60"
+                                         height="60">
+                                </a>
+
+                                <!-- User info -->
+                                <div style="flex: 1;">
+                                    <div class="d-flex align-items-center">
+                                        <a href="{% url 'user_profile' user.username %}"
+                                           class="text-decoration-none text-dark">
+                                            <h6 class="mb-0">{{ user.username }}</h6>
+                                        </a>
+
+                                        <!-- Badges -->
+                                        <div class="ms-2">
+                                            {% if user.profile.is_expert %}
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-star"></i> Expert
+                                            </span>
+                                            {% endif %}
+                                            {% if user.profile.kyc_verified %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle"></i> Verified
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Stats -->
+                                    <div class="d-flex gap-3 mt-1">
+                                        <small class="text-muted">
+                                            <strong>{{ user.posts.count }}</strong> posts
+                                        </small>
+                                        <small class="text-muted">
+                                            <strong>{{ user.followers.count }}</strong> followers
+                                        </small>
+                                        <small class="text-muted">
+                                            <strong>{{ user.following.count }}</strong> following
+                                        </small>
+                                    </div>
+
+                                    <!-- Bio -->
+                                    {% if user.profile.bio %}
+                                    <p class="mt-2 mb-0 text-muted small">
+                                        {{ user.profile.bio|truncatechars:100 }}
+                                    </p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="ms-auto">
+                                    {% if user != request.user %}
+                                    {% if list_type == 'followers' %}
+                                    <!-- Check if we follow back -->
+                                    {% with is_following=user.followers.filter.follower=request.user %}
+                                    {% if not is_following %}
+                                    <button class="btn btn-sm btn-outline-primary follow-btn"
+                                            data-user-id="{{ user.id }}">
+                                        <i class="fas fa-user-plus me-1"></i> Follow Back
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-secondary follow-btn"
+                                            data-user-id="{{ user.id }}">
+                                        <i class="fas fa-check me-1"></i> Following
+                                    </button>
+                                    {% endif %}
+                                    {% endwith %}
+
+                                    {% elif list_type == 'following' %}
+                                    <!-- Already following, show unfollow button -->
+                                    <button class="btn btn-sm btn-outline-danger unfollow-btn"
+                                            data-user-id="{{ user.id }}"
+                                            data-username="{{ user.username }}">
+                                        <i class="fas fa-user-minus me-1"></i> Unfollow
+                                    </button>
+                                    {% endif %}
+                                    {% endif %}
+
+                                    <!-- Message button -->
+                                    <a href="{% url 'chat_detail' user.username %}"
+                                       class="btn btn-sm btn-outline-secondary ms-2">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                    {% else %}
+                    <div class="text-center py-5">
+                        {% if list_type == 'following' %}
+                        <i class="fas fa-user-friends fa-4x text-muted mb-3"></i>
+                        <h5>Not following anyone yet</h5>
+                        <p class="text-muted">When you follow people, they'll appear here</p>
+                        <a href="{% url 'explore' %}" class="btn btn-primary mt-2">
+                            <i class="fas fa-compass me-2"></i> Explore Traders
+                        </a>
+                        {% else %}
+                        <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                        <h5>No followers yet</h5>
+                        <p class="text-muted">Start posting and engaging with others to get followers</p>
+                        <a href="{% url 'create_post' %}" class="btn btn-primary mt-2">
+                            <i class="fas fa-plus me-2"></i> Create Your First Post
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Follow/Unfollow functionality
+    document.querySelectorAll('.follow-btn, .unfollow-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            const username = this.dataset.username;
+            const isUnfollowButton = this.classList.contains('unfollow-btn');
+
+            if (isUnfollowButton) {
+                if (!confirm(`Are you sure you want to unfollow ${username}?`)) {
+                    return;
+                }
+            }
+
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Loading...';
+            this.disabled = true;
+
+            // Send AJAX request
+            fetch(`/community/profile/${username}/follow/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'followed') {
+                    // Update button to show "Following"
+                    this.innerHTML = '<i class="fas fa-check me-1"></i> Following';
+                    this.classList.remove('btn-outline-primary');
+                    this.classList.add('btn-secondary');
+                    this.classList.remove('follow-btn');
+                    this.classList.add('unfollow-btn');
+
+                    // Update text
+                    this.querySelector('i').className = 'fas fa-user-minus me-1';
+                    const textNode = this.childNodes[1];
+                    if (textNode.nodeType === 3) {
+                        textNode.textContent = ' Unfollow';
+                    }
+                } else if (data.status === 'unfollowed') {
+                    // Update button to show "Follow Back"
+                    this.innerHTML = '<i class="fas fa-user-plus me-1"></i> Follow Back';
+                    this.classList.remove('btn-secondary');
+                    this.classList.add('btn-outline-primary');
+                    this.classList.remove('unfollow-btn');
+                    this.classList.add('follow-btn');
+                }
+
+                // Show toast notification
+                const toast = new bootstrap.Toast(document.getElementById('followToast'));
+                document.getElementById('toastMessage').textContent =
+                    data.status === 'followed' ?
+                    `You are now following ${username}` :
+                    `You unfollowed ${username}`;
+                toast.show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+                this.innerHTML = originalText;
+            })
+            .finally(() => {
+                this.disabled = false;
+            });
+        });
+    });
+</script>
+
+<!-- Toast for follow notifications -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="followToast" class="toast" role="alert">
+        <div class="toast-body">
+            <i class="fas fa-check-circle text-success me-2"></i>
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% endblock %}

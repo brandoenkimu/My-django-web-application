@@ -1,0 +1,3483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages | Bold Trading Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --admin-gradient: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+            --self-gradient: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+            --danger-gradient: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            --chat-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --user-gradient: linear-gradient(135deg, #8a2387 0%, #f27121 100%);
+            --dark-bg: #1a1f36;
+            --light-bg: #f8fafc;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --hover-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light-bg);
+            color: #374151;
+            overflow-x: hidden;
+        }
+
+        /* FLOATING QUICK CHAT WIDGET */
+        .floating-chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            height: 500px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .floating-chat-widget.minimized {
+            height: 60px;
+            width: 300px;
+        }
+
+        .floating-chat-header {
+            background: var(--chat-gradient);
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .floating-chat-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .floating-chat-title i {
+            font-size: 1.2rem;
+        }
+
+        .floating-chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .floating-chat-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .floating-chat-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .floating-chat-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f8fafc;
+        }
+
+        .floating-chat-contacts {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .floating-chat-contact {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f1f1;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .floating-chat-contact:hover {
+            background: #f8fafc;
+        }
+
+        .floating-chat-contact.active {
+            background: rgba(17, 153, 142, 0.1);
+            border-left: 3px solid #11998e;
+        }
+
+        .floating-chat-contact-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--chat-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-right: 10px;
+        }
+
+        .floating-chat-contact-info {
+            flex: 1;
+        }
+
+        .floating-chat-contact-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1f2937;
+        }
+
+        .floating-chat-contact-status {
+            font-size: 0.75rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .floating-chat-contact-status.online::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .floating-chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .floating-chat-message {
+            margin-bottom: 10px;
+            max-width: 85%;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .floating-chat-message.received {
+            background: #f1f5f9;
+            border: 1px solid #e5e7eb;
+            align-self: flex-start;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+
+        .floating-chat-message.sent {
+            background: var(--chat-gradient);
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .floating-chat-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .floating-chat-input-container {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .floating-chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .floating-chat-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .floating-chat-input:focus {
+            border-color: #11998e;
+        }
+
+        .floating-chat-send-btn {
+            background: var(--chat-gradient);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .floating-chat-send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Notification Popup */
+        .notification-popup {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            z-index: 9999;
+            border-left: 4px solid;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .notification-popup.broadcast {
+            border-left-color: #ff416c;
+        }
+
+        .notification-popup.admin {
+            border-left-color: #ff7e5f;
+        }
+
+        .notification-popup.support {
+            border-left-color: #11998e;
+        }
+
+        .notification-header {
+            padding: 12px 15px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .notification-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .notification-body {
+            padding: 15px;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #4b5563;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* User Info Bar */
+        .user-info-bar {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .user-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-right: 12px;
+        }
+
+        .user-avatar-small.admin {
+            background: var(--admin-gradient);
+        }
+
+        .user-avatar-small.premium {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+
+        .user-greeting h4 {
+            margin: 0;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .user-greeting p {
+            margin: 3px 0 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        /* Role Badges */
+        .role-badge {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .role-admin {
+            background: var(--admin-gradient);
+            color: white;
+        }
+
+        .role-premium {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            color: white;
+        }
+
+        .role-user {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        /* Admin Controls */
+        .admin-controls {
+            background: linear-gradient(135deg, rgba(255, 126, 95, 0.1) 0%, rgba(254, 180, 123, 0.1) 100%);
+            border: 2px solid rgba(255, 126, 95, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 40px;
+            display: none;
+        }
+
+        .admin-controls.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Sidebar */
+        .sidebar-wrapper {
+            background: white;
+            min-height: 100vh;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.05);
+            border-right: 1px solid #e5e7eb;
+            padding: 0;
+        }
+
+        .compose-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            margin: 25px 20px;
+            width: calc(100% - 40px);
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .compose-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .compose-btn.admin {
+            background: var(--admin-gradient);
+            box-shadow: 0 5px 20px rgba(255, 126, 95, 0.3);
+        }
+
+        .sidebar-section {
+            padding: 0 20px;
+            margin-bottom: 25px;
+        }
+
+        .sidebar-title {
+            color: #6b7280;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            padding-left: 10px;
+        }
+
+        .nav-link-custom {
+            color: #4b5563;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link-custom:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .nav-link-custom.active {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            color: #667eea;
+            font-weight: 600;
+            border-left: 3px solid #667eea;
+        }
+
+        .nav-link-custom i {
+            width: 25px;
+            font-size: 1.1rem;
+            margin-right: 12px;
+        }
+
+        .badge-count {
+            background: var(--primary-gradient);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            min-width: 25px;
+            text-align: center;
+            margin-left: auto;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .badge-count.unread {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            animation: pulse 2s infinite;
+        }
+
+        .badge-count.admin {
+            background: var(--admin-gradient);
+        }
+
+        .badge-count.danger {
+            background: var(--danger-gradient);
+        }
+
+        .badge-count.self {
+            background: var(--self-gradient);
+        }
+
+        .badge-count.chat {
+            background: var(--chat-gradient);
+        }
+
+        .badge-count.user {
+            background: var(--user-gradient);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 0;
+            background: var(--light-bg);
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 40px;
+            color: white;
+            border-radius: 0 0 25px 25px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section.admin {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+        }
+
+        .welcome-section.premium {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1%, transparent 1%);
+            background-size: 30px 30px;
+            opacity: 0.3;
+        }
+
+        .welcome-icon {
+            font-size: 4.5rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .welcome-text h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .welcome-text p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+        }
+
+        .stats-banner {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: -30px 40px 40px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .stat-number.admin {
+            background: var(--admin-gradient);
+            -webkit-background-clip: text;
+        }
+
+        .stat-number.self {
+            background: var(--self-gradient);
+            -webkit-background-clip: text;
+        }
+
+        .stat-number.chat {
+            background: var(--chat-gradient);
+            -webkit-background-clip: text;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Message Cards */
+        .messages-container {
+            padding: 0 40px 40px;
+        }
+
+        .message-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .message-card.unread {
+            border-left: 4px solid #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+        }
+
+        .message-card.admin-message {
+            border-left: 4px solid #ff7e5f;
+            background: linear-gradient(135deg, rgba(255, 126, 95, 0.03) 0%, rgba(254, 180, 123, 0.03) 100%);
+        }
+
+        .message-card.self-message {
+            border-left: 4px solid #36d1dc;
+            background: linear-gradient(135deg, rgba(54, 209, 220, 0.03) 0%, rgba(91, 134, 229, 0.03) 100%);
+        }
+
+        .message-card.broadcast-message {
+            border-left: 4px solid #ff416c;
+            background: linear-gradient(135deg, rgba(255, 65, 108, 0.03) 0%, rgba(255, 75, 43, 0.03) 100%);
+        }
+
+        .message-card.chat-message {
+            border-left: 4px solid #11998e;
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.03) 0%, rgba(56, 239, 125, 0.03) 100%);
+        }
+
+        .message-card.user-message {
+            border-left: 4px solid #8a2387;
+            background: linear-gradient(135deg, rgba(138, 35, 135, 0.03) 0%, rgba(242, 113, 33, 0.03) 100%);
+        }
+
+        .message-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .message-card:hover::before {
+            opacity: 1;
+        }
+
+        .message-card.admin-message:hover::before {
+            background: var(--admin-gradient);
+        }
+
+        .message-card.self-message:hover::before {
+            background: var(--self-gradient);
+        }
+
+        .message-card.broadcast-message:hover::before {
+            background: var(--danger-gradient);
+        }
+
+        .message-card.chat-message:hover::before {
+            background: var(--chat-gradient);
+        }
+
+        .message-card.user-message:hover::before {
+            background: var(--user-gradient);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .sender-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sender-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: var(--secondary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .sender-avatar.admin {
+            background: var(--admin-gradient);
+        }
+
+        .sender-avatar.self {
+            background: var(--self-gradient);
+        }
+
+        .sender-avatar.broadcast {
+            background: var(--danger-gradient);
+        }
+
+        .sender-avatar.premium {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+
+        .sender-avatar.chat {
+            background: var(--chat-gradient);
+        }
+
+        .sender-avatar.user {
+            background: var(--user-gradient);
+        }
+
+        .sender-details h5 {
+            margin: 0;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .sender-details p {
+            margin: 3px 0 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .admin-badge {
+            background: var(--admin-gradient);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .self-badge {
+            background: var(--self-gradient);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .broadcast-badge {
+            background: var(--danger-gradient);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .premium-badge {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .chat-badge {
+            background: var(--chat-gradient);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .user-badge {
+            background: var(--user-gradient);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .message-time {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            background: #f9fafb;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .message-content h4 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+
+        .message-preview {
+            color: #4b5563;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .message-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reply {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-forward {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-save-note {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-broadcast {
+            background: var(--danger-gradient);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 65, 108, 0.3);
+        }
+
+        .btn-quick-note {
+            background: var(--self-gradient);
+            color: white;
+            box-shadow: 0 5px 15px rgba(54, 209, 220, 0.3);
+        }
+
+        .btn-quick-chat {
+            background: var(--chat-gradient);
+            color: white;
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .quick-action-btn:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .quick-action-btn.admin {
+            background: linear-gradient(135deg, rgba(255, 126, 95, 0.1) 0%, rgba(254, 180, 123, 0.1) 100%);
+            border-color: #ff7e5f;
+        }
+
+        .quick-action-btn.self {
+            background: linear-gradient(135deg, rgba(54, 209, 220, 0.1) 0%, rgba(91, 134, 229, 0.1) 100%);
+            border-color: #36d1dc;
+        }
+
+        .quick-action-btn.chat {
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+            border-color: #11998e;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: #9ca3af;
+        }
+
+        .empty-icon {
+            font-size: 6rem;
+            color: #e5e7eb;
+            margin-bottom: 25px;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar-wrapper {
+                min-height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+
+            .welcome-section {
+                padding: 40px 20px;
+                border-radius: 0 0 20px 20px;
+            }
+
+            .welcome-text h1 {
+                font-size: 2rem;
+            }
+
+            .stats-banner {
+                margin: -25px 20px 30px;
+                padding: 20px;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .messages-container {
+                padding: 0 20px 40px;
+            }
+
+            .message-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .message-time {
+                align-self: flex-start;
+            }
+
+            .admin-controls {
+                margin: 20px;
+            }
+
+            .floating-chat-widget {
+                width: 300px;
+                height: 450px;
+                bottom: 10px;
+                right: 10px;
+            }
+
+            .floating-chat-widget.minimized {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .welcome-section {
+                padding: 30px 15px;
+            }
+
+            .welcome-text h1 {
+                font-size: 1.8rem;
+            }
+
+            .message-card {
+                padding: 20px;
+            }
+
+            .message-actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .quick-actions {
+                flex-direction: column;
+            }
+
+            .floating-chat-widget {
+                width: calc(100% - 20px);
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Quick Chat Widget -->
+    <div class="floating-chat-widget" id="floating-chat-widget">
+        <div class="floating-chat-header" onclick="toggleFloatingChat()">
+            <div class="floating-chat-title">
+                <i class="fas fa-comment-dots"></i>
+                <span id="floating-chat-title">Quick Chat</span>
+                <span class="badge bg-danger" id="floating-chat-notification-badge" style="display: none;">!</span>
+            </div>
+            <div class="floating-chat-actions">
+                <button class="floating-chat-btn" onclick="toggleFloatingChat()">
+                    <i class="fas fa-minus" id="floating-chat-toggle-icon"></i>
+                </button>
+                <button class="floating-chat-btn" onclick="closeFloatingChat()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="floating-chat-content" id="floating-chat-content">
+            <!-- Contacts List -->
+            <div class="floating-chat-contacts" id="floating-chat-contacts">
+                <div class="floating-chat-contact active" onclick="selectFloatingChatContact('yourself')">
+                    <div class="floating-chat-contact-avatar">Y</div>
+                    <div class="floating-chat-contact-info">
+                        <div class="floating-chat-contact-name">Yourself</div>
+                        <div class="floating-chat-contact-status">Personal notes</div>
+                    </div>
+                </div>
+                {% for other_user in all_users %}
+                    {% if other_user.id != user.id %}
+                    <div class="floating-chat-contact" onclick="selectFloatingChatContact('{{ other_user.id }}')">
+                        <div class="floating-chat-contact-avatar">{{ other_user.username|first|upper }}</div>
+                        <div class="floating-chat-contact-info">
+                            <div class="floating-chat-contact-name">{{ other_user.username }}</div>
+                            <div class="floating-chat-contact-status {% if other_user.is_online %}online{% endif %}">
+                                {% if other_user.is_staff or other_user.is_superuser %}Admin{% else %}User{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Messages Area -->
+            <div class="floating-chat-messages" id="floating-chat-messages">
+                <!-- Messages loaded dynamically -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="floating-chat-input-container" id="floating-chat-input-container">
+                <div class="floating-chat-input-wrapper">
+                    <input type="text" class="floating-chat-input" id="floating-chat-input" placeholder="Type a message..." onkeypress="handleFloatingChatKeypress(event)">
+                    <button class="floating-chat-send-btn" onclick="sendFloatingChatMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Info Bar -->
+    <div class="user-info-bar">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar-small" id="user-avatar">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <div class="user-greeting">
+                        <h4 id="welcome-text">Welcome, {{ user.first_name|default:user.username|title }}!
+                            <span class="role-badge" id="user-role-badge"></span>
+                        </h4>
+                        <p id="user-role-description">Manage your messages and stay connected</p>
+                    </div>
+                </div>
+                <div>
+                    {% if user.is_staff or user.is_superuser %}
+                    <button class="btn btn-outline-warning me-2" id="admin-mode-btn" onclick="toggleAdminMode()">
+                        <i class="fas fa-user-shield me-2"></i>Admin Mode
+                    </button>
+                    <button class="btn btn-outline-danger me-2" id="broadcast-btn" onclick="openBroadcastModal()" style="display: none;">
+                        <i class="fas fa-bullhorn me-2"></i>Broadcast
+                    </button>
+                    {% endif %}
+                    <button class="btn btn-outline-primary me-2" onclick="openQuickNote()">
+                        <i class="fas fa-sticky-note me-2"></i>Quick Note
+                    </button>
+                    <button class="btn btn-quick-chat me-2" onclick="openFloatingChat()">
+                        <i class="fas fa-comment-dots me-2"></i>Quick Chat
+                    </button>
+                    <a href="{% url 'market_research' %}" class="btn btn-primary">
+                        <i class="fas fa-chart-line me-2"></i>Trading Hub
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Controls -->
+    <div class="admin-controls" id="admin-controls">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1"><i class="fas fa-user-shield me-2"></i>Administrator Controls</h5>
+                    <p class="mb-0 text-muted">Send broadcasts, notifications, and manage user messages</p>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-danger" onclick="openBroadcastModal()">
+                        <i class="fas fa-bullhorn me-1"></i>Send Broadcast
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="openNotificationModal()">
+                        <i class="fas fa-bell me-1"></i>Send Notification
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar-wrapper">
+                <!-- Compose Button -->
+                <div class="sidebar-section">
+                    <button class="compose-btn" id="compose-btn" onclick="composeNewMessage()">
+                        <i class="fas fa-pen me-2"></i>Compose New
+                    </button>
+                </div>
+
+                <!-- Admin Quick Actions (Only for admins) -->
+                {% if user.is_staff or user.is_superuser %}
+                <div class="sidebar-section" id="admin-quick-actions" style="display: none;">
+                    <div class="quick-actions">
+                        <button class="quick-action-btn admin" onclick="openBroadcastModal()">
+                            <i class="fas fa-bullhorn"></i>Broadcast
+                        </button>
+                        <button class="quick-action-btn admin" onclick="openNotificationModal()">
+                            <i class="fas fa-bell"></i>Notify All
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Quick Actions -->
+                <div class="sidebar-section">
+                    <div class="quick-actions">
+                        <button class="quick-action-btn self" onclick="messageToSelf()">
+                            <i class="fas fa-sticky-note"></i>Note to Self
+                        </button>
+                        <button class="quick-action-btn chat" onclick="openFloatingChat()">
+                            <i class="fas fa-comment-dots"></i>Quick Chat
+                        </button>
+                        <button class="quick-action-btn" onclick="openSupportChat()">
+                            <i class="fas fa-headset"></i>Support
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages Section -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Messages</div>
+                    <nav class="nav flex-column">
+                        <a href="#" class="nav-link-custom active" onclick="loadFolder('inbox')">
+                            <i class="fas fa-inbox"></i>
+                            <span>Inbox</span>
+                            <span class="badge-count unread" id="inbox-count">5</span>
+                        </a>
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('sent')">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Sent</span>
+                            <span class="badge-count" id="sent-count">15</span>
+                        </a>
+                        {% if user.is_staff or user.is_superuser %}
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('broadcasts')">
+                            <i class="fas fa-bullhorn"></i>
+                            <span>Broadcasts</span>
+                            <span class="badge-count danger" id="broadcast-count">3</span>
+                        </a>
+                        {% endif %}
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('admin')">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Support</span>
+                            <span class="badge-count admin" id="admin-message-count">2</span>
+                        </a>
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('users')">
+                            <i class="fas fa-users"></i>
+                            <span>User Messages</span>
+                            <span class="badge-count user" id="user-message-count">8</span>
+                        </a>
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('chats')">
+                            <i class="fas fa-comments"></i>
+                            <span>Quick Chats</span>
+                            <span class="badge-count chat" id="chat-count">4</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Personal Folders -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Personal</div>
+                    <nav class="nav flex-column">
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('self')">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Self Messages</span>
+                            <span class="badge-count self" id="self-count">4</span>
+                        </a>
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('notes')">
+                            <i class="fas fa-sticky-note"></i>
+                            <span>Quick Notes</span>
+                            <span class="badge-count" id="notes-count">6</span>
+                        </a>
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('starred')">
+                            <i class="fas fa-star"></i>
+                            <span>Starred</span>
+                            <span class="badge-count" id="starred-count">7</span>
+                        </a>
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('trash')">
+                            <i class="fas fa-trash"></i>
+                            <span>Trash</span>
+                            <span class="badge-count" id="trash-count">8</span>
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Labels Section -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Labels</div>
+                    <nav class="nav flex-column">
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('work')">
+                            <i class="fas fa-briefcase"></i>
+                            <span>Work</span>
+                            <span class="badge-count" id="work-count">4</span>
+                        </a>
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('alerts')">
+                            <i class="fas fa-tag"></i>
+                            <span>Trading Alerts</span>
+                            <span class="badge-count unread">9</span>
+                        </a>
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('updates')">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Market Updates</span>
+                            <span class="badge-count">18</span>
+                        </a>
+                        <a href="#" class="nav-link-custom" onclick="loadFolder('system')">
+                            <i class="fas fa-cog"></i>
+                            <span>System</span>
+                            <span class="badge-count">5</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Welcome Banner -->
+                <div class="welcome-section" id="welcome-section">
+                    <div class="container-fluid">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="welcome-text">
+                                <h1 id="welcome-title">Messaging Hub</h1>
+                                <p id="welcome-description">Send messages to yourself, take quick notes, and stay connected with your trading community.</p>
+                            </div>
+                            <div class="welcome-icon d-none d-lg-block">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Banner -->
+                <div class="stats-banner">
+                    <div class="stat-item">
+                        <div class="stat-number" id="total-messages">68</div>
+                        <div class="stat-label">Total Messages</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="unread-count">5</div>
+                        <div class="stat-label">Unread</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number self" id="self-messages-count">4</div>
+                        <div class="stat-label">Self Messages</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number chat" id="quick-chats-count">4</div>
+                        <div class="stat-label">Quick Chats</div>
+                    </div>
+                </div>
+
+                <!-- Messages Container -->
+                <div class="messages-container">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="mb-0" id="folder-title">Recent Messages</h3>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="filterMessages()">
+                                <i class="fas fa-filter me-2"></i>Filter
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="sortMessages()">
+                                <i class="fas fa-sort me-2"></i>Sort
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="markAllAsRead()">
+                                <i class="fas fa-check-double me-2"></i>Mark All Read
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="refreshMessages()">
+                                <i class="fas fa-sync-alt me-2"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Message List -->
+                    <div id="messages-list">
+                        <!-- Quick Chat Message Card -->
+                        <div class="message-card chat-message" data-message-id="chat-1" style="animation: slideIn 0.4s ease;">
+                            <div class="message-header">
+                                <div class="sender-info">
+                                    <div class="sender-avatar chat">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div class="sender-details">
+                                        <h5>Quick Chat <span class="chat-badge">QUICK CHAT</span></h5>
+                                        <p>Yourself - Market Discussion</p>
+                                    </div>
+                                </div>
+                                <div class="message-time">
+                                    <i class="far fa-clock me-1"></i>Today, 10:40 AM
+                                </div>
+                            </div>
+                            <div class="message-content">
+                                <h4>💬 EUR/USD Trading Discussion</h4>
+                                <div class="message-preview">
+                                    Got it. The resistance at 1.0850 is holding strong. Looking for breakout above 1.0900 today. Setting alerts now. Also check GBP/JPY volatility...
+                                </div>
+                            </div>
+                            <div class="message-actions">
+                                <button class="action-btn btn-quick-chat" onclick="openFloatingChat()">
+                                    <i class="fas fa-comment-dots"></i>Continue Chat
+                                </button>
+                                <button class="action-btn btn-forward" onclick="forwardMessage('chat-1')">
+                                    <i class="fas fa-share"></i>Share
+                                </button>
+                                <button class="action-btn btn-delete" onclick="deleteMessage('chat-1')">
+                                    <i class="fas fa-trash"></i>Delete
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- User-to-User Message Card -->
+                        <div class="message-card user-message" data-message-id="user-1" style="animation: slideIn 0.5s ease;">
+                            <div class="message-header">
+                                <div class="sender-info">
+                                    <div class="sender-avatar user">
+                                        M
+                                    </div>
+                                    <div class="sender-details">
+                                        <h5>Maria Rodriguez <span class="user-badge">USER</span></h5>
+                                        <p>Premium Member</p>
+                                    </div>
+                                </div>
+                                <div class="message-time">
+                                    <i class="far fa-clock me-1"></i>Today, 9:30 AM
+                                </div>
+                            </div>
+                            <div class="message-content">
+                                <h4>📊 Trading Strategy Inquiry</h4>
+                                <div class="message-preview">
+                                    Hi! I noticed you're good with technical analysis. Could you share your thoughts on the current EUR/GBP setup? The 0.8600 level seems to be holding...
+                                </div>
+                            </div>
+                            <div class="message-actions">
+                                <button class="action-btn btn-reply" onclick="replyToUser('user-1')">
+                                    <i class="fas fa-reply"></i>Reply
+                                </button>
+                                <button class="action-btn btn-forward" onclick="forwardMessage('user-1')">
+                                    <i class="fas fa-share"></i>Forward
+                                </button>
+                                <button class="action-btn btn-save-note" onclick="saveAsNote('user-1')">
+                                    <i class="fas fa-sticky-note"></i>Save Note
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Self Message Card -->
+                        <div class="message-card self-message" data-message-id="self-1" style="animation: slideIn 0.6s ease;">
+                            <div class="message-header">
+                                <div class="sender-info">
+                                    <div class="sender-avatar self">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                    <div class="sender-details">
+                                        <h5>Yourself <span class="self-badge">SELF MESSAGE</span></h5>
+                                        <p>Personal Note</p>
+                                    </div>
+                                </div>
+                                <div class="message-time">
+                                    <i class="far fa-clock me-1"></i>Today, 9:00 AM
+                                </div>
+                            </div>
+                            <div class="message-content">
+                                <h4>📝 Trading Strategy Notes</h4>
+                                <div class="message-preview">
+                                    Remember to analyze EUR/USD performance from yesterday. The resistance at 1.0850 held strong. Consider setting alerts for breakout above 1.0900...
+                                </div>
+                            </div>
+                            <div class="message-actions">
+                                <button class="action-btn btn-reply" onclick="replyToSelf('self-1')">
+                                    <i class="fas fa-edit"></i>Edit Note
+                                </button>
+                                <button class="action-btn btn-forward" onclick="forwardMessage('self-1')">
+                                    <i class="fas fa-share"></i>Share
+                                </button>
+                                <button class="action-btn btn-delete" onclick="deleteMessage('self-1')">
+                                    <i class="fas fa-trash"></i>Delete
+                                </button>
+                            </div>
+                        </div>
+
+                        {% if user.is_staff or user.is_superuser %}
+                        <!-- Admin Broadcast Card -->
+                        <div class="message-card broadcast-message unread" data-message-id="broadcast-1" style="animation: slideIn 0.7s ease;">
+                            <div class="message-header">
+                                <div class="sender-info">
+                                    <div class="sender-avatar broadcast">
+                                        <i class="fas fa-bullhorn"></i>
+                                    </div>
+                                    <div class="sender-details">
+                                        <h5>System Administrator <span class="broadcast-badge">BROADCAST</span></h5>
+                                        <p>Platform Announcement</p>
+                                    </div>
+                                </div>
+                                <div class="message-time">
+                                    <i class="far fa-clock me-1"></i>2 days ago
+                                </div>
+                            </div>
+                            <div class="message-content">
+                                <h4>🚀 Platform Upgrade Scheduled</h4>
+                                <div class="message-preview">
+                                    Important announcement: We're upgrading our trading platform this Saturday. New features include advanced charting tools and enhanced security...
+                                </div>
+                            </div>
+                            <div class="message-actions">
+                                <button class="action-btn btn-reply" onclick="replyToBroadcast('broadcast-1')">
+                                    <i class="fas fa-reply"></i>Reply
+                                </button>
+                                <button class="action-btn btn-forward" onclick="forwardMessage('broadcast-1')">
+                                    <i class="fas fa-share"></i>Forward
+                                </button>
+                                {% if user.is_staff or user.is_superuser %}
+                                <button class="action-btn btn-broadcast" onclick="editBroadcast('broadcast-1')">
+                                    <i class="fas fa-edit"></i>Edit
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Support Message Card -->
+                        <div class="message-card admin-message" data-message-id="admin-1" style="animation: slideIn 0.8s ease;">
+                            <div class="message-header">
+                                <div class="sender-info">
+                                    <div class="sender-avatar admin">
+                                        <i class="fas fa-headset"></i>
+                                    </div>
+                                    <div class="sender-details">
+                                        <h5>Support Team <span class="admin-badge">SUPPORT</span></h5>
+                                        <p>Customer Support</p>
+                                    </div>
+                                </div>
+                                <div class="message-time">
+                                    <i class="far fa-clock me-1"></i>3 days ago
+                                </div>
+                            </div>
+                            <div class="message-content">
+                                <h4>Your Account Has Been Verified</h4>
+                                <div class="message-preview">
+                                    Hello! We're pleased to inform you that your account verification has been completed successfully...
+                                </div>
+                            </div>
+                            <div class="message-actions">
+                                <button class="action-btn btn-reply" onclick="replyToMessage('admin-1')">
+                                    <i class="fas fa-reply"></i>Reply
+                                </button>
+                                <button class="action-btn btn-forward" onclick="forwardMessage('admin-1')">
+                                    <i class="fas fa-share"></i>Forward
+                                </button>
+                                <button class="action-btn btn-save-note" onclick="saveAsNote('admin-1')">
+                                    <i class="fas fa-sticky-note"></i>Save Note
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="empty-state d-none">
+                        <div class="empty-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h3>No Messages Here</h3>
+                        <p>This folder is empty. Start a conversation, message yourself, or check other folders.</p>
+                        <div class="d-flex gap-3 justify-content-center">
+                            <button class="btn btn-primary btn-lg" onclick="composeNewMessage()">
+                                <i class="fas fa-pen me-2"></i>Compose Message
+                            </button>
+                            <button class="btn btn-outline-primary btn-lg" onclick="messageToSelf()">
+                                <i class="fas fa-sticky-note me-2"></i>Note to Self
+                            </button>
+                            <button class="btn btn-quick-chat btn-lg" onclick="openFloatingChat()">
+                                <i class="fas fa-comment-dots me-2"></i>Quick Chat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compose Modal -->
+    <div class="modal fade" id="composeModal" tabindex="-1" aria-labelledby="composeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--primary-gradient); color: white;">
+                    <h5 class="modal-title" id="composeModalLabel">Compose New Message</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="compose-form">
+                        <div class="mb-3">
+                            <label class="form-label">Recipient:</label>
+                            <select class="form-select" id="recipient-select" onchange="toggleRecipientOptions()">
+                                <option value="">Select recipient...</option>
+                                <option value="self">To Self (Personal Note)</option>
+                                {% if user.is_staff or user.is_superuser %}
+                                <option value="broadcast">Broadcast to All Users</option>
+                                {% endif %}
+                                <option value="admin">Support Team</option>
+                                <option value="user">Specific User...</option>
+                                <option value="quicknote">Save as Quick Note</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="user-select-container" style="display: none;">
+                            <label class="form-label">Select User:</label>
+                            <select class="form-select" id="user-select">
+                                <option value="">Choose a user...</option>
+                                {% for other_user in all_users %}
+                                    {% if other_user.id != user.id %}
+                                    <option value="{{ other_user.id }}">{{ other_user.username }} {% if other_user.first_name %}({{ other_user.first_name }}){% endif %}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% if user.is_staff or user.is_superuser %}
+                        <div class="mb-3" id="broadcast-warning" style="display: none;">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Admin Only:</strong> This message will be sent to all users as a broadcast.
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label class="form-label">Subject:</label>
+                            <input type="text" id="subject-input" class="form-control" placeholder="Message subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message:</label>
+                            <textarea id="message-input" class="form-control" rows="8" placeholder="Type your message here..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category:</label>
+                            <select class="form-select" id="category-select">
+                                <option value="general">General</option>
+                                <option value="trading">Trading</option>
+                                <option value="technical">Technical Issue</option>
+                                <option value="account">Account Related</option>
+                                <option value="suggestion">Suggestion</option>
+                                <option value="community">Community Discussion</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="saveAsDraft()">
+                        <i class="fas fa-save me-1"></i>Save Draft
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane me-1"></i>Send Message
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Broadcast Modal (Admin Only) -->
+    {% if user.is_staff or user.is_superuser %}
+    <div class="modal fade" id="broadcastModal" tabindex="-1" aria-labelledby="broadcastModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--danger-gradient); color: white;">
+                    <h5 class="modal-title"><i class="fas fa-bullhorn me-2"></i>Send Broadcast to All Users</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="broadcast-form">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            This message will be sent to all <strong>{{ total_users }}</strong> users.
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Broadcast Type:</label>
+                            <select class="form-select" id="broadcast-type">
+                                <option value="announcement">Announcement</option>
+                                <option value="alert">Alert</option>
+                                <option value="update">System Update</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="trading">Trading Alert</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Subject:</label>
+                            <input type="text" id="broadcast-subject" class="form-control" placeholder="Broadcast subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message:</label>
+                            <textarea id="broadcast-message" class="form-control" rows="8" placeholder="Type your broadcast message here..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Priority:</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="broadcast-priority" id="priority-normal" value="normal" checked>
+                                <label class="form-check-label" for="priority-normal">
+                                    Normal
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="broadcast-priority" id="priority-high" value="high">
+                                <label class="form-check-label" for="priority-high">
+                                    High (Important)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="broadcast-priority" id="priority-urgent" value="urgent">
+                                <label class="form-check-label" for="priority-urgent">
+                                    Urgent (Critical)
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="sendBroadcast()">
+                        <i class="fas fa-bullhorn me-1"></i>Send Broadcast
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Django User Data
+        const djangoUser = {
+            id: "{{ user.id }}",
+            username: "{{ user.username }}",
+            firstName: "{{ user.first_name|default:user.username|title }}",
+            email: "{{ user.email }}",
+            isStaff: {% if user.is_staff %}true{% else %}false{% endif %},
+            isSuperuser: {% if user.is_superuser %}true{% else %}false{% endif %},
+            isPremium: {% if user.profile.is_premium %}true{% else %}false{% endif %}
+        };
+
+        // Django Users List
+        const djangoUsers = [
+            {% for other_user in all_users %}
+            {
+                id: "{{ other_user.id }}",
+                username: "{{ other_user.username }}",
+                firstName: "{{ other_user.first_name|default:other_user.username|title }}",
+                email: "{{ other_user.email }}",
+                isStaff: {% if other_user.is_staff %}true{% else %}false{% endif %},
+                isSuperuser: {% if other_user.is_superuser %}true{% else %}false{% endif %},
+                isOnline: {% if other_user.is_online %}true{% else %}false{% endif %}
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // Messaging system
+        const messagingSystem = {
+            currentUser: djangoUser,
+            currentFolder: 'inbox',
+            adminMode: false,
+            floatingChat: {
+                isMinimized: false,
+                currentContact: 'yourself',
+                contacts: {},
+                unreadCount: 0,
+                isVisible: true
+            },
+            messages: {
+                inbox: [],
+                sent: [],
+                broadcasts: [],
+                admin: [],
+                users: [],
+                self: [],
+                notes: [],
+                chats: [],
+                starred: [],
+                trash: []
+            },
+            // WebSocket connections
+            chatSocket: null,
+            broadcastSocket: null,
+            transactionSocket: null
+        };
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize floating chat
+            initializeFloatingChatContacts();
+
+            // Initialize messaging system
+            initializeMessagingSystem();
+
+            // Setup event listeners
+            setupEventListeners();
+
+            // Update UI
+            updateUserUI();
+
+            // Load initial data
+            loadMessages();
+            loadFloatingChatMessages();
+            simulateInitialData();
+
+            // Connect WebSockets
+            connectWebSockets();
+        });
+
+        function initializeFloatingChatContacts() {
+            // Add yourself
+            messagingSystem.floatingChat.contacts['yourself'] = {
+                id: 'yourself',
+                name: 'Yourself',
+                avatar: 'Y',
+                status: 'Personal notes',
+                messages: []
+            };
+
+            // Add all other users
+            djangoUsers.forEach(user => {
+                if (user.id !== djangoUser.id) {
+                    messagingSystem.floatingChat.contacts[user.id] = {
+                        id: user.id,
+                        name: user.username,
+                        avatar: user.username.charAt(0).toUpperCase(),
+                        status: user.isStaff || user.isSuperuser ? 'Admin' : 'User',
+                        isOnline: user.isOnline || false,
+                        messages: []
+                    };
+                }
+            });
+        }
+
+        function connectWebSockets() {
+            // Connect to transaction WebSocket (using your existing consumer)
+            connectTransactionWebSocket();
+
+            // Connect to broadcast WebSocket
+            connectBroadcastWebSocket();
+        }
+
+        function connectTransactionWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host;
+            const wsUrl = `${protocol}//${host}/ws/transaction/${djangoUser.id}/`;
+
+            try {
+                console.log('Connecting to transaction WebSocket:', wsUrl);
+                const socket = new WebSocket(wsUrl);
+
+                socket.onopen = function(e) {
+                    console.log('✅ Transaction WebSocket connected');
+                    messagingSystem.transactionSocket = socket;
+
+                    // Request initial data
+                    socket.send(JSON.stringify({
+                        type: 'get_notifications',
+                        request_id: 'init_notifications'
+                    }));
+                };
+
+                socket.onmessage = function(e) {
+                    try {
+                        const data = JSON.parse(e.data);
+                        handleTransactionMessage(data);
+                    } catch (error) {
+                        console.error('Error parsing transaction message:', error);
+                    }
+                };
+
+                socket.onclose = function(e) {
+                    console.log('Transaction WebSocket disconnected:', e.code, e.reason);
+                    messagingSystem.transactionSocket = null;
+
+                    if (e.code !== 1000) {
+                        console.log('Reconnecting in 3 seconds...');
+                        setTimeout(connectTransactionWebSocket, 3000);
+                    }
+                };
+
+                socket.onerror = function(error) {
+                    console.error('Transaction WebSocket error:', error);
+                };
+
+            } catch (error) {
+                console.error('Failed to connect to transaction WebSocket:', error);
+                setTimeout(connectTransactionWebSocket, 5000);
+            }
+        }
+
+        function connectBroadcastWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.host;
+            const wsUrl = `${protocol}//${host}/ws/broadcast/`;
+
+            try {
+                console.log('Connecting to broadcast WebSocket:', wsUrl);
+                const socket = new WebSocket(wsUrl);
+
+                socket.onopen = function(e) {
+                    console.log('✅ Broadcast WebSocket connected');
+                    messagingSystem.broadcastSocket = socket;
+
+                    // Join admin group if admin
+                    if (djangoUser.isStaff || djangoUser.isSuperuser) {
+                        socket.send(JSON.stringify({
+                            type: 'admin_join',
+                            user_id: djangoUser.id,
+                            username: djangoUser.username
+                        }));
+                    }
+                };
+
+                socket.onmessage = function(e) {
+                    try {
+                        const data = JSON.parse(e.data);
+                        handleBroadcastMessage(data);
+                    } catch (error) {
+                        console.error('Error parsing broadcast message:', error);
+                    }
+                };
+
+                socket.onclose = function(e) {
+                    console.log('Broadcast WebSocket disconnected:', e.code, e.reason);
+                    messagingSystem.broadcastSocket = null;
+
+                    if (e.code !== 1000) {
+                        console.log('Reconnecting in 3 seconds...');
+                        setTimeout(connectBroadcastWebSocket, 3000);
+                    }
+                };
+
+                socket.onerror = function(error) {
+                    console.error('Broadcast WebSocket error:', error);
+                };
+
+            } catch (error) {
+                console.error('Failed to connect to broadcast WebSocket:', error);
+                setTimeout(connectBroadcastWebSocket, 5000);
+            }
+        }
+
+        function handleTransactionMessage(data) {
+            const type = data.type;
+
+            switch(type) {
+                case 'notification':
+                    handleNotification(data.notification);
+                    break;
+                case 'initial_data':
+                    // Handle initial data if needed
+                    break;
+                case 'response':
+                    // Handle responses
+                    break;
+                default:
+                    console.log('Unknown transaction message type:', type);
+            }
+        }
+
+        function handleBroadcastMessage(data) {
+            const type = data.type;
+
+            switch(type) {
+                case 'broadcast':
+                    // Handle broadcast message from admin
+                    const { title, message, sender, priority, broadcast_type, timestamp } = data;
+                    receiveBroadcast(title, message, sender, priority, broadcast_type, timestamp);
+                    break;
+                case 'admin_notification':
+                    // Handle admin notifications
+                    if (djangoUser.isStaff || djangoUser.isSuperuser) {
+                        showAdminNotification(data);
+                    }
+                    break;
+                case 'system_alert':
+                    // Handle system alerts
+                    showSystemAlert(data);
+                    break;
+                default:
+                    console.log('Unknown broadcast message type:', type);
+            }
+        }
+
+        function handleNotification(notification) {
+            if (notification.notification_type === 'broadcast') {
+                // This is a broadcast notification
+                showBroadcastNotification(
+                    notification.title || 'Broadcast',
+                    notification.message || 'New broadcast',
+                    notification.data?.sender || 'System'
+                );
+            } else if (notification.notification_type === 'chat_message') {
+                // This is a chat message notification
+                const senderId = notification.data?.sender_id;
+                const sender = notification.data?.sender || 'Unknown';
+                const message = notification.message;
+
+                showChatNotification(sender, message);
+
+                // Add to floating chat if we're chatting with this user
+                const contactId = messagingSystem.floatingChat.currentContact;
+                if (contactId === senderId) {
+                    addFloatingChatMessage(message, 'received', new Date().toLocaleTimeString(), sender);
+                } else {
+                    // Increment unread count
+                    messagingSystem.floatingChat.unreadCount++;
+                    updateFloatingChatBadge();
+
+                    // Save to contact's history
+                    const contact = messagingSystem.floatingChat.contacts[senderId];
+                    if (contact) {
+                        contact.messages.push({
+                            text: message,
+                            type: 'received',
+                            time: new Date().toLocaleTimeString(),
+                            sender: sender
+                        });
+                    }
+                }
+            }
+        }
+
+        function receiveBroadcast(title, message, sender, priority, broadcast_type, timestamp) {
+            // Show notification popup
+            showBroadcastNotification(title, message, sender);
+
+            // Add to messages system
+            const broadcastMessage = {
+                id: 'broadcast-' + Date.now(),
+                type: 'broadcast',
+                unread: true,
+                sender: sender || 'System Administrator',
+                subject: title,
+                content: message,
+                preview: message.substring(0, 150) + '...',
+                time: timestamp || new Date().toLocaleTimeString(),
+                priority: priority || 'normal',
+                broadcastType: broadcast_type || 'announcement'
+            };
+
+            messagingSystem.messages.broadcasts.unshift(broadcastMessage);
+            messagingSystem.messages.inbox.unshift(broadcastMessage);
+
+            updateStats();
+
+            // If we're in the inbox or broadcasts folder, reload messages
+            if (messagingSystem.currentFolder === 'inbox' || messagingSystem.currentFolder === 'broadcasts') {
+                loadMessages();
+            }
+        }
+
+        function sendBroadcastMessageToServer(title, message, priority = 'normal', broadcastType = 'announcement') {
+            if (!messagingSystem.broadcastSocket || messagingSystem.broadcastSocket.readyState !== WebSocket.OPEN) {
+                showNotification('Broadcast connection not available. Using HTTP fallback.', 'warning');
+                // Fall back to HTTP request
+                return sendBroadcastViaHTTP(title, message, priority, broadcastType);
+            }
+
+            if (!messagingSystem.currentUser.isStaff && !messagingSystem.currentUser.isSuperuser) {
+                showNotification('Admin privileges required', 'error');
+                return false;
+            }
+
+            const broadcastData = {
+                type: 'broadcast',
+                title: title,
+                message: message,
+                sender: djangoUser.username,
+                priority: priority,
+                broadcast_type: broadcastType,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                messagingSystem.broadcastSocket.send(JSON.stringify(broadcastData));
+                return true;
+            } catch (error) {
+                console.error('Error sending broadcast via WebSocket:', error);
+                showNotification('Failed to send broadcast via WebSocket', 'error');
+                return sendBroadcastViaHTTP(title, message, priority, broadcastType);
+            }
+        }
+
+        function sendBroadcastViaHTTP(title, message, priority = 'normal', broadcastType = 'announcement') {
+            const csrfToken = getCookie('csrftoken');
+
+            return fetch('/send-broadcast/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    title: title,
+                    message: message,
+                    priority: priority,
+                    broadcast_type: broadcastType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Create local notification for current user
+                    receiveBroadcast(title, message, djangoUser.username, priority, broadcastType);
+                    return true;
+                } else {
+                    showNotification('Failed to send broadcast: ' + data.message, 'error');
+                    return false;
+                }
+            })
+            .catch(error => {
+                console.error('Error sending broadcast:', error);
+                showNotification('Error sending broadcast', 'error');
+                return false;
+            });
+        }
+
+        function sendChatMessageToServer(message, recipientId) {
+            // First try WebSocket
+            if (messagingSystem.transactionSocket && messagingSystem.transactionSocket.readyState === WebSocket.OPEN) {
+                try {
+                    messagingSystem.transactionSocket.send(JSON.stringify({
+                        type: 'chat_message',
+                        message: message,
+                        recipient_id: recipientId,
+                        timestamp: new Date().toISOString()
+                    }));
+                    return true;
+                } catch (error) {
+                    console.error('Error sending chat via WebSocket:', error);
+                }
+            }
+
+            // Fall back to HTTP
+            return sendChatViaHTTP(message, recipientId);
+        }
+
+        function sendChatViaHTTP(message, recipientId) {
+            const csrfToken = getCookie('csrftoken');
+
+            return fetch('/send-chat-message/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    recipient_id: recipientId,
+                    message: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    return true;
+                } else {
+                    showNotification('Failed to send message: ' + data.message, 'error');
+                    return false;
+                }
+            })
+            .catch(error => {
+                console.error('Error sending chat:', error);
+                showNotification('Error sending message', 'error');
+                return false;
+            });
+        }
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // FLOATING CHAT FUNCTIONS
+        function toggleFloatingChat() {
+            const widget = document.getElementById('floating-chat-widget');
+            const content = document.getElementById('floating-chat-content');
+            const toggleIcon = document.getElementById('floating-chat-toggle-icon');
+
+            messagingSystem.floatingChat.isMinimized = !messagingSystem.floatingChat.isMinimized;
+
+            if (messagingSystem.floatingChat.isMinimized) {
+                widget.classList.add('minimized');
+                content.style.display = 'none';
+                toggleIcon.className = 'fas fa-plus';
+            } else {
+                widget.classList.remove('minimized');
+                content.style.display = 'flex';
+                toggleIcon.className = 'fas fa-minus';
+                loadFloatingChatMessages();
+                scrollFloatingChatToBottom();
+            }
+        }
+
+        function closeFloatingChat() {
+            messagingSystem.floatingChat.isVisible = false;
+            document.getElementById('floating-chat-widget').style.display = 'none';
+        }
+
+        function openFloatingChat() {
+            messagingSystem.floatingChat.isVisible = true;
+            messagingSystem.floatingChat.isMinimized = false;
+            const widget = document.getElementById('floating-chat-widget');
+            widget.style.display = 'flex';
+            widget.classList.remove('minimized');
+            document.getElementById('floating-chat-content').style.display = 'flex';
+            document.getElementById('floating-chat-toggle-icon').className = 'fas fa-minus';
+
+            loadFloatingChatMessages();
+            scrollFloatingChatToBottom();
+
+            // Clear notification badge
+            messagingSystem.floatingChat.unreadCount = 0;
+            updateFloatingChatBadge();
+        }
+
+        function selectFloatingChatContact(contactId) {
+            // Update active contact
+            document.querySelectorAll('.floating-chat-contact').forEach(contact => {
+                contact.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            messagingSystem.floatingChat.currentContact = contactId;
+
+            // Update chat title
+            const contact = messagingSystem.floatingChat.contacts[contactId];
+            if (contact) {
+                document.getElementById('floating-chat-title').textContent = contact.name;
+            }
+
+            // Load messages
+            loadFloatingChatMessages();
+
+            // Focus on input
+            document.getElementById('floating-chat-input').focus();
+
+            // Clear notification badge for this contact
+            messagingSystem.floatingChat.unreadCount = 0;
+            updateFloatingChatBadge();
+        }
+
+        function loadFloatingChatMessages() {
+            const messagesContainer = document.getElementById('floating-chat-messages');
+            messagesContainer.innerHTML = '';
+
+            const contactId = messagingSystem.floatingChat.currentContact;
+            const contact = messagingSystem.floatingChat.contacts[contactId];
+
+            if (!contact || !contact.messages) return;
+
+            contact.messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `floating-chat-message ${msg.type}`;
+                messageDiv.innerHTML = `
+                    ${msg.text}
+                    <div class="floating-chat-time">${msg.time} ${msg.sender ? '• ' + msg.sender : ''}</div>
+                `;
+                messagesContainer.appendChild(messageDiv);
+            });
+
+            scrollFloatingChatToBottom();
+        }
+
+        function addFloatingChatMessage(text, type, time = null, sender = null) {
+            const contactId = messagingSystem.floatingChat.currentContact;
+            const contact = messagingSystem.floatingChat.contacts[contactId];
+
+            if (!contact) return;
+
+            const now = new Date();
+            const timeString = time || now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+
+            contact.messages.push({
+                text: text,
+                type: type,
+                time: timeString,
+                sender: sender
+            });
+
+            if (messagingSystem.floatingChat.currentContact === contactId && !messagingSystem.floatingChat.isMinimized) {
+                loadFloatingChatMessages();
+            }
+        }
+
+        function sendFloatingChatMessage() {
+            const input = document.getElementById('floating-chat-input');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            const contactId = messagingSystem.floatingChat.currentContact;
+
+            if (contactId === 'yourself') {
+                // Save as note to self
+                addFloatingChatMessage(text, 'sent');
+
+                // Save to messages system
+                const selfMessage = {
+                    id: 'self-' + Date.now(),
+                    type: 'self',
+                    unread: false,
+                    sender: 'Yourself',
+                    subject: 'Quick Note',
+                    content: text,
+                    preview: text.substring(0, 100),
+                    time: new Date().toLocaleTimeString(),
+                    category: 'note'
+                };
+
+                messagingSystem.messages.self.unshift(selfMessage);
+                messagingSystem.messages.inbox.unshift(selfMessage);
+
+                showNotification('Note saved!', 'success');
+            } else {
+                // Send to another user
+                const success = sendChatMessageToServer(text, contactId);
+
+                if (success) {
+                    addFloatingChatMessage(text, 'sent');
+                    showNotification('Message sent!', 'success');
+
+                    // Save to sent messages
+                    const contact = messagingSystem.floatingChat.contacts[contactId];
+                    const userMessage = {
+                        id: 'user-' + Date.now(),
+                        type: 'user',
+                        unread: false,
+                        sender: djangoUser.username,
+                        recipient: contactId,
+                        recipientName: contact.name,
+                        subject: `Chat with ${contact.name}`,
+                        content: text,
+                        preview: text.substring(0, 100),
+                        time: new Date().toLocaleTimeString(),
+                        category: 'chat'
+                    };
+
+                    messagingSystem.messages.sent.unshift(userMessage);
+                } else {
+                    showNotification('Failed to send message', 'error');
+                }
+            }
+
+            input.value = '';
+            scrollFloatingChatToBottom();
+            updateStats();
+        }
+
+        function handleFloatingChatKeypress(event) {
+            if (event.key === 'Enter') {
+                sendFloatingChatMessage();
+            }
+        }
+
+        function scrollFloatingChatToBottom() {
+            const messagesContainer = document.getElementById('floating-chat-messages');
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        function updateFloatingChatBadge() {
+            const badge = document.getElementById('floating-chat-notification-badge');
+            if (messagingSystem.floatingChat.unreadCount > 0) {
+                badge.textContent = messagingSystem.floatingChat.unreadCount;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // NOTIFICATION FUNCTIONS
+        function showBroadcastNotification(title, message, sender) {
+            const notification = document.createElement('div');
+            notification.className = 'notification-popup broadcast';
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <div class="notification-title">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Broadcast: ${sender || 'System'}</span>
+                    </div>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="notification-body">
+                    <h6 class="mb-2">${title}</h6>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 10000);
+        }
+
+        function showChatNotification(sender, message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification-popup support';
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <div class="notification-title">
+                        <i class="fas fa-comment"></i>
+                        <span>New Message: ${sender}</span>
+                    </div>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="notification-body">
+                    <div class="notification-message">${message.substring(0, 100)}${message.length > 100 ? '...' : ''}</div>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 8 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 8000);
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                max-width: 400px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                border: none;
+                border-radius: 10px;
+            `;
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle'} me-2" style="font-size: 1.2rem;"></i>
+                    <div style="flex: 1;">
+                        <strong class="d-block mb-1">${type === 'success' ? 'Success!' : type === 'warning' ? 'Warning!' : type === 'error' ? 'Error!' : 'Info!'}</strong>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 0.8rem;"></button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        function showAdminNotification(data) {
+            const notification = document.createElement('div');
+            notification.className = 'notification-popup admin';
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <div class="notification-title">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin Alert</span>
+                    </div>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="notification-body">
+                    <h6 class="mb-2">${data.title || 'Admin Notification'}</h6>
+                    <div class="notification-message">${data.message}</div>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 8000);
+        }
+
+        function showSystemAlert(data) {
+            const notification = document.createElement('div');
+            notification.className = 'notification-popup warning';
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <div class="notification-title">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>System Alert</span>
+                    </div>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="notification-body">
+                    <h6 class="mb-2">${data.title || 'System Alert'}</h6>
+                    <div class="notification-message">${data.message}</div>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 8000);
+        }
+
+        function setupEventListeners() {
+            // Floating chat input
+            const floatingChatInput = document.getElementById('floating-chat-input');
+            floatingChatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendFloatingChatMessage();
+                }
+            });
+        }
+
+        function initializeMessagingSystem() {
+            const sampleMessages = [
+                {
+                    id: 'chat-1',
+                    type: 'chat',
+                    unread: false,
+                    sender: 'Quick Chat',
+                    subject: 'EUR/USD Trading Discussion',
+                    preview: 'Got it. The resistance at 1.0850 is holding strong. Looking for breakout above 1.0900 today...',
+                    time: 'Today, 10:40 AM',
+                    category: 'trading'
+                },
+                {
+                    id: 'user-1',
+                    type: 'user',
+                    unread: true,
+                    sender: 'Maria Rodriguez',
+                    subject: 'Trading Strategy Inquiry',
+                    preview: 'Hi! I noticed you\'re good with technical analysis. Could you share your thoughts on the current EUR/GBP setup...',
+                    time: 'Today, 9:30 AM',
+                    category: 'trading',
+                    senderId: 'user-456'
+                },
+                {
+                    id: 'self-1',
+                    type: 'self',
+                    unread: false,
+                    sender: 'Yourself',
+                    subject: 'Trading Strategy Notes',
+                    preview: 'Remember to analyze EUR/USD performance...',
+                    time: 'Today, 9:00 AM',
+                    category: 'trading'
+                }
+            ];
+
+            messagingSystem.messages.inbox = sampleMessages;
+
+            if (messagingSystem.currentUser.isStaff || messagingSystem.currentUser.isSuperuser) {
+                messagingSystem.messages.inbox.unshift(
+                    {
+                        id: 'broadcast-1',
+                        type: 'broadcast',
+                        unread: true,
+                        sender: 'System Administrator',
+                        subject: 'Platform Upgrade Scheduled',
+                        preview: 'Important announcement about platform upgrade...',
+                        time: '2 days ago',
+                        category: 'announcement'
+                    }
+                );
+                messagingSystem.messages.broadcasts = [
+                    {
+                        id: 'broadcast-1',
+                        subject: 'Platform Upgrade Scheduled',
+                        content: 'Important announcement about platform upgrade...',
+                        time: '2 days ago',
+                        type: 'announcement',
+                        priority: 'high'
+                    }
+                ];
+            }
+
+            messagingSystem.messages.inbox.push(
+                {
+                    id: 'admin-1',
+                    type: 'admin',
+                    unread: false,
+                    sender: 'Support Team',
+                    subject: 'Your Account Has Been Verified',
+                    preview: 'Hello! We\'re pleased to inform you...',
+                    time: '3 days ago',
+                    category: 'account'
+                }
+            );
+
+            messagingSystem.messages.users = [
+                {
+                    id: 'user-1',
+                    type: 'user',
+                    unread: true,
+                    sender: 'Maria Rodriguez',
+                    subject: 'Trading Strategy Inquiry',
+                    content: 'Hi! I noticed you\'re good with technical analysis. Could you share your thoughts on the current EUR/GBP setup? The 0.8600 level seems to be holding...',
+                    preview: 'Hi! I noticed you\'re good with technical analysis...',
+                    time: 'Today, 9:30 AM',
+                    category: 'trading',
+                    senderId: 'user-456'
+                }
+            ];
+
+            messagingSystem.messages.self = [
+                {
+                    id: 'self-1',
+                    subject: 'Trading Strategy Notes',
+                    content: 'Remember to analyze EUR/USD performance from yesterday. The resistance at 1.0850 held strong. Consider setting alerts for breakout above 1.0900...',
+                    time: 'Today, 9:00 AM',
+                    category: 'trading'
+                }
+            ];
+
+            messagingSystem.messages.chats = [
+                {
+                    id: 'chat-1',
+                    type: 'chat',
+                    sender: 'Quick Chat',
+                    subject: 'EUR/USD Trading Discussion',
+                    content: 'Got it. The resistance at 1.0850 is holding strong. Looking for breakout above 1.0900 today. Setting alerts now. Also check GBP/JPY volatility.',
+                    time: 'Today, 10:40 AM',
+                    category: 'trading'
+                }
+            ];
+
+            updateStats();
+        }
+
+        function updateUserUI() {
+            const user = messagingSystem.currentUser;
+
+            // Update user role badge
+            const roleBadge = document.getElementById('user-role-badge');
+            let roleText = 'User';
+            let roleClass = 'role-user';
+
+            if (user.isSuperuser) {
+                roleText = 'Super Admin';
+                roleClass = 'role-admin';
+            } else if (user.isStaff) {
+                roleText = 'Admin';
+                roleClass = 'role-admin';
+            } else if (user.isPremium) {
+                roleText = 'Premium';
+                roleClass = 'role-premium';
+            }
+
+            roleBadge.textContent = roleText;
+            roleBadge.className = `role-badge ${roleClass}`;
+
+            // Update user avatar
+            const userAvatar = document.getElementById('user-avatar');
+            if (user.isSuperuser || user.isStaff) {
+                userAvatar.classList.add('admin');
+            } else if (user.isPremium) {
+                userAvatar.classList.add('premium');
+            }
+
+            // Update welcome section
+            const welcomeSection = document.getElementById('welcome-section');
+            const welcomeTitle = document.getElementById('welcome-title');
+            const welcomeDescription = document.getElementById('welcome-description');
+
+            if (user.isSuperuser || user.isStaff) {
+                welcomeSection.classList.add('admin');
+                welcomeTitle.textContent = 'Admin Messaging Hub';
+                welcomeDescription.textContent = 'Manage broadcasts, user messages, and platform communications.';
+            } else if (user.isPremium) {
+                welcomeSection.classList.add('premium');
+                welcomeTitle.textContent = 'Premium Messaging Hub';
+                welcomeDescription.textContent = 'Connect with traders, share insights, and receive priority support.';
+            } else {
+                welcomeTitle.textContent = 'Community Messaging Hub';
+                welcomeDescription.textContent = 'Connect with other traders, share insights, and grow together.';
+            }
+
+            // Show/hide admin controls
+            const adminModeBtn = document.getElementById('admin-mode-btn');
+            const broadcastBtn = document.getElementById('broadcast-btn');
+            const adminQuickActions = document.getElementById('admin-quick-actions');
+
+            if (user.isStaff || user.isSuperuser) {
+                adminModeBtn.style.display = 'inline-block';
+                broadcastBtn.style.display = 'inline-block';
+                if (adminQuickActions) adminQuickActions.style.display = 'block';
+            } else {
+                adminModeBtn.style.display = 'none';
+                broadcastBtn.style.display = 'none';
+                if (adminQuickActions) adminQuickActions.style.display = 'none';
+            }
+        }
+
+        // All the original messaging functions remain the same...
+        function toggleAdminMode() {
+            if (!messagingSystem.currentUser.isStaff && !messagingSystem.currentUser.isSuperuser) {
+                showNotification('Admin mode requires staff privileges', 'warning');
+                return;
+            }
+
+            messagingSystem.adminMode = !messagingSystem.adminMode;
+
+            const adminControls = document.getElementById('admin-controls');
+            const broadcastBtn = document.getElementById('broadcast-btn');
+            const adminQuickActions = document.getElementById('admin-quick-actions');
+            const composeBtn = document.getElementById('compose-btn');
+            const adminModeBtn = document.getElementById('admin-mode-btn');
+
+            if (messagingSystem.adminMode) {
+                adminControls.classList.add('show');
+                broadcastBtn.style.display = 'inline-block';
+                if (adminQuickActions) adminQuickActions.style.display = 'block';
+                composeBtn.classList.add('admin');
+                adminModeBtn.innerHTML = '<i class="fas fa-user me-2"></i>User Mode';
+                adminModeBtn.classList.remove('btn-outline-warning');
+                adminModeBtn.classList.add('btn-warning');
+                showNotification('Admin mode activated', 'success');
+            } else {
+                adminControls.classList.remove('show');
+                broadcastBtn.style.display = 'none';
+                if (adminQuickActions) adminQuickActions.style.display = 'none';
+                composeBtn.classList.remove('admin');
+                adminModeBtn.innerHTML = '<i class="fas fa-user-shield me-2"></i>Admin Mode';
+                adminModeBtn.classList.remove('btn-warning');
+                adminModeBtn.classList.add('btn-outline-warning');
+                showNotification('Admin mode deactivated', 'info');
+            }
+        }
+
+        function loadMessages() {
+            const messagesList = document.getElementById('messages-list');
+            messagesList.innerHTML = '';
+
+            const currentMessages = messagingSystem.messages[messagingSystem.currentFolder] || [];
+
+            if (currentMessages.length === 0) {
+                document.getElementById('empty-state').classList.remove('d-none');
+                return;
+            }
+
+            document.getElementById('empty-state').classList.add('d-none');
+
+            currentMessages.forEach((msg, index) => {
+                const messageCard = createMessageCard(msg, index);
+                messagesList.appendChild(messageCard);
+            });
+
+            updateFolderTitle();
+        }
+
+        function createMessageCard(message, index) {
+            const card = document.createElement('div');
+            const cardClass = `message-card ${message.type === 'broadcast' ? 'broadcast-message' : message.type === 'admin' ? 'admin-message' : message.type === 'self' ? 'self-message' : message.type === 'chat' ? 'chat-message' : message.type === 'user' ? 'user-message' : ''} ${message.unread ? 'unread' : ''}`;
+            card.className = cardClass;
+            card.setAttribute('data-message-id', message.id);
+            card.style.animation = `slideIn ${0.4 + (index * 0.1)}s ease`;
+
+            const isBroadcast = message.type === 'broadcast';
+            const isSelf = message.type === 'self';
+            const isAdmin = message.type === 'admin';
+            const isChat = message.type === 'chat';
+            const isUserMessage = message.type === 'user';
+
+            let avatarIcon = 'fas fa-user';
+            if (isBroadcast) avatarIcon = 'fas fa-bullhorn';
+            else if (isAdmin) avatarIcon = 'fas fa-headset';
+            else if (isChat) avatarIcon = 'fas fa-comments';
+            else if (isSelf) avatarIcon = 'fas fa-user-circle';
+            else if (isUserMessage) avatarIcon = 'fas fa-user-friends';
+
+            card.innerHTML = `
+                <div class="message-header">
+                    <div class="sender-info">
+                        <div class="sender-avatar ${isBroadcast ? 'broadcast' : isAdmin ? 'admin' : isSelf ? 'self' : isChat ? 'chat' : isUserMessage ? 'user' : ''}">
+                            ${isUserMessage && message.sender ? message.sender.charAt(0).toUpperCase() : `<i class="${avatarIcon}"></i>`}
+                        </div>
+                        <div class="sender-details">
+                            <h5>${message.sender || 'Unknown'}
+                                ${isBroadcast ? '<span class="broadcast-badge">BROADCAST</span>' : ''}
+                                ${isAdmin ? '<span class="admin-badge">SUPPORT</span>' : ''}
+                                ${isSelf ? '<span class="self-badge">SELF</span>' : ''}
+                                ${isChat ? '<span class="chat-badge">QUICK CHAT</span>' : ''}
+                                ${isUserMessage ? '<span class="user-badge">USER</span>' : ''}
+                            </h5>
+                            <p>${isBroadcast ? 'Platform Announcement' : isAdmin ? 'Customer Support' : isChat ? 'Quick Chat' : isSelf ? 'Self Message' : isUserMessage ? 'Community Member' : 'Message'}</p>
+                        </div>
+                    </div>
+                    <div class="message-time">
+                        <i class="far fa-clock me-1"></i>${message.time}
+                        ${message.category === 'trading' ? '<i class="fas fa-chart-line ms-2 text-success"></i>' : ''}
+                    </div>
+                </div>
+                <div class="message-content">
+                    <h4>${message.subject || 'No Subject'}</h4>
+                    <div class="message-preview">
+                        ${message.preview || message.content || 'No content available'}
+                    </div>
+                </div>
+                <div class="message-actions">
+                    ${isBroadcast ? `
+                        ${messagingSystem.currentUser.isStaff || messagingSystem.currentUser.isSuperuser ? `
+                            <button class="action-btn btn-reply" onclick="replyToBroadcast('${message.id}')">
+                                <i class="fas fa-reply"></i>Reply
+                            </button>
+                            <button class="action-btn btn-broadcast" onclick="editBroadcast('${message.id}')">
+                                <i class="fas fa-edit"></i>Edit
+                            </button>
+                        ` : `
+                            <button class="action-btn btn-reply" onclick="replyToAdmin('${message.id}')">
+                                <i class="fas fa-reply"></i>Reply to Admin
+                            </button>
+                        `}
+                    ` : isSelf || isChat ? `
+                        <button class="action-btn btn-quick-chat" onclick="openFloatingChat()">
+                            <i class="fas fa-comment-dots"></i>${isChat ? 'Continue Chat' : 'Edit Note'}
+                        </button>
+                    ` : isUserMessage ? `
+                        <button class="action-btn btn-reply" onclick="replyToUser('${message.id}')">
+                            <i class="fas fa-reply"></i>Reply
+                        </button>
+                        <button class="action-btn btn-forward" onclick="forwardMessage('${message.id}')">
+                            <i class="fas fa-share"></i>Share
+                        </button>
+                    ` : `
+                        <button class="action-btn btn-reply" onclick="replyToMessage('${message.id}')">
+                            <i class="fas fa-reply"></i>Reply
+                        </button>
+                    `}
+                    <button class="action-btn btn-forward" onclick="forwardMessage('${message.id}')">
+                        <i class="fas fa-share"></i>${isSelf || isChat ? 'Share' : 'Forward'}
+                    </button>
+                    ${!isBroadcast && !isAdmin ? `
+                        <button class="action-btn btn-save-note" onclick="saveAsNote('${message.id}')">
+                            <i class="fas fa-sticky-note"></i>Save Note
+                        </button>
+                        <button class="action-btn btn-delete" onclick="deleteMessage('${message.id}')">
+                            <i class="fas fa-trash"></i>Delete
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+
+            card.addEventListener('click', function(e) {
+                if (!e.target.closest('.message-actions')) {
+                    viewMessage(message.id);
+                }
+            });
+
+            return card;
+        }
+
+        function composeNewMessage() {
+            document.getElementById('composeModalLabel').textContent = 'Compose New Message';
+            document.getElementById('recipient-select').value = '';
+            document.getElementById('subject-input').value = '';
+            document.getElementById('message-input').value = '';
+            document.getElementById('category-select').value = 'general';
+            document.getElementById('user-select-container').style.display = 'none';
+
+            const broadcastWarning = document.getElementById('broadcast-warning');
+            if (broadcastWarning) {
+                broadcastWarning.style.display = 'none';
+            }
+
+            const userSelect = document.getElementById('user-select');
+            if (userSelect) {
+                userSelect.innerHTML = '<option value="">Choose a user...</option>';
+                djangoUsers.forEach(user => {
+                    if (user.id !== djangoUser.id) {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = `${user.username} ${user.firstName ? `(${user.firstName})` : ''}`;
+                        userSelect.appendChild(option);
+                    }
+                });
+            }
+
+            const composeModal = new bootstrap.Modal(document.getElementById('composeModal'));
+            composeModal.show();
+        }
+
+        function sendMessage() {
+            const recipient = document.getElementById('recipient-select').value;
+            const subject = document.getElementById('subject-input').value;
+            const message = document.getElementById('message-input').value;
+            const category = document.getElementById('category-select').value;
+            const specificUser = document.getElementById('user-select') ? document.getElementById('user-select').value : '';
+
+            if (!recipient || !subject || !message) {
+                showNotification('Please fill all required fields', 'warning');
+                return;
+            }
+
+            if (recipient === 'broadcast') {
+                if (!messagingSystem.currentUser.isStaff && !messagingSystem.currentUser.isSuperuser) {
+                    showNotification('Only administrators can send broadcasts', 'error');
+                    return;
+                }
+
+                const priority = 'normal';
+                const broadcastType = 'announcement';
+                const success = sendBroadcastMessageToServer(subject, message, priority, broadcastType);
+
+                if (success) {
+                    showNotification('Broadcast sent successfully!', 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('composeModal')).hide();
+                }
+            } else if (recipient === 'user' && specificUser) {
+                const selectedUser = djangoUsers.find(u => u.id === specificUser);
+                if (!selectedUser) {
+                    showNotification('Selected user not found', 'error');
+                    return;
+                }
+
+                const success = sendChatMessageToServer(message, specificUser);
+
+                if (success) {
+                    // Save to sent messages
+                    const userMessage = {
+                        id: 'user-' + Date.now(),
+                        type: 'user',
+                        unread: false,
+                        sender: messagingSystem.currentUser.username,
+                        recipient: selectedUser.id,
+                        recipientName: selectedUser.username,
+                        subject: subject,
+                        content: message,
+                        preview: message.substring(0, 150) + '...',
+                        time: 'Just now',
+                        category: category
+                    };
+
+                    messagingSystem.messages.sent.unshift(userMessage);
+                    showNotification(`Message sent to ${selectedUser.username}!`, 'success');
+                    bootstrap.Modal.getInstance(document.getElementById('composeModal')).hide();
+                }
+            } else if (recipient === 'self') {
+                const newNote = {
+                    id: 'self-' + Date.now(),
+                    type: 'self',
+                    unread: false,
+                    sender: 'Yourself',
+                    subject: subject,
+                    content: message,
+                    preview: message.substring(0, 150) + '...',
+                    time: 'Just now',
+                    category: category
+                };
+
+                messagingSystem.messages.self.unshift(newNote);
+                messagingSystem.messages.inbox.unshift(newNote);
+
+                showNotification('Note to self saved successfully!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('composeModal')).hide();
+            } else if (recipient === 'admin') {
+                const adminMessage = {
+                    id: 'admin-' + Date.now(),
+                    type: 'admin',
+                    unread: false,
+                    sender: messagingSystem.currentUser.username,
+                    subject: subject,
+                    content: message,
+                    preview: message.substring(0, 150) + '...',
+                    time: 'Just now',
+                    category: category
+                };
+
+                messagingSystem.messages.sent.unshift(adminMessage);
+                showNotification('Message sent to support team!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('composeModal')).hide();
+            } else if (recipient === 'quicknote') {
+                const newNote = {
+                    id: 'note-' + Date.now(),
+                    type: 'self',
+                    unread: false,
+                    sender: 'Quick Note',
+                    subject: subject,
+                    content: message,
+                    preview: message.substring(0, 150) + '...',
+                    time: 'Just now',
+                    category: category
+                };
+
+                messagingSystem.messages.notes.unshift(newNote);
+                messagingSystem.messages.self.unshift(newNote);
+                messagingSystem.messages.inbox.unshift(newNote);
+
+                showNotification('Quick note saved successfully!', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('composeModal')).hide();
+            }
+
+            updateStats();
+            loadMessages();
+        }
+
+        function openBroadcastModal() {
+            if (!messagingSystem.currentUser.isStaff && !messagingSystem.currentUser.isSuperuser) {
+                showNotification('Admin privileges required for broadcasting', 'warning');
+                return;
+            }
+
+            document.getElementById('broadcast-subject').value = '';
+            document.getElementById('broadcast-message').value = '';
+            document.getElementById('broadcast-type').value = 'announcement';
+            document.querySelector('input[name="broadcast-priority"][value="normal"]').checked = true;
+
+            const broadcastModal = new bootstrap.Modal(document.getElementById('broadcastModal'));
+            broadcastModal.show();
+        }
+
+        function sendBroadcast() {
+            if (!messagingSystem.currentUser.isStaff && !messagingSystem.currentUser.isSuperuser) {
+                showNotification('Admin privileges required', 'error');
+                return;
+            }
+
+            const type = document.getElementById('broadcast-type').value;
+            const subject = document.getElementById('broadcast-subject').value;
+            const message = document.getElementById('broadcast-message').value;
+            const priority = document.querySelector('input[name="broadcast-priority"]:checked').value;
+
+            if (!subject || !message) {
+                showNotification('Please fill all required fields', 'warning');
+                return;
+            }
+
+            const success = sendBroadcastMessageToServer(subject, message, priority, type);
+
+            if (success) {
+                // Add to local messages
+                const broadcast = {
+                    id: 'broadcast-' + Date.now(),
+                    type: 'broadcast',
+                    unread: true,
+                    sender: 'System Administrator',
+                    subject: subject,
+                    content: message,
+                    preview: message.substring(0, 150) + '...',
+                    time: 'Just now',
+                    priority: priority,
+                    broadcastType: type
+                };
+
+                messagingSystem.messages.broadcasts.unshift(broadcast);
+                messagingSystem.messages.inbox.unshift(broadcast);
+
+                showNotification(`Broadcast sent successfully to all users!`, 'success');
+                bootstrap.Modal.getInstance(document.getElementById('broadcastModal')).hide();
+
+                updateStats();
+
+                if (messagingSystem.currentFolder === 'broadcasts' || messagingSystem.currentFolder === 'inbox') {
+                    loadMessages();
+                }
+            }
+        }
+
+        function loadFolder(folder) {
+            messagingSystem.currentFolder = folder;
+            loadMessages();
+            updateFolderTitle();
+            updateActiveNavLink(folder);
+        }
+
+        function updateFolderTitle() {
+            const folderTitles = {
+                'inbox': 'Recent Messages',
+                'sent': 'Sent Messages',
+                'broadcasts': 'Broadcasts',
+                'admin': 'Support Messages',
+                'users': 'User Messages',
+                'self': 'Self Messages',
+                'notes': 'Quick Notes',
+                'chats': 'Quick Chats',
+                'starred': 'Starred Messages',
+                'trash': 'Trash'
+            };
+            document.getElementById('folder-title').textContent = folderTitles[messagingSystem.currentFolder] || 'Messages';
+        }
+
+        function updateActiveNavLink(folder) {
+            document.querySelectorAll('.nav-link-custom').forEach(link => {
+                link.classList.remove('active');
+                const linkText = link.querySelector('span').textContent.toLowerCase();
+                if (linkText.includes(folder) || (folder === 'inbox' && linkText === 'inbox')) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        function replyToUser(messageId) {
+            const message = findMessageById(messageId);
+            if (message) {
+                composeNewMessage();
+                document.getElementById('recipient-select').value = 'user';
+                document.getElementById('subject-input').value = `Re: ${message.subject}`;
+                if (message.senderId) {
+                    const userSelect = document.getElementById('user-select');
+                    const userOption = Array.from(userSelect.options).find(opt => opt.value === message.senderId);
+                    if (userOption) {
+                        userSelect.value = message.senderId;
+                        document.getElementById('user-select-container').style.display = 'block';
+                    }
+                }
+            }
+        }
+
+        function replyToBroadcast(messageId) {
+            const message = findMessageById(messageId);
+            if (message) {
+                composeNewMessage();
+                document.getElementById('recipient-select').value = 'admin';
+                document.getElementById('subject-input').value = `Re: ${message.subject}`;
+            }
+        }
+
+        function replyToSelf(messageId) {
+            const message = findMessageById(messageId);
+            if (message) {
+                composeNewMessage();
+                document.getElementById('recipient-select').value = 'self';
+                document.getElementById('subject-input').value = `Update: ${message.subject}`;
+                document.getElementById('message-input').value = `Previous note: ${message.content}\n\nUpdate: `;
+            }
+        }
+
+        function editBroadcast(messageId) {
+            if (!messagingSystem.currentUser.isStaff && !messagingSystem.currentUser.isSuperuser) {
+                showNotification('Only administrators can edit broadcasts', 'error');
+                return;
+            }
+
+            const message = findMessageById(messageId);
+            if (message) {
+                openBroadcastModal();
+                setTimeout(() => {
+                    document.getElementById('broadcast-subject').value = message.subject;
+                    document.getElementById('broadcast-message').value = message.content;
+                    document.getElementById('broadcast-type').value = message.broadcastType || 'announcement';
+                    if (message.priority) {
+                        const priorityRadio = document.querySelector(`input[name="broadcast-priority"][value="${message.priority}"]`);
+                        if (priorityRadio) {
+                            priorityRadio.checked = true;
+                        }
+                    }
+                }, 500);
+            }
+        }
+
+        function forwardMessage(messageId) {
+            const message = findMessageById(messageId);
+            if (message) {
+                composeNewMessage();
+                document.getElementById('subject-input').value = `Fwd: ${message.subject}`;
+                document.getElementById('message-input').value = `\n\n--- Forwarded Message ---\nFrom: ${message.sender}\nSubject: ${message.subject}\n\n${message.content || message.preview}`;
+            }
+        }
+
+        function saveAsNote(messageId) {
+            const message = findMessageById(messageId);
+            if (message) {
+                const note = {
+                    ...message,
+                    id: 'note-' + Date.now(),
+                    type: 'self',
+                    sender: 'Quick Note',
+                    time: 'Just now (saved)'
+                };
+
+                messagingSystem.messages.notes.push(note);
+                messagingSystem.messages.self.push(note);
+
+                showNotification('Message saved as personal note', 'success');
+                updateStats();
+            }
+        }
+
+        function deleteMessage(messageId) {
+            if (confirm('Are you sure you want to delete this message?')) {
+                const message = findMessageById(messageId);
+                if (message) {
+                    messagingSystem.messages.trash.push(message);
+
+                    const folder = messagingSystem.currentFolder;
+                    const index = messagingSystem.messages[folder].findIndex(m => m.id === messageId);
+                    if (index > -1) {
+                        messagingSystem.messages[folder].splice(index, 1);
+                    }
+
+                    showNotification('Message moved to trash', 'warning');
+                    loadMessages();
+                    updateStats();
+                }
+            }
+        }
+
+        function viewMessage(messageId) {
+            const message = findMessageById(messageId);
+            if (message && message.unread) {
+                message.unread = false;
+                updateStats();
+                loadMessages();
+            }
+        }
+
+        function markAllAsRead() {
+            for (const folder in messagingSystem.messages) {
+                messagingSystem.messages[folder].forEach(msg => {
+                    msg.unread = false;
+                });
+            }
+            showNotification('All messages marked as read', 'success');
+            loadMessages();
+            updateStats();
+        }
+
+        function refreshMessages() {
+            showNotification('Checking for new messages...', 'info');
+
+            const newUserMessage = {
+                id: 'user-new-' + Date.now(),
+                type: 'user',
+                unread: true,
+                sender: 'John Trader',
+                subject: 'Trading Idea - GBP/USD',
+                content: 'Hey, have you seen the GBP/USD setup? The 1.2500 level looks like strong support...',
+                preview: 'Hey, have you seen the GBP/USD setup? The 1.2500 level looks like strong support...',
+                time: 'Just now',
+                category: 'trading',
+                senderId: 'user-789'
+            };
+
+            messagingSystem.messages.inbox.unshift(newUserMessage);
+            messagingSystem.messages.users.unshift(newUserMessage);
+
+            showNotification('New message received!', 'info');
+            loadMessages();
+            updateStats();
+        }
+
+        function filterMessages() {
+            showNotification('Filter options will be implemented soon', 'info');
+        }
+
+        function sortMessages() {
+            showNotification('Sort options will be implemented soon', 'info');
+        }
+
+        function findMessageById(messageId) {
+            for (const folder in messagingSystem.messages) {
+                const message = messagingSystem.messages[folder].find(m => m.id === messageId);
+                if (message) return message;
+            }
+            return null;
+        }
+
+        function updateStats() {
+            const totalMessages = Object.values(messagingSystem.messages).reduce((sum, folder) => sum + folder.length, 0);
+            const unreadCount = messagingSystem.messages.inbox.filter(m => m.unread).length;
+            const selfCount = messagingSystem.messages.self.length;
+            const chatsCount = messagingSystem.messages.chats.length;
+            const usersCount = messagingSystem.messages.users.length;
+
+            document.getElementById('total-messages').textContent = totalMessages;
+            document.getElementById('unread-count').textContent = unreadCount;
+            document.getElementById('self-messages-count').textContent = selfCount;
+            document.getElementById('quick-chats-count').textContent = chatsCount;
+
+            document.getElementById('inbox-count').textContent = unreadCount;
+            document.getElementById('self-count').textContent = selfCount;
+            document.getElementById('chat-count').textContent = chatsCount;
+            document.getElementById('user-message-count').textContent = usersCount;
+
+            if (messagingSystem.currentUser.isStaff || messagingSystem.currentUser.isSuperuser) {
+                document.getElementById('broadcast-count').textContent = messagingSystem.messages.broadcasts.length;
+            }
+
+            document.getElementById('admin-message-count').textContent = messagingSystem.messages.admin.length;
+
+            document.getElementById('inbox-count').classList.toggle('unread', unreadCount > 0);
+        }
+
+        function simulateInitialData() {
+            setTimeout(() => {
+                const sampleMessage = {
+                    id: 'user-welcome-' + Date.now(),
+                    type: 'user',
+                    unread: true,
+                    sender: 'Community Bot',
+                    subject: 'Welcome to Trading Community!',
+                    content: 'Welcome to our trading community! Feel free to connect with other traders, share ideas, and learn together.',
+                    preview: 'Welcome to our trading community! Feel free to connect with other traders...',
+                    time: 'Just now',
+                    category: 'community',
+                    senderId: 'bot-001'
+                };
+
+                messagingSystem.messages.inbox.unshift(sampleMessage);
+                messagingSystem.messages.users.unshift(sampleMessage);
+
+                updateStats();
+
+                if (messagingSystem.currentFolder === 'inbox' || messagingSystem.currentFolder === 'users') {
+                    loadMessages();
+                }
+
+                showNotification('Welcome to the trading community!', 'info');
+            }, 2000);
+        }
+
+        function messageToSelf() {
+            composeNewMessage();
+            document.getElementById('recipient-select').value = 'self';
+            document.getElementById('subject-input').value = 'Note to Self - ' + new Date().toLocaleDateString();
+            document.getElementById('category-select').value = 'personal';
+        }
+
+        function openSupportChat() {
+            composeNewMessage();
+            document.getElementById('recipient-select').value = 'admin';
+            document.getElementById('subject-input').value = 'Support Request';
+            document.getElementById('category-select').value = 'technical';
+        }
+
+        function openQuickNote() {
+            const note = prompt('Enter your quick note:');
+            if (note) {
+                const newNote = {
+                    id: 'note-' + Date.now(),
+                    type: 'self',
+                    unread: false,
+                    sender: 'Quick Note',
+                    subject: 'Quick Note: ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                    content: note,
+                    preview: note.substring(0, 100) + (note.length > 100 ? '...' : ''),
+                    time: 'Just now',
+                    category: 'quick'
+                };
+
+                messagingSystem.messages.notes.unshift(newNote);
+                messagingSystem.messages.inbox.unshift(newNote);
+
+                showNotification('Quick note saved!', 'success');
+                updateStats();
+
+                if (messagingSystem.currentFolder === 'notes' || messagingSystem.currentFolder === 'inbox') {
+                    loadMessages();
+                }
+            }
+        }
+
+        function openNotificationModal() {
+            if (!messagingSystem.currentUser.isStaff && !messagingSystem.currentUser.isSuperuser) {
+                showNotification('Admin privileges required', 'error');
+                return;
+            }
+            showNotification('Notification system will be implemented soon', 'info');
+        }
+
+        function saveAsDraft() {
+            showNotification('Draft saved successfully', 'info');
+            bootstrap.Modal.getInstance(document.getElementById('composeModal')).hide();
+        }
+
+        function toggleRecipientOptions() {
+            const recipient = document.getElementById('recipient-select').value;
+            const userContainer = document.getElementById('user-select-container');
+            const broadcastWarning = document.getElementById('broadcast-warning');
+
+            userContainer.style.display = recipient === 'user' ? 'block' : 'none';
+
+            if (broadcastWarning) {
+                broadcastWarning.style.display = recipient === 'broadcast' ? 'block' : 'none';
+            }
+
+            const broadcastOption = document.querySelector('#recipient-select option[value="broadcast"]');
+            if (broadcastOption) {
+                broadcastOption.disabled = !(messagingSystem.currentUser.isStaff || messagingSystem.currentUser.isSuperuser);
+            }
+        }
+    </script>
+</body>
+</html>

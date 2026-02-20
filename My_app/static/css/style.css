@@ -1,0 +1,267 @@
+            @import url('https //fonts.googleapis.com/css family=poppins');
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'poppins', sans-serif;
+            }
+            body{
+                background: url(global.jpg) no-repeat;
+                background-attachment: fixed;
+                background-size: cover;
+                background-position: center;
+                display: grid;
+                
+                
+            }            
+            .welcome{
+                background: transparent;
+            }
+            .welcome p{
+                color: #fff;
+                box-sizing: border-box;
+                border: 2px #fff;
+                width:400px;
+                height: 50px;
+                font-size: 24px;
+                font-family: serif;
+                box-shadow: 2px 2px 2px 2px  rgb(23, 234, 241);
+                justify-content: center;
+                align-items: center;
+                
+            }
+            marquee{
+                background: transparent;
+                color: #e28316;
+                font-weight: bolder;
+                font-size: 30px;
+                font-family: serif;
+                margin-left: 60px;
+                margin-right: 60px;
+            }
+            
+            section {
+                position: sticky;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                height: 130vh;
+                background: url(global.jpg) no-repeat;
+                background-attachment: fixed;
+                background-size: cover;
+                background-position: center;
+               /* animation: animateBg 5s linear infinite;*/
+                
+                
+            }
+            
+            @keyframes animateBg {
+                100% {
+                    filter: hue-rotate(360deg);
+                }
+            }
+            
+            .login-box {
+                position: relative;
+                width: 400px;
+                height: 600px;
+                background: transparent;
+                border: 2px solid rgba(255, 255, 255, .5);
+                display: grid;
+                align-items: center;
+                justify-content: center;
+                border-radius: 20px;
+                box-shadow: 2px 2px 2px rgb(131, 241, 5);
+                backdrop-filter: blur(5px);
+            }
+            
+            h2 {
+                font-size: 2em;
+                color: #fff;
+                text-align: center;
+            }
+            
+            .input-box {
+                position: relative;
+                width: 310px;
+                margin: 30px 0;
+                border-bottom: 2px solid #fff;
+            }
+            
+            .input-box label {
+                position: absolute;
+                top: 50%;
+                left: 5px;
+                transform: translateY(-50%);
+                font-size: 1em;
+                color: #fff;
+                pointer-events: none;
+                transition: .5s;
+            }
+            
+            .input-box input:focus~label,
+            .input-box input:valid~label {
+                top: -5px;
+            }
+            
+            .input-box input {
+                width: 100%;
+                 height: 50px;
+                background: transparent;
+                border: none;
+                outline: none;
+                font-size: 1em;
+                color: #fff;
+                padding: 0 35px 0 5px;
+            }
+            
+            .input-box .icon {
+                position: absolute;
+                right: 8px;
+                font-size: 1.2em;
+                line-height: 57px;
+                color: #fff;
+            }
+            .input-box .icon-password {
+                position: absolute;
+                right: 8px;
+                font-size: 0.54em;
+                line-height: 57px;
+                color: #fff;
+            }
+            #passwordStrength {
+                height: 10px;
+                margin-top: 5px;
+                background-color: none;
+                border-radius: 2px;
+                
+            }
+            
+            #passwordStrength .bar {
+                height: 100%;
+                width: 0;
+            }
+            
+            #passwordMatch {
+                color: red;
+                font-size: 24px;
+            }
+            
+            #passwordStrength .very-weak {
+                background-color: red;
+            }
+            
+            #passwordStrength .weak {
+                background-color: orange;
+            }
+            
+            #passwordStrength .average {
+                background-color: yellow;
+            }
+            
+            #passwordStrength .strong {
+                background-color: green;
+            }
+            
+            .terms-conditions {
+                margin: -15px 0 15px;
+                font-size: 15px;
+                color: #fff;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .terms-conditions label input {
+                margin-right: 3px;
+            }
+            
+            .terms-conditions a {
+                color: #07f8f8;
+                text-decoration: none;
+                font-weight: 30px;
+            }
+            
+            .terms-conditions a:hover {
+                text-decoration: overline;
+                color: aquamarine;
+            }
+            
+            button {
+                width: 100%;
+                height: 40px;
+                background: #fff;
+                border: none;
+                outline: none;
+                border-radius: 40px;
+                cursor: pointer;
+                font-size: 1em;
+                color: #000;
+                font-weight: 500;
+                transition: .5s ease-in-out;
+            }
+            button:hover{
+                width:95% ;
+                color: #ffffff;
+                background-color: rgb(6, 168, 168);
+                font-weight: 30px;
+                text-decoration: underline;
+                align-items:center;
+                
+
+            }
+            
+            .register-link {
+                font-size: .9em;
+                color: #fff;
+                text-align: center;
+                margin: 35px 0 10px;
+                margin-right: 50px;
+                
+            }
+            
+            .register-link p a {
+                color: #fff;
+                text-decoration: none;
+                font-weight: bold;
+                
+                
+                
+            }
+            
+            .register-link p a:hover {
+                text-decoration: underline;
+                color: aqua;
+            }
+            .login-existing{
+                margin: -15px 0 15px;
+                font-size: 15px;
+                color: #fff;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .login-existing a {
+                color: #07f8f8;
+                text-decoration: none;
+                font-weight: 30px;
+            }
+            
+            .login-existing a:hover {
+                text-decoration: underline;
+                color: aquamarine;
+            }
+            
+            @media (max-width: 360px) {
+                .login-box {
+                    width: 100%;
+                    height: 100vh;
+                    border: none;
+                    border-radius: 0;
+                }
+                .input-box {
+                    width: 290px;
+                }
+            }

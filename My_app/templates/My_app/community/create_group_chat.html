@@ -1,0 +1,197 @@
+<!-- templates/community/create_group_chat.html -->
+{% extends 'polls/base.html' %}
+
+{% block title %}Create Group Chat - TradingHub{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-users me-2"></i>Create Group Chat</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <!-- Group Name -->
+                        <div class="mb-3">
+                            <label for="id_name" class="form-label">Group Name *</label>
+                            <input type="text"
+                                   name="name"
+                                   id="id_name"
+                                   class="form-control"
+                                   placeholder="Enter group name"
+                                   value="{{ form.name.value|default:'' }}"
+                                   required>
+                            {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="id_description" class="form-label">Description</label>
+                            <textarea name="description"
+                                      id="id_description"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="What's this group about?">{{ form.description.value|default:'' }}</textarea>
+                            {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Members -->
+                        <div class="mb-3">
+                            <label class="form-label">Add Members</label>
+                            <div class="members-search-container">
+                                <input type="text"
+                                       class="form-control mb-2"
+                                       id="member-search"
+                                       placeholder="Search users...">
+
+                                <!-- Selected members display -->
+                                <div id="selected-members" class="mb-3">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+
+                                <!-- Hidden input for selected members -->
+                                <input type="hidden" name="members" id="id_members" value="">
+
+                                <!-- Suggested members -->
+                                <div class="suggested-members">
+                                    <h6 class="text-muted mb-2">Suggested:</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        {% for user in suggested_members %}
+                                        <div class="user-pill" data-user-id="{{ user.id }}">
+                                            <img src="{{ user.profile.get_avatar_url }}"
+                                                 class="rounded-circle me-1"
+                                                 width="24"
+                                                 height="24">
+                                            <span>{{ user.username }}</span>
+                                            <button type="button" class="btn-close btn-close-sm"></button>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Privacy -->
+                        <div class="mb-3">
+                            <label class="form-label">Group Type</label>
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="is_private"
+                                       id="id_public"
+                                       value="false"
+                                       checked>
+                                <label class="form-check-label" for="id_public">
+                                    <i class="fas fa-globe me-1"></i> Public - Anyone can join
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="is_private"
+                                       id="id_private"
+                                       value="true">
+                                <label class="form-check-label" for="id_private">
+                                    <i class="fas fa-lock me-1"></i> Private - Invite only
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'chat_list' %}" class="btn btn-secondary me-md-2">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i> Create Group
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Member selection functionality
+    const selectedMembers = new Set();
+    const memberSearch = document.getElementById('member-search');
+    const selectedMembersDiv = document.getElementById('selected-members');
+    const membersInput = document.getElementById('id_members');
+
+    // Add user pill to selected members
+    function addMember(userId, username, avatarUrl) {
+        if (selectedMembers.has(userId)) return;
+
+        selectedMembers.add(userId);
+        updateSelectedMembersDisplay();
+        updateHiddenInput();
+    }
+
+    // Remove user from selected members
+    function removeMember(userId) {
+        selectedMembers.delete(userId);
+        updateSelectedMembersDisplay();
+        updateHiddenInput();
+    }
+
+    // Update display of selected members
+    function updateSelectedMembersDisplay() {
+        if (selectedMembers.size === 0) {
+            selectedMembersDiv.innerHTML = '<div class="text-muted">No members selected yet</div>';
+            return;
+        }
+
+        let html = '<div class="d-flex flex-wrap gap-2">';
+        // In a real app, you'd fetch user data from the server
+        selectedMembers.forEach(userId => {
+            // For demo, we'll just show the ID
+            html += `
+                <div class="user-pill selected" data-user-id="${userId}">
+                    <span>User ${userId}</span>
+                    <button type="button" class="btn-close btn-close-sm" onclick="removeMember(${userId})"></button>
+                </div>
+            `;
+        });
+        html += '</div>';
+        selectedMembersDiv.innerHTML = html;
+    }
+
+    // Update hidden input value
+    function updateHiddenInput() {
+        membersInput.value = Array.from(selectedMembers).join(',');
+    }
+
+    // Initialize
+    updateSelectedMembersDisplay();
+
+    // Search functionality (simplified)
+    memberSearch.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length > 2) {
+            // In a real app, you'd make an AJAX request to search users
+            console.log('Searching for:', query);
+        }
+    });
+
+    // Add suggested members when clicked
+    document.querySelectorAll('.user-pill:not(.selected)').forEach(pill => {
+        pill.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            const username = this.querySelector('span').textContent;
+            const avatarUrl = this.querySelector('img')?.src;
+            addMember(userId, username, avatarUrl);
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

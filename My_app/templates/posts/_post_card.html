@@ -1,0 +1,455 @@
+<!-- templates/posts/_post_card.html -->
+<div class="post-card card shadow-sm border-0 mb-4" data-post-id="{{ post.id }}">
+    <!-- Post Header -->
+    <div class="card-header bg-white border-0 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <!-- User Avatar -->
+            <a href="{% url 'user_profile' post.author.username %}" class="text-decoration-none">
+                <img src="{{ post.author.profile.get_avatar_url }}"
+                     class="rounded-circle me-3"
+                     alt="{{ post.author.username }}"
+                     width="48"
+                     height="48"
+                     style="object-fit: cover;"
+                     onerror="this.src='https://ui-avatars.com/api/?name={{ post.author.username }}&background=667eea&color=fff'">
+            </a>
+
+            <!-- User Info -->
+            <div>
+                <a href="{% url 'user_profile' post.author.username %}" class="text-decoration-none text-dark fw-bold">
+                    {{ post.author.profile.get_display_name }}
+                </a>
+                {% if post.author.profile.kyc_verified %}
+                    <i class="fas fa-shield-check text-success ms-1" title="Verified User"></i>
+                {% endif %}
+
+                <div class="text-muted small">
+                    <i class="far fa-clock me-1"></i>
+                    <span class="post-time" title="{{ post.created_at|date:'Y-m-d H:i:s' }}">
+                        {{ post.created_at|timesince }} ago
+                    </span>
+
+                    {% if post.trading_symbol %}
+                        <span class="ms-2">
+                            <i class="fas fa-chart-line me-1"></i>
+                            {{ post.trading_symbol }}
+                        </span>
+                    {% endif %}
+
+                    {% if post.post_type == 'trade_idea' %}
+                        <span class="badge bg-info ms-2">
+                            <i class="fas fa-lightbulb me-1"></i>
+                            Trade Idea
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Post Actions Dropdown -->
+        <div class="dropdown">
+            <button class="btn btn-link text-muted" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                {% if user == post.author %}
+                    <li>
+                        <a class="dropdown-item" href="#" onclick="editPost({{ post.id }})">
+                            <i class="far fa-edit me-2"></i>Edit
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="#" onclick="deletePost({{ post.id }})">
+                            <i class="far fa-trash-alt me-2"></i>Delete
+                        </a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a class="dropdown-item" href="#" onclick="reportPost({{ post.id }})">
+                            <i class="far fa-flag me-2"></i>Report
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#" onclick="blockUser({{ post.author.id }})">
+                            <i class="fas fa-ban me-2"></i>Block User
+                        </a>
+                    </li>
+                {% endif %}
+                <li>
+                    <a class="dropdown-item" href="{% url 'social_post_detail' post.id %}">
+                        <i class="far fa-eye me-2"></i>View Post
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" onclick="copyPostLink({{ post.id }})">
+                        <i class="fas fa-link me-2"></i>Copy Link
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Post Body -->
+    <div class="card-body">
+        <!-- Post Content -->
+        <div class="post-content mb-3">
+            {{ post.content|linebreaks|urlize }}
+        </div>
+
+        <!-- Trading Info (for trade ideas) -->
+        {% if post.trading_symbol and post.entry_price %}
+            <div class="trading-info bg-light p-3 rounded mb-3">
+                <h6 class="mb-2">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Trading Details
+                </h6>
+                <div class="row">
+                    {% if post.entry_price %}
+                        <div class="col-md-3 col-6 mb-2">
+                            <small class="text-muted d-block">Entry</small>
+                            <strong>${{ post.entry_price }}</strong>
+                        </div>
+                    {% endif %}
+
+                    {% if post.target_price %}
+                        <div class="col-md-3 col-6 mb-2">
+                            <small class="text-muted d-block">Target</small>
+                            <strong class="text-success">${{ post.target_price }}</strong>
+                        </div>
+                    {% endif %}
+
+                    {% if post.stop_loss %}
+                        <div class="col-md-3 col-6 mb-2">
+                            <small class="text-muted d-block">Stop Loss</small>
+                            <strong class="text-danger">${{ post.stop_loss }}</strong>
+                        </div>
+                    {% endif %}
+
+                    {% if post.risk_reward_ratio %}
+                        <div class="col-md-3 col-6 mb-2">
+                            <small class="text-muted d-block">Risk/Reward</small>
+                            <strong>{{ post.risk_reward_ratio }}:1</strong>
+                        </div>
+                    {% endif %}
+
+                    {% if post.trade_direction %}
+                        <div class="col-md-3 col-6 mb-2">
+                            <small class="text-muted d-block">Direction</small>
+                            <span class="badge {% if post.trade_direction == 'long' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ post.trade_direction|title }}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    {% if post.timeframe %}
+                        <div class="col-md-3 col-6 mb-2">
+                            <small class="text-muted d-block">Timeframe</small>
+                            <strong>{{ post.timeframe }}</strong>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Post Image/Media -->
+        {% if post.image %}
+            <div class="post-media mb-3">
+                <img src="{{ post.image.url }}"
+                     alt="Post image"
+                     class="img-fluid rounded"
+                     style="max-height: 400px; width: 100%; object-fit: cover;">
+            </div>
+        {% endif %}
+
+        <!-- Trade Outcome (if completed) -->
+        {% if post.trade_outcome %}
+            <div class="trade-outcome alert {% if post.trade_outcome == 'win' %}alert-success{% elif post.trade_outcome == 'loss' %}alert-danger{% else %}alert-warning{% endif %} mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-{% if post.trade_outcome == 'win' %}trophy{% elif post.trade_outcome == 'loss' %}times-circle{% else %}equals{% endif %} me-2"></i>
+                        <strong>{{ post.trade_outcome|title }} Trade</strong>
+
+                        {% if post.pnl_amount %}
+                            <span class="ms-2">
+                                {% if post.pnl_amount > 0 %}
+                                    <i class="fas fa-arrow-up text-success"></i>
+                                {% elif post.pnl_amount < 0 %}
+                                    <i class="fas fa-arrow-down text-danger"></i>
+                                {% endif %}
+                                ${{ post.pnl_amount|floatformat:2 }}
+                            </span>
+                        {% endif %}
+
+                        {% if post.pnl_percentage %}
+                            <span class="ms-2">
+                                ({{ post.pnl_percentage|floatformat:2 }}%)
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    {% if user == post.author and not post.trade_outcome == 'open' %}
+                        <button class="btn btn-sm btn-outline-secondary" onclick="editTradeOutcome({{ post.id }})">
+                            <i class="fas fa-edit me-1"></i>Edit
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Post Tags -->
+        {% if post.tags %}
+            <div class="post-tags mb-3">
+                {% for tag in post.tags %}
+                    <a href="{% url 'posts_by_tag' tag %}" class="badge bg-secondary text-decoration-none me-1">
+                        #{{ tag }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Post Stats -->
+        <div class="post-stats text-muted d-flex justify-content-between mb-2">
+            <div>
+                <span class="like-count">
+                    <i class="far fa-thumbs-up me-1"></i>
+                    <span>{{ post.likes_count }}</span>
+                </span>
+                <span class="ms-3">
+                    <i class="far fa-comment me-1"></i>
+                    <span>{{ post.comments_count }}</span>
+                </span>
+                <span class="ms-3">
+                    <i class="far fa-eye me-1"></i>
+                    <span>{{ post.views_count }}</span>
+                </span>
+            </div>
+
+            {% if post.is_edited %}
+                <div>
+                    <small>Edited {{ post.edited_at|timesince }} ago</small>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Post Actions -->
+    <div class="card-footer bg-white border-0">
+        <div class="d-flex justify-content-around">
+            <!-- Like Button -->
+            <button class="btn btn-link text-decoration-none text-muted like-btn"
+                    onclick="toggleLike({{ post.id }})"
+                    data-post-id="{{ post.id }}">
+                <i class="far fa-thumbs-up me-1 {% if user in post.likes.all %}text-primary{% endif %}"></i>
+                <span class="like-text">{% if user in post.likes.all %}Liked{% else %}Like{% endif %}</span>
+            </button>
+
+            <!-- Comment Button -->
+            <button class="btn btn-link text-decoration-none text-muted"
+                    onclick="focusComment({{ post.id }})">
+                <i class="far fa-comment me-1"></i> Comment
+            </button>
+
+            <!-- Share Button -->
+            <button class="btn btn-link text-decoration-none text-muted"
+                    onclick="sharePost({{ post.id }})">
+                <i class="fas fa-share-alt me-1"></i> Share
+            </button>
+
+            <!-- Bookmark Button -->
+            <button class="btn btn-link text-decoration-none text-muted"
+                    onclick="toggleBookmark({{ post.id }})">
+                <i class="far fa-bookmark me-1"></i> Save
+            </button>
+        </div>
+
+        <!-- Quick Comment Form -->
+        <div class="quick-comment-form mt-3 d-none" id="comment-form-{{ post.id }}">
+            <form onsubmit="submitComment(event, {{ post.id }})">
+                <div class="input-group">
+                    <input type="text"
+                           class="form-control"
+                           placeholder="Write a comment..."
+                           id="comment-input-{{ post.id }}"
+                           required>
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Comments Preview -->
+        {% if post.comments.exists %}
+            <div class="comments-preview mt-3">
+                {% for comment in post.comments.all|slice:":2" %}
+                    <div class="comment-item d-flex mb-2">
+                        <img src="{{ comment.author.profile.get_avatar_url }}"
+                             class="rounded-circle me-2"
+                             alt="{{ comment.author.username }}"
+                             width="32"
+                             height="32"
+                             style="object-fit: cover;"
+                             onerror="this.src='https://ui-avatars.com/api/?name={{ comment.author.username }}&background=667eea&color=fff'">
+
+                        <div class="comment-content bg-light p-2 rounded flex-grow-1">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ comment.author.profile.get_display_name }}</strong>
+                                <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                            </div>
+                            <p class="mb-0">{{ comment.content|truncatechars:100 }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% if post.comments.count > 2 %}
+                    <a href="{% url 'social_post_detail' post.id %}" class="text-decoration-none">
+                        View all {{ post.comments.count }} comments
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.post-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.like-btn:hover .like-text {
+    color: #0d6efd !important;
+}
+
+.like-btn:hover i {
+    color: #0d6efd !important;
+}
+
+.comment-item:hover {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.badge.bg-info {
+    background-color: #0dcaf0 !important;
+}
+
+.img-fluid {
+    max-height: 400px;
+    object-fit: cover;
+}
+</style>
+
+<script>
+function toggleLike(postId) {
+    fetch(`/api/posts/${postId}/like/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const likeBtn = document.querySelector(`.like-btn[data-post-id="${postId}"]`);
+            const likeIcon = likeBtn.querySelector('i');
+            const likeText = likeBtn.querySelector('.like-text');
+            const likeCount = document.querySelector(`.like-count span`);
+
+            if (data.liked) {
+                likeIcon.className = 'fas fa-thumbs-up me-1 text-primary';
+                likeText.textContent = 'Liked';
+                if (likeCount) {
+                    likeCount.textContent = parseInt(likeCount.textContent) + 1;
+                }
+            } else {
+                likeIcon.className = 'far fa-thumbs-up me-1';
+                likeText.textContent = 'Like';
+                if (likeCount) {
+                    likeCount.textContent = parseInt(likeCount.textContent) - 1;
+                }
+            }
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function focusComment(postId) {
+    const commentForm = document.getElementById(`comment-form-${postId}`);
+    const commentInput = document.getElementById(`comment-input-${postId}`);
+
+    commentForm.classList.remove('d-none');
+    commentInput.focus();
+}
+
+function submitComment(event, postId) {
+    event.preventDefault();
+
+    const input = document.getElementById(`comment-input-${postId}`);
+    const content = input.value.trim();
+
+    if (!content) return;
+
+    fetch(`/api/posts/${postId}/comment/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content: content })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            input.value = '';
+            location.reload(); // Simple reload for now
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function sharePost(postId) {
+    const url = `${window.location.origin}/social/post/${postId}/`;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('Link copied to clipboard!', 'success');
+    });
+}
+
+function copyPostLink(postId) {
+    const url = `${window.location.origin}/social/post/${postId}/`;
+    navigator.clipboard.writeText(url).then(() => {
+        showToast('Link copied to clipboard!', 'success');
+    });
+}
+
+function showToast(message, type = 'info') {
+    // Simple toast implementation
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
+    toast.innerHTML = `${message} <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>`;
+
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>

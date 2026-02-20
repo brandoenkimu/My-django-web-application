@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Disclosure - TradeMaster Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .legal-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .legal-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 10px;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .nav-link.active {
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .risk-warning {
+            border-left: 4px solid var(--danger-color);
+            padding-left: 1rem;
+            background-color: #fff5f5;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1.5rem 0;
+        }
+
+        .risk-high {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .legal-content {
+                padding: 1.5rem;
+            }
+            .legal-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'base' %}">
+                <i class="bi bi-graph-up me-2"></i>Bentely-Brand-Dev
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'market_research' %}">Trading Platform</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'privacy_policy' %}">Privacy Policy</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'terms_of_service' %}">Terms of Service</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'contact1' %}">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'risk_disclosure' %}">Risk Disclosure</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="container py-5">
+        <div class="legal-header text-center">
+            <h1 class="display-5 fw-bold">Risk Disclosure Statement</h1>
+            <p class="lead">Important information about the risks of trading</p>
+        </div>
+
+        <div class="legal-content">
+            <div class="risk-warning">
+                <h4 class="risk-high"><i class="bi bi-exclamation-triangle-fill me-2"></i>HIGH RISK WARNING</h4>
+                <p>Trading financial instruments on margin carries a high level of risk and may not be suitable for all investors. The high degree of leverage can work against you as well as for you. Before deciding to trade, you should carefully consider your investment objectives, level of experience, and risk appetite.</p>
+            </div>
+
+            <p class="lead">This document provides important information about the risks associated with trading financial instruments through TradeMaster Pro. Trading involves substantial risk of loss.</p>
+
+            <h3 class="section-title">Market Risk</h3>
+            <p>Financial markets are volatile and prices can fluctuate rapidly. These fluctuations may result in losses that exceed your initial investment. Factors that may affect market prices include, but are not limited to:</p>
+            <ul>
+                <li>Changes in supply and demand</li>
+                <li>Government policies and economic indicators</li>
+                <li>Global political and economic events</li>
+                <li>Market sentiment and investor psychology</li>
+                <li>Natural disasters and unforeseen events</li>
+            </ul>
+
+            <h3 class="section-title">Leverage Risk</h3>
+            <p>The use of leverage magnifies both gains and losses. Even small market movements can have a large impact on your trading account when leverage is used. You may lose more than your initial deposit.</p>
+
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Instrument</th>
+                            <th>Maximum Leverage</th>
+                            <th>Margin Requirement</th>
+                            <th>Risk Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Forex (Major Pairs)</td>
+                            <td>30:1</td>
+                            <td>3.33%</td>
+                            <td><span class="badge bg-warning">High</span></td>
+                        </tr>
+                        <tr>
+                            <td>Forex (Minor Pairs)</td>
+                            <td>20:1</td>
+                            <td>5%</td>
+                            <td><span class="badge bg-warning">High</span></td>
+                        </tr>
+                        <tr>
+                            <td>Indices</td>
+                            <td>20:1</td>
+                            <td>5%</td>
+                            <td><span class="badge bg-danger">Very High</span></td>
+                        </tr>
+                        <tr>
+                            <td>Commodities</td>
+                            <td>10:1</td>
+                            <td>10%</td>
+                            <td><span class="badge bg-danger">Very High</span></td>
+                        </tr>
+                        <tr>
+                            <td>Cryptocurrencies</td>
+                            <td>2:1</td>
+                            <td>50%</td>
+                            <td><span class="badge bg-danger">Extreme</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="section-title">Liquidity Risk</h3>
+            <p>Some financial instruments may become illiquid, meaning you may not be able to buy or sell the instrument at the desired price. This can occur during periods of high volatility or low trading volume.</p>
+
+            <h3 class="section-title">Technology Risk</h3>
+            <p>Online trading depends on the reliable operation of technology, including trading platforms, internet connectivity, and electronic systems. Technical failures, system outages, or cyber attacks may prevent you from executing trades or accessing your account.</p>
+
+            <h3 class="section-title">Regulatory Risk</h3>
+            <p>Changes in laws, regulations, or policies in any relevant jurisdiction may affect the value of your investments or your ability to trade certain instruments.</p>
+
+            <h3 class="section-title">Recommendation</h3>
+            <p>We strongly recommend that you:</p>
+            <ul>
+                <li>Only trade with money you can afford to lose</li>
+                <li>Educate yourself about financial markets and trading strategies</li>
+                <li>Use risk management tools like stop-loss orders</li>
+                <li>Start with a demo account to practice without risk</li>
+                <li>Consider seeking advice from a qualified financial advisor</li>
+            </ul>
+
+            <div class="alert alert-warning" role="alert">
+                <h5 class="alert-heading"><i class="bi bi-info-circle-fill me-2"></i>Important Notice</h5>
+                <p>Past performance is not indicative of future results. The information provided here is for educational purposes only and should not be considered as financial advice.</p>
+            </div>
+
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="riskAcknowledgment">
+                <label class="form-check-label" for="riskAcknowledgment">
+                    <strong>I acknowledge that I have read, understood, and accept the risks described in this Risk Disclosure Statement.</strong>
+                </label>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>BoldTrader Pro</h5>
+                    <p>A professional trading platform for serious investors.</p>
+                </div>
+                <div class="col-md-2">
+                    <h5>Legal</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'privacy_policy' %}" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
+                        <li><a href="{% url 'terms_of_service' %}" class="text-white-50 text-decoration-none">Terms of Service</a></li>
+                        <li><a href="{% url 'risk_disclosure' %}" class="text-white-50 text-decoration-none">Risk Disclosure</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none">Cookie Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'contact1' %}" class="text-white-50 text-decoration-none">Support Center</a></li>
+                        <li><a href="{% url 'contact1' %}" class="text-white-50 text-decoration-none">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-4 mb-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">© 2026 BoldTrading. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">Trade responsibly. Trading involves risk of loss.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <a href="#" class="back-to-top">
+        <i class="bi bi-arrow-up"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const backToTopButton = document.querySelector('.back-to-top');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopButton.style.display = 'flex';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+        backToTopButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

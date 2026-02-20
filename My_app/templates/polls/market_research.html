@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Trading Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .navbar,
+        .card {
+            border-radius: 12px;
+        }
+        .dropdown-menu-scrollable {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .navbar-nav .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+        }
+        #currentSymbolDisplay {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        .positive { color: #22c55e; font-weight: bold; }
+        .negative { color: #ef4444; font-weight: bold; }
+        .card {
+            border: none;
+            background: var(--card-bg);
+            transition: background-color 0.3s;
+        }
+        .card-header {
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-header);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .btn-group-vertical .btn { text-align: left; }
+        .btn-outline-primary,
+        .btn-outline-success,
+        .btn-outline-warning,
+        .btn-outline-info,
+        .btn-outline-danger {
+            border-radius: 999px;
+        }
+        .form-control,
+        .form-select {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--input-text);
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+        .form-control:focus,
+        .form-select:focus {
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 .25rem rgba(59,130,246,.25);
+        }
+        .input-group-text {
+            border-color: var(--input-border);
+            color: var(--text-color);
+            background-color: var(--card-header);
+        }
+        .alert-info {
+            background: rgba(59,130,246,0.08);
+            color: var(--text-color);
+            border-color: rgba(59,130,246,0.4);
+        }
+        /* Loader overlay */
+        #chartLoader {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.45);
+            z-index: 5;
+            border-radius: 12px;
+            display: none;
+        }
+        /* Watchlist styles */
+        .watchlist-item {
+            cursor: pointer;
+        }
+        .watchlist-item:hover {
+            background: var(--hover-bg);
+        }
+        /* Layout buttons */
+        .layout-btn.active {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        /* --------------------------------------------------
+        THEME VARIABLES (Light + Dark)
+        -------------------------------------------------- */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #0f172a;
+            --card-bg: #f1f5f9;
+            --card-header: #e2e8f0;
+            --border-color: #cbd5e1;
+            --input-bg: #ffffff;
+            --input-text: #0f172a;
+            --input-border: #94a3b8;
+            --accent: #3b82f6;
+            --hover-bg: rgba(55,65,81,0.2);
+            --muted-text: #6b7280;
+            --strong-text: #0f172a;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --text-color: #e5e7eb;
+            --card-bg: #020617;
+            --card-header: #1e293b;
+            --border-color: #1f2937;
+            --input-bg: #020617;
+            --input-text: #e5e7eb;
+            --input-border: #1f2937;
+            --accent: #3b82f6;
+            --hover-bg: rgba(55,65,81,0.7);
+            --muted-text: #d1d5db;
+            --strong-text: #f3f4f6;
+        }
+
+        /* Navbar styling */
+        .navbar {
+            background: var(--card-header) !important;
+            color: var(--text-color) !important;
+        }
+
+        .dropdown-menu {
+            background: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .dropdown-item {
+            color: var(--text-color);
+        }
+
+        .dropdown-item:hover {
+            background: var(--hover-bg);
+        }
+
+        /* Watchlist items */
+        .watchlist-item {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Order panel specific styles */
+        #orderSymbol,
+        #orderQty,
+        #orderPrice,
+        #orderType {
+            background-color: var(--input-bg) !important;
+            color: var(--input-text) !important;
+            border-color: var(--input-border) !important;
+        }
+
+        #placeOrderBtn {
+            background-color: var(--accent) !important;
+            color: white !important;
+            border-color: var(--input-border) !important;
+        }
+
+        #placeOrderBtn:hover {
+            background-color: #2563eb !important;
+        }
+
+        /* Text muted adjustments for theme */
+        .text-muted {
+            color: var(--muted-text) !important;
+            opacity: 1 !important;
+        }
+
+        .form-label {
+            color: var(--strong-text) !important;
+            font-weight: 600;
+            opacity: 1;
+        }
+
+        .card-header h6, .card-header .mb-0 {
+            color: var(--strong-text) !important;
+            font-weight: 700;
+            opacity: 1;
+        }
+
+        .watchlist-item {
+            color: var(--strong-text) !important;
+            opacity: 1 !important;
+            font-weight: 500;
+        }
+
+        .form-control::placeholder {
+            color: var(--muted-text) !important;
+            opacity: 1 !important;
+        }
+
+        small {
+            color: var(--muted-text) !important;
+            opacity: 1 !important;
+            font-weight: 500;
+        }
+
+        .list-group-item {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        #watchlistList .list-group-item {
+            color: var(--muted-text) !important;
+            opacity: 1 !important;
+            font-style: italic;
+        }
+
+        @media (max-width: 991px) {
+            #themeSwitcher {
+                margin-top: 6px;
+            }
+        }
+
+        /* NEW: Tools Column Styles */
+        .tools-column {
+            background: var(--card-bg);
+            border-left: 1px solid var(--border-color);
+            padding: 15px 0;
+            height: 600px;
+            overflow-y: auto;
+        }
+
+        .tools-section {
+            margin-bottom: 20px;
+        }
+
+        .tools-section-header {
+            padding: 10px 15px;
+            background: var(--card-header);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--strong-text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tools-section-header:hover {
+            background: var(--hover-bg);
+        }
+
+        .tools-section-content {
+            padding: 10px;
+            display: none;
+        }
+
+        .tools-section.active .tools-section-content {
+            display: block;
+        }
+
+        .tool-btn {
+            width: 100%;
+            margin-bottom: 5px;
+            text-align: left;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            transform: translateX(3px);
+            background: var(--hover-bg);
+        }
+
+        .tool-btn i {
+            margin-right: 8px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .tools-column-header {
+            background: var(--card-header);
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 700;
+            color: var(--strong-text);
+            text-align: center;
+        }
+
+        /* Chart container with tools column */
+        .chart-with-tools-container {
+            display: flex;
+            gap: 0;
+            min-height: 600px;
+        }
+
+        .chart-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .tools-container {
+            width: 250px;
+            flex-shrink: 0;
+        }
+
+        /* NEW: Footer Section Styles */
+        .dashboard-footer {
+            margin-top: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .achievement-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .achievement-progress {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .achievement-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .broker-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .broker-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .broker-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border-color: var(--accent);
+        }
+
+        .broker-logo {
+            height: 40px;
+            margin-bottom: 10px;
+            filter: grayscale(100%);
+            transition: filter 0.3s;
+        }
+
+        .broker-card:hover .broker-logo {
+            filter: grayscale(0%);
+        }
+
+        .broker-commission {
+            font-size: 0.8rem;
+            color: var(--muted-text);
+            margin-top: 5px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--muted-text);
+            margin-top: 5px;
+        }
+
+        .footer-cta {
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .footer-copyright {
+            text-align: center;
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            color: var(--muted-text);
+            font-size: 0.9rem;
+        }
+
+        /* Navbar styling - DARK THEME stays exactly as before */
+        .navbar {
+            background: var(--card-header) !important;
+            color: var(--text-color) !important;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Keep ALL dark theme navbar styles EXACTLY as before */
+        [data-theme="dark"] .navbar {
+            background: var(--card-header) !important;
+            color: var(--text-color) !important;
+            border-color: var(--border-color);
+        }
+
+        [data-theme="dark"] .navbar .nav-link,
+        [data-theme="dark"] .navbar .navbar-brand {
+            color: var(--text-color) !important;
+        }
+
+        [data-theme="dark"] .navbar .nav-link:hover,
+        [data-theme="dark"] .navbar .nav-link:focus {
+            color: rgba(229, 231, 235, 0.8) !important;
+        }
+
+        [data-theme="dark"] .navbar .dropdown-menu {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .navbar .dropdown-item {
+            color: var(--text-color);
+        }
+
+        [data-theme="dark"] .navbar .dropdown-item:hover {
+            background: var(--hover-bg);
+        }
+
+        /* NEW: Light theme navbar styling ONLY (your screenshot) */
+        [data-theme="light"] .navbar {
+            background: #3b82f6 !important;
+            color: white !important;
+            border-color: #2563eb;
+        }
+
+        [data-theme="light"] .navbar .nav-link,
+        [data-theme="light"] .navbar .navbar-brand {
+            color: white !important;
+        }
+
+        [data-theme="light"] .navbar .nav-link:hover,
+        [data-theme="light"] .navbar .nav-link:focus {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        [data-theme="light"] .navbar .dropdown-menu {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        [data-theme="light"] .navbar .dropdown-item {
+            color: var(--text-color);
+        }
+
+        [data-theme="light"] .navbar .dropdown-item:hover {
+            background: var(--hover-bg);
+        }
+
+        /* Navbar toggler icon - DARK THEME stays as before */
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .navbar-toggler {
+            border-color: rgba(229, 231, 235, 0.3);
+        }
+
+        [data-theme="dark"] .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23e5e7eb' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* NEW: Light theme toggler only */
+        [data-theme="light"] .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        [data-theme="light"] .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='white' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* Open Positions Table Styling */
+        .positions-table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .positions-table-container::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .positions-table-container::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+
+        .positions-table-container::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .positions-table-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        #positionsTable tr {
+            transition: all 0.2s ease;
+        }
+
+        #positionsTable tr:hover {
+            background-color: var(--hover-bg) !important;
+        }
+
+        #positionsTable td {
+            padding: 8px 12px !important;
+            vertical-align: middle;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        #positionsTable th {
+            padding: 10px 12px !important;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--strong-text);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--card-header);
+            white-space: nowrap;
+        }
+
+        .position-close-btn {
+            width: 24px;
+            height: 24px;
+            line-height: 1;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Card footer styling */
+        .positions-footer {
+            background: var(--card-header);
+            border-top: 1px solid var(--border-color);
+            padding: 8px 15px;
+        }
+
+        @media (max-width: 1200px) {
+            .tools-container {
+                width: 220px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .chart-with-tools-container {
+                flex-direction: column;
+            }
+
+            .tools-container {
+                width: 100%;
+                height: auto;
+                border-left: none;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .tools-column {
+                height: auto;
+                max-height: 300px;
+            }
+
+            .achievements-grid,
+            .broker-links-grid,
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid mt-3">
+    <div class="row g-3">
+        <!-- LEFT SIDEBAR: Watchlist + Order Panel -->
+        <div class="col-lg-3">
+            <!-- Watchlist -->
+            <div class="card mb-3 shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">📋 Watchlist</h6>
+                    <small class="text-muted" style="font-size: 0.75rem;">Saved locally</small>
+                </div>
+                <div class="card-body">
+                    <div class="input-group mb-2">
+                        <input type="text" id="watchlistInput" class="form-control form-control-sm" placeholder="Add symbol e.g. EURUSD, BTCUSDT">
+                        <button class="btn btn-outline-primary btn-sm" type="button" id="addWatchlistBtn">Add</button>
+                    </div>
+                    <ul class="list-group list-group-flush" id="watchlistList" style="max-height: 260px; overflow-y:auto;"></ul>
+                    <button class="btn btn-outline-danger btn-sm w-100 mt-2" id="clearWatchlistBtn">
+                        Clear Watchlist
+                    </button>
+                </div>
+            </div>
+
+            <!-- Order Panel (Demo) -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h6 class="mb-0">🧾 Quick Order (Demo)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <label class="form-label mb-1">Symbol</label>
+                        <input type="text" id="orderSymbol" class="form-control form-control-sm" readonly>
+                        <small class="text-muted" style="font-size: 0.7rem;">Currency Pair</small>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label mb-1">Market</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="orderSide" id="orderBuy" autocomplete="off" checked>
+                            <label class="btn btn-outline-success btn-sm" for="orderBuy">Buy</label>
+
+                            <input type="radio" class="btn-check" name="orderSide" id="orderSell" autocomplete="off">
+                            <label class="btn btn-outline-danger btn-sm" for="orderSell">Sell</label>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label mb-1">Quantity (lots)</label>
+                        <input type="number" id="orderQty" class="form-control form-control-sm" min="0.01" step="0.01" value="0.10">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label mb-1">Order Type</label>
+                        <select id="orderType" class="form-select form-select-sm">
+                            <option value="market">Market</option>
+                            <option value="limit">Limit</option>
+                            <option value="stop">Stop</option>
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label mb-1">Price (for limit/stop)</label>
+                        <input type="number" id="orderPrice" class="form-control form-control-sm" step="0.0001">
+                    </div>
+                    <button class="btn btn-primary btn-sm w-100" id="placeOrderBtn">
+                        Place Demo Order
+                    </button>
+                    <small id="orderStatus" class="d-block mt-2 text-muted" style="font-size: 0.75rem;"></small>
+                </div>
+            </div>
+            <div class="alert alert-info mt-3" id="propRulesBox">
+                <strong>Prop Firm Rules:</strong>
+                <span id="ruleStatus">Checking…</span>
+            </div>
+
+            <!-- ================= OPEN POSITIONS ================= -->
+            <div class="card mt-3 shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">📊 Open Positions</span>
+                    <button class="btn btn-sm btn-danger" onclick="closeAllTrades()">Close All</button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="positions-table-container">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 80px;">Symbol</th>
+                                    <th style="min-width: 60px;">Side</th>
+                                    <th style="min-width: 60px;">Lot</th>
+                                    <th style="min-width: 80px;">Entry</th>
+                                    <th style="min-width: 70px;">SL</th>
+                                    <th style="min-width: 70px;">TP</th>
+                                    <th style="min-width: 80px;">PnL</th>
+                                    <th style="min-width: 50px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="positionsTable">
+                                <!-- Positions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center p-3 border-top" id="noPositionsMessage">
+                        <small class="text-muted">No open positions</small>
+                    </div>
+                </div>
+                <div class="positions-footer">
+                    <div class="row text-center small">
+                        <div class="col">
+                            <span class="text-muted">Total PnL:</span>
+                            <span id="totalPnl" class="fw-bold ms-1">$0.00</span>
+                        </div>
+                        <div class="col">
+                            <span class="text-muted">Positions:</span>
+                            <span id="totalPositions" class="fw-bold ms-1">0</span>
+                        </div>
+                        <div class="col">
+                            <span class="text-muted">Margin:</span>
+                            <span id="totalMargin" class="fw-bold ms-1">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Risk Dashboard -->
+            <div class="card mt-3 shadow">
+                <div class="card-header">Admin Risk Dashboard</div>
+                <div class="card-body p-0">
+                    <div class="positions-table-container">
+                        <table class="table table-sm" id="adminRiskTable">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 100px;">Trader</th>
+                                    <th style="min-width: 80px;">Balance</th>
+                                    <th style="min-width: 80px;">Daily PnL</th>
+                                    <th style="min-width: 80px;">Phase</th>
+                                    <th style="min-width: 100px;">Max Drawdown</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN AREA: Navbar + Chart + Tools -->
+        <div class="col-lg-9">
+            <div class="card shadow p-3 position-relative">
+                <!-- Loader -->
+                <div id="chartLoader">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="mt-2">Loading chart...</div>
+                    </div>
+                </div>
+
+                <div class="tradingview-widget-container">
+                    <!-- Market Navigation -->
+                    <nav class="navbar navbar-expand-lg mb-3 rounded sticky-top">
+                        <div class="container-fluid">
+                            <a href="{% url 'base' %}" class="navbar-brand"><span class="navbar-brand fw-bold">BRAND-BENTLEY-DEV</span></a>
+
+                            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#marketNav">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+                            <div class="collapse navbar-collapse" id="marketNav">
+                                <ul class="navbar-nav me-auto">
+                                    <!-- Forex Dropdown -->
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="forexDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            💹 Forex
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-scrollable" aria-labelledby="forexDropdown">
+                                            <li><h6 class="dropdown-header">Major Pairs</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:EURUSD')">EUR/USD</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:GBPUSD')">GBP/USD</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:USDJPY')">USD/JPY</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:USDCHF')">USD/CHF</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:USDCAD')">USD/CAD</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:AUDUSD')">AUD/USD</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:NZDUSD')">NZD/USD</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header">Minor & Cross Pairs</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:EURGBP')">EUR/GBP</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:EURJPY')">EUR/JPY</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:GBPJPY')">GBP/JPY</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:EURCHF')">EUR/CHF</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:AUDJPY')">AUD/JPY</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FX:CADJPY')">CAD/JPY</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header">Metals</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('OANDA:XAUUSD')">XAU/USD (Gold)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('OANDA:XAGUSD')">XAG/USD (Silver)</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Stocks Dropdown -->
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="stocksDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            📈 Stocks
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-scrollable" aria-labelledby="stocksDropdown">
+                                            <li><h6 class="dropdown-header">US Tech Stocks</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NASDAQ:AAPL')">Apple (AAPL)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NASDAQ:TSLA')">Tesla (TSLA)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NASDAQ:MSFT')">Microsoft (MSFT)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NASDAQ:GOOGL')">Google (GOOGL)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NASDAQ:AMZN')">Amazon (AMZN)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NASDAQ:META')">Meta (META)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NASDAQ:NVDA')">NVIDIA (NVDA)</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header">ETFs & Others</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('AMEX:SPY')">SPDR S&P 500 (SPY)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NASDAQ:QQQ')">Invesco QQQ</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NYSE:IBM')">IBM</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NYSE:JPM')">JPMorgan</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Crypto Dropdown -->
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="cryptoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            ₿ Crypto
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-scrollable" aria-labelledby="cryptoDropdown">
+                                            <li><h6 class="dropdown-header">Major Cryptos</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('BINANCE:BTCUSDT')">Bitcoin (BTC/USDT)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('BINANCE:ETHUSDT')">Ethereum (ETH/USDT)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('BINANCE:ADAUSDT')">Cardano (ADA/USDT)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('BINANCE:DOTUSDT')">Polkadot (DOT/USDT)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('BINANCE:BNBUSDT')">Binance Coin (BNB/USDT)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('BINANCE:XRPUSDT')">Ripple (XRP/USDT)</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header">Altcoins</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('BINANCE:SOLUSDT')">Solana (SOL/USDT)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('BINANCE:DOGEUSDT')">Dogecoin (DOGE/USDT)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('BINANCE:MATICUSDT')">Polygon (MATIC/USDT)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('BINANCE:AVAXUSDT')">Avalanche (AVAX/USDT)</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Futures Dropdown -->
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="futuresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            ⚡ Futures
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-scrollable" aria-labelledby="futuresDropdown">
+                                            <li><h6 class="dropdown-header">Indices Futures</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('CME_MINI:ES1!')">S&P 500 E-mini (ES)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('CME_MINI:NQ1!')">Nasdaq E-mini (NQ)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('CBOT_MINI:YM1!')">Dow E-mini (YM)</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header">Commodities</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('COMEX:GC1!')">Gold (GC)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('COMEX:SI1!')">Silver (SI)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NYMEX:CL1!')">Crude Oil (CL)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NYMEX:NG1!')">Natural Gas (NG)</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Indices Dropdown -->
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="indicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            📊 Indices
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-scrollable" aria-labelledby="indicesDropdown">
+                                            <li><h6 class="dropdown-header">US Indices</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('SP:SPX')">S&P 500 (SPX)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('DJ:DJI')">Dow Jones (DJI)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('NASDAQ:NDX')">Nasdaq 100 (NDX)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('RUSSELL:RUT')">Russell 2000 (RUT)</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header">Global Indices</h6></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('FTSE:UKX')">FTSE 100 (UK)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('INDEX:DAX')">DAX 40 (Germany)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('INDEX:CAC')">CAC 40 (France)</a></li>
+                                            <li><a class="dropdown-item" href="#" onclick="loadSymbol('INDEX:NI225')">Nikkei 225 (Japan)</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- PUSH EVERYTHING AFTER THIS TO THE RIGHT -->
+                                    <li class="nav-item ms-auto">
+                                        <a class="nav-link fw-bold" href="#">
+                                            🎆 Happy New Year 2026
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <select id="themeSwitcher" class="form-select form-select-sm">
+                                            <option value="light">🌤 Light</option>
+                                            <option value="dark" selected>🌙 Dark</option>
+                                        </select>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <!-- Chart Controls -->
+                    <div class="row mb-3 g-2">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">🔍</span>
+                                <input type="text" id="symbolSearch" class="form-control" placeholder="Search any symbol...">
+                                <button class="btn btn-outline-primary" type="button" id="searchBtn">Load</button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="timeframe">
+                                <option value="1">1 Minute</option>
+                                <option value="3">3 Minutes</option>
+                                <option value="5">5 Minutes</option>
+                                <option value="15">15 Minutes</option>
+                                <option value="30">30 Minutes</option>
+                                <option value="60" selected>1 Hour</option>
+                                <option value="120">2 Hours</option>
+                                <option value="240">4 Hours</option>
+                                <option value="D">Daily</option>
+                                <option value="W">Weekly</option>
+                                <option value="M">Monthly</option>
+                            </select>
+                        </div>
+                        <div class="ms-auto col-md-3 d-flex gap-1">
+                            <select class="form-select" id="chartTheme">
+                                <option value="light">Light Theme</option>
+                                <option value="dark" selected>Dark Theme</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Symbol header -->
+                    <div class="row mb-2">
+                        <div class="col-12">
+                            <div class="alert alert-info py-2" id="currentSymbolDisplay">
+                                <strong>Current:</strong> <span id="symbolName">EUR/USD</span> |
+                                <span id="symbolPrice">Loading...</span> |
+                                <span id="symbolChange">-</span> |
+                                <span id="symbolRange">Range: -</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Container with Tools Column -->
+                    <div class="chart-with-tools-container">
+                        <div class="chart-container">
+                            <div id="tradingview_chart" style="height: 600px;"></div>
+                        </div>
+
+                        <!-- NEW: Tools Column (Drop-right menu) -->
+                        <div class="tools-container">
+                            <div class="tools-column-header">
+                                <i class="bi bi-tools"></i> Chart Tools
+                            </div>
+                            <div class="tools-column">
+
+                                <!-- Technical Indicators Section -->
+                                <div class="tools-section active">
+                                    <div class="tools-section-header" onclick="toggleSection('indicators')">
+                                        <span><i class="bi bi-graph-up"></i> Indicators</span>
+                                        <i class="bi bi-chevron-down"></i>
+                                    </div>
+                                    <div class="tools-section-content">
+                                        <button class="btn btn-outline-primary btn-sm tool-btn" onclick="addIndicator('RSI')">
+                                            <i class="bi bi-speedometer2"></i> RSI
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm tool-btn" onclick="addIndicator('MACD')">
+                                            <i class="bi bi-bar-chart"></i> MACD
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm tool-btn" onclick="addIndicator('Stochastic')">
+                                            <i class="bi bi-arrow-repeat"></i> Stochastic
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm tool-btn" onclick="addIndicator('BB')">
+                                            <i class="bi bi-bounding-box"></i> Bollinger Bands
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm tool-btn" onclick="addIndicator('ATR')">
+                                            <i class="bi bi-rulers"></i> ATR
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm tool-btn" onclick="addIndicator('Ichimoku')">
+                                            <i class="bi bi-cloud"></i> Ichimoku Cloud
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm tool-btn" onclick="addIndicator('MA')">
+                                            <i class="bi bi-arrow-down-up"></i> Moving Average
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm tool-btn" onclick="addIndicator('VWAP')">
+                                            <i class="bi bi-calculator"></i> VWAP
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm tool-btn" onclick="addIndicator('OBV')">
+                                            <i class="bi bi-volume-up"></i> OBV
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Drawing Tools Section -->
+                                <div class="tools-section">
+                                    <div class="tools-section-header" onclick="toggleSection('drawing')">
+                                        <span><i class="bi bi-pencil"></i> Drawing Tools</span>
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                    <div class="tools-section-content">
+                                        <button class="btn btn-outline-success btn-sm tool-btn" onclick="activateTool('trend_line')">
+                                            <i class="bi bi-slash"></i> Trend Line
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm tool-btn" onclick="activateTool('horizontal_line')">
+                                            <i class="bi bi-dash"></i> Horizontal Line
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm tool-btn" onclick="activateTool('vertical_line')">
+                                            <i class="bi bi-dash-vertical"></i> Vertical Line
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm tool-btn" onclick="activateTool('fibonacci')">
+                                            <i class="bi bi-percent"></i> Fibonacci
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm tool-btn" onclick="activateTool('pitchfork')">
+                                            <i class="bi bi-fork"></i> Pitchfork
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm tool-btn" onclick="activateTool('elliott_wave')">
+                                            <i class="bi bi-sine-wave"></i> Elliott Wave
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm tool-btn" onclick="activateTool('rectangle')">
+                                            <i class="bi bi-square"></i> Rectangle
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm tool-btn" onclick="activateTool('circle')">
+                                            <i class="bi bi-circle"></i> Circle
+                                        </button>
+                                        <button class="btn btn-outline-success btn-sm tool-btn" onclick="activateTool('arrow')">
+                                            <i class="bi bi-arrow-right"></i> Arrow
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Chart Actions Section -->
+                                <div class="tools-section">
+                                    <div class="tools-section-header" onclick="toggleSection('actions')">
+                                        <span><i class="bi bi-gear"></i> Chart Actions</span>
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                    <div class="tools-section-content">
+                                        <button class="btn btn-outline-warning btn-sm tool-btn" onclick="clearAllIndicators()">
+                                            <i class="bi bi-trash"></i> Clear Indicators
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-sm tool-btn" onclick="clearAllDrawings()">
+                                            <i class="bi bi-eraser"></i> Clear Drawings
+                                        </button>
+                                        <button class="btn btn-outline-info btn-sm tool-btn" onclick="takeScreenshot()">
+                                            <i class="bi bi-camera"></i> Screenshot
+                                        </button>
+                                        <button class="btn btn-outline-danger btn-sm tool-btn" onclick="resetChart()">
+                                            <i class="bi bi-arrow-clockwise"></i> Reset Chart
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="saveChartTemplate()">
+                                            <i class="bi bi-save"></i> Save Template
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="loadChartTemplate()">
+                                            <i class="bi bi-folder"></i> Load Template
+                                        </button>
+                                        <button class="btn btn-outline-info btn-sm tool-btn" onclick="toggleFullScreen()">
+                                            <i class="bi bi-arrows-fullscreen"></i> Full Screen
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="toggleGrid()">
+                                            <i class="bi bi-grid"></i> Toggle Grid
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="toggleVolume()">
+                                            <i class="bi bi-volume-up"></i> Toggle Volume
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Studies Section -->
+                                <div class="tools-section">
+                                    <div class="tools-section-header" onclick="toggleSection('studies')">
+                                        <span><i class="bi bi-clipboard-data"></i> Studies</span>
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                    <div class="tools-section-content">
+                                        <button class="btn btn-outline-info btn-sm tool-btn" onclick="addStudy('PivotPoints')">
+                                            <i class="bi bi-bullseye"></i> Pivot Points
+                                        </button>
+                                        <button class="btn btn-outline-info btn-sm tool-btn" onclick="addStudy('VolumeProfile')">
+                                            <i class="bi bi-bar-chart-line"></i> Volume Profile
+                                        </button>
+                                        <button class="btn btn-outline-info btn-sm tool-btn" onclick="addStudy('MarketProfile')">
+                                            <i class="bi bi-file-bar-graph"></i> Market Profile
+                                        </button>
+                                        <button class="btn btn-outline-info btn-sm tool-btn" onclick="addStudy('Gann')">
+                                            <i class="bi bi-asterisk"></i> Gann Studies
+                                        </button>
+                                        <button class="btn btn-outline-info btn-sm tool-btn" onclick="addStudy('Cycles')">
+                                            <i class="bi bi-arrow-repeat"></i> Cycle Analysis
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Timeframes -->
+                                <div class="tools-section">
+                                    <div class="tools-section-header" onclick="toggleSection('timeframes')">
+                                        <span><i class="bi bi-clock"></i> Quick TF</span>
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                    <div class="tools-section-content">
+                                        <div class="btn-group-vertical w-100">
+                                            <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="setTimeframe('1')">
+                                                1 Minute
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="setTimeframe('5')">
+                                                5 Minutes
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="setTimeframe('15')">
+                                                15 Minutes
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="setTimeframe('30')">
+                                                30 Minutes
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="setTimeframe('60')">
+                                                1 Hour
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="setTimeframe('240')">
+                                                4 Hours
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="setTimeframe('D')">
+                                                Daily
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm tool-btn" onclick="setTimeframe('W')">
+                                                Weekly
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Dashboard Footer Section -->
+                    <div class="dashboard-footer">
+                        <!-- Stats Overview -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value" id="totalTrades">42</div>
+                                <div class="stat-label">Total Trades</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="winRate">78%</div>
+                                <div class="stat-label">Win Rate</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="totalProfit">$5,240</div>
+                                <div class="stat-label">Total Profit</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="avgTrade">$124.76</div>
+                                <div class="stat-label">Avg Trade</div>
+                            </div>
+                        </div>
+
+                        <!-- Achievements Section -->
+                        <h6 class="mt-4 mb-3">🏆 Trading Achievements</h6>
+                        <div class="achievements-grid">
+                            <div class="achievement-card">
+                                <div class="achievement-icon">🎯</div>
+                                <h6>Perfect Trade Streak</h6>
+                                <p>Completed 5 consecutive profitable trades</p>
+                                <div class="achievement-progress">
+                                    <div class="achievement-progress-bar" style="width: 100%"></div>
+                                </div>
+                                <small class="text-muted">Completed - Unlocked on Jan 5, 2026</small>
+                            </div>
+
+                            <div class="achievement-card">
+                                <div class="achievement-icon">📈</div>
+                                <h6>Risk Manager</h6>
+                                <p>Maintained risk below 2% for 30 days</p>
+                                <div class="achievement-progress">
+                                    <div class="achievement-progress-bar" style="width: 85%"></div>
+                                </div>
+                                <small class="text-muted">25/30 days completed</small>
+                            </div>
+
+                            <div class="achievement-card">
+                                <div class="achievement-icon">💰</div>
+                                <h6>Prop Firm Graduate</h6>
+                                <p>Completed Phase 1 & 2 of prop firm challenge</p>
+                                <div class="achievement-progress">
+                                    <div class="achievement-progress-bar" style="width: 100%"></div>
+                                </div>
+                                <small class="text-muted">Completed - Funded account: $100,000</small>
+                            </div>
+
+                            <div class="achievement-card">
+                                <div class="achievement-icon">⚡</div>
+                                <h6>Fast Executor</h6>
+                                <p>Execute trades within 3 seconds of signal</p>
+                                <div class="achievement-progress">
+                                    <div class="achievement-progress-bar" style="width: 60%"></div>
+                                </div>
+                                <small class="text-muted">18/30 required trades</small>
+                            </div>
+
+                            <div class="achievement-card">
+                                <div class="achievement-icon">🎲</div>
+                                <h6>Market Analyst</h6>
+                                <p>Analyze 50 different markets</p>
+                                <div class="achievement-progress">
+                                    <div class="achievement-progress-bar" style="width: 74%"></div>
+                                </div>
+                                <small class="text-muted">37/50 markets analyzed</small>
+                            </div>
+
+                            <div class="achievement-card">
+                                <div class="achievement-icon">🛡️</div>
+                                <h6>Discipline Master</h6>
+                                <p>Follow trading plan for 100 consecutive trades</p>
+                                <div class="achievement-progress">
+                                    <div class="achievement-progress-bar" style="width: 42%"></div>
+                                </div>
+                                <small class="text-muted">42/100 trades completed</small>
+                            </div>
+                        </div>
+
+                        <!-- Broker Links Section -->
+                        <h6 class="mt-4 mb-3">🤝 Recommended Brokers</h6>
+                        <div class="broker-links-grid">
+                            <a href="https://www.icmarkets.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://www.icmarkets.com/img/logos/icmarkets-logo.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">IC Markets</h6>
+                                    <p class="small mb-1">Raw Spreads from 0.0 pips</p>
+                                    <p class="broker-commission">Commission: $3.5 per lot</p>
+                                    <span class="badge bg-success">Best for Forex</span>
+                                </div>
+                            </a>
+
+                            <a href="https://www.pepperstone.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://www.pepperstone.com/site/themes/pepperstone/assets/img/pepperstone-logo.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">Pepperstone</h6>
+                                    <p class="small mb-1">ASIC & FCA Regulated</p>
+                                    <p class="broker-commission">Commission: $3.0 per lot</p>
+                                    <span class="badge bg-info">MT4/MT5</span>
+                                </div>
+                            </a>
+
+                            <a href="https://www.avatrade.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://www.avatrade.com/themes/custom/ava/images/logo/logo2x.png') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">AvaTrade</h6>
+                                    <p class="small mb-1">Multi-Asset Trading</p>
+                                    <p class="broker-commission">Commission: No</p>
+                                    <span class="badge bg-warning">Beginner Friendly</span>
+                                </div>
+                            </a>
+
+                            <a href="https://www.oanda.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://www.oanda.com/etc/designs/oanda/clientlib-site/images/oanda-logo.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">OANDA</h6>
+                                    <p class="small mb-1">Trusted since 1996</p>
+                                    <p class="broker-commission">Commission: No</p>
+                                    <span class="badge bg-primary">US Clients</span>
+                                </div>
+                            </a>
+
+                            <a href="https://www.fxpro.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://www.fxpro.com/site/themes/custom/fxpro/logo.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">FxPro</h6>
+                                    <p class="small mb-1">No Dealing Desk</p>
+                                    <p class="broker-commission">Commission: $4.5 per lot</p>
+                                    <span class="badge bg-danger">Premium Service</span>
+                                </div>
+                            </a>
+
+                            <a href="https://www.xm.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://www.xm.com/assets/img/logo/logo.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">XM</h6>
+                                    <p class="small mb-1">Leverage up to 1:888</p>
+                                    <p class="broker-commission">Commission: No</p>
+                                    <span class="badge bg-secondary">High Leverage</span>
+                                </div>
+                            </a>
+                            <a href="https://fbs.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://fbs.com/themes/custom/fbs_theme/logo.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">FBS</h6>
+                                    <p class="small mb-1">Leverage up to 1:3000</p>
+                                    <p class="broker-commission">Commission: No</p>
+                                    <span class="badge bg-success">Ultra High Leverage</span>
+                                </div>
+                            </a>
+                            <a href="https://fxpesa.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://fxpesa.com/wp-content/uploads/2022/10/fxpesa-logo.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">FXPesa</h6>
+                                    <p class="small mb-1">Leverage up to 1:400</p>
+                                    <p class="broker-commission">Commission: No</p>
+                                    <span class="badge bg-primary">Kenya Regulated</span>
+                                </div>
+                            </a>
+                            <a href="https://www.exness.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://www.exness.com/static/assets/images/logo-full.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">Exness</h6>
+                                    <p class="small mb-1">Leverage up to Unlimited</p>
+                                    <p class="broker-commission">Commission: Depends on account</p>
+                                    <span class="badge bg-warning text-dark">Popular Choice</span>
+                                </div>
+                            </a>
+
+                        </div>
+
+                        <!-- Prop Firm Links -->
+                        <h6 class="mt-4 mb-3">🏢 Proprietary Trading Firms</h6>
+                        <div class="broker-links-grid">
+                            <a href="https://www.ftmo.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://ftmo.com/wp-content/uploads/2020/11/ftmo-logo-1.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">FTMO</h6>
+                                    <p class="small mb-1">Up to $400,000 Funding</p>
+                                    <p class="broker-commission">Profit Split: 80% - 90%</p>
+                                    <span class="badge bg-success">Most Popular</span>
+                                </div>
+                            </a>
+                            <a href="https://fundednext.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://fundednext.com/wp-content/uploads/2022/08/FundedNext-Logo.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">FundedNext</h6>
+                                    <p class="small mb-1">Express & Evaluation Plans</p>
+                                    <p class="broker-commission">Profit Split: Up to 95%</p>
+                                    <span class="badge bg-success">Instant Funding</span>
+                                </div>
+                            </a>
+
+
+                            <a href="https://www.the5ers.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://the5ers.com/wp-content/themes/TheFundedTraderProgram/assets/images/logo/logo.svg') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">The5%ers</h6>
+                                    <p class="small mb-1">Fast Scaling Plan</p>
+                                    <p class="broker-commission">Profit Split: 50% - 100%</p>
+                                    <span class="badge bg-info">Scaling Available</span>
+                                </div>
+                            </a>
+
+                            <a href="https://www.myforexfunds.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://myforexfunds.com/wp-content/uploads/2023/01/logo-1.png') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">MyForexFunds</h6>
+                                    <p class="small mb-1">Instant Funding Available</p>
+                                    <p class="broker-commission">Profit Split: 80% - 85%</p>
+                                    <span class="badge bg-warning">Instant Funding</span>
+                                </div>
+                            </a>
+
+                            <a href="https://www.citytradersimperium.com" target="_blank" class="text-decoration-none">
+                                <div class="broker-card">
+                                    <div class="broker-logo" style="background: url('https://citytradersimperium.com/wp-content/uploads/2022/12/logo.png') no-repeat center; background-size: contain;"></div>
+                                    <h6 class="mb-1">City Traders Imperium</h6>
+                                    <p class="small mb-1">1-Step Evaluation</p>
+                                    <p class="broker-commission">Profit Split: 80%</p>
+                                    <span class="badge bg-primary">1-Step Challenge</span>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Call to Action -->
+                        <div class="footer-cta">
+                            <h5>Ready to Level Up Your Trading?</h5>
+                            <p class="mb-3">Join our community of successful traders and access exclusive resources</p>
+                            <button class="btn btn-light me-2" onclick="showNotification('Community registration coming soon!')">
+                                Join Community
+                            </button>
+                            <button class="btn btn-outline-light" onclick="showNotification('Downloading trading guide...')">
+                                Download Free Guide
+                            </button>
+                        </div>
+
+                        <!-- Copyright -->
+                        <div class="footer-copyright">
+                            <p class="mb-0">© 2026 BRAND-BENTLEY-DEV Trading Dashboard. All rights reserved.</p>
+                            <p class="mb-0 small">This is a demo trading platform for educational purposes. Past performance is not indicative of future results.</p>
+                            <div class="mt-2">
+                                <a href="{% url 'privacy_policy' %}" class="text-muted me-3" onclick="showNotification('Privacy policy coming soon')">Privacy Policy</a>
+                                <a href="{% url 'terms_of_service' %}" class="text-muted me-3" onclick="showNotification('Terms of service coming soon')">Terms of Service</a>
+                                <a href="{% url 'contact1' %}" class="text-muted me-3" onclick="showNotification('Contact form coming soon')">Contact</a>
+                                <a href="'{% url 'risk_disclosure' %}" class="text-muted" onclick="showNotification('Risk disclosure coming soon')">Risk Disclosure</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS includes -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
+<script type="text/javascript">
+    let widget = null;
+    let currentSymbol = "FX:EURUSD";
+    let currentInterval = "60";
+    let currentTheme = "dark";
+    let priceUpdateInterval = null;
+    let searchDebounceTimer = null;
+    let positions = [];
+    let pnlUpdateInterval = null;
+
+    // Initialize chart
+    function initializeChart() {
+        showLoader(true);
+        widget = new TradingView.widget({
+            autosize: true,
+            symbol: currentSymbol,
+            interval: currentInterval,
+            timezone: "Etc/UTC",
+            theme: currentTheme,
+            style: "1",
+            locale: "en",
+            toolbar_bg: currentTheme === 'dark' ? '#020617' : '#f1f3f6',
+            enable_publishing: false,
+            allow_symbol_change: true,
+            hide_top_toolbar: false,
+            hide_legend: false,
+            save_image: true,
+            container_id: "tradingview_chart",
+            overrides: {
+                "mainSeriesProperties.showCountdown": true,
+                "paneProperties.background": currentTheme === 'dark' ? '#020617' : '#ffffff',
+                "paneProperties.vertGridProperties.color": currentTheme === 'dark' ? '#1f2937' : '#E5E7EB',
+                "paneProperties.horzGridProperties.color": currentTheme === 'dark' ? '#1f2937' : '#E5E7EB'
+            }
+        });
+
+        setTimeout(() => {
+            showLoader(false);
+            startRealTimePriceUpdates();
+            updateSymbolDisplay(currentSymbol);
+            document.getElementById('orderSymbol').value = getSymbolDisplayName(currentSymbol);
+            updateOrderPrice();
+        }, 1500);
+    }
+
+    function showLoader(show) {
+        document.getElementById('chartLoader').style.display = show ? 'flex' : 'none';
+    }
+
+    function loadSymbol(symbol) {
+        currentSymbol = symbol;
+        showLoader(true);
+        if (widget) {
+            widget.chart().setSymbol(symbol);
+            updateSymbolDisplay(symbol);
+            updatePriceFromAPI();
+            document.getElementById('orderSymbol').value = getSymbolDisplayName(symbol);
+            updateOrderPrice();
+        }
+        setTimeout(() => showLoader(false), 800);
+    }
+
+    function updateSymbolDisplay(symbol) {
+        const symbolName = getSymbolDisplayName(symbol);
+        document.getElementById('symbolName').textContent = symbolName;
+        document.getElementById('currentSymbolDisplay').style.display = 'block';
+    }
+
+    function getSymbolDisplayName(symbol) {
+        const symbolMap = {
+            'FX:EURUSD': 'EUR/USD',
+            'FX:GBPUSD': 'GBP/USD',
+            'FX:USDJPY': 'USD/JPY',
+            'FX:USDCHF': 'USD/CHF',
+            'FX:USDCAD': 'USD/CAD',
+            'FX:AUDUSD': 'AUD/USD',
+            'FX:NZDUSD': 'NZD/USD',
+            'FX:EURGBP': 'EUR/GBP',
+            'FX:EURJPY': 'EUR/JPY',
+            'FX:GBPJPY': 'GBP/JPY',
+            'FX:EURCHF': 'EUR/CHF',
+            'FX:AUDJPY': 'AUD/JPY',
+            'FX:CADJPY': 'CAD/JPY',
+            'OANDA:XAUUSD': 'XAU/USD',
+            'OANDA:XAGUSD': 'XAG/USD',
+            'BINANCE:BTCUSDT': 'BTC/USDT',
+            'BINANCE:ETHUSDT': 'ETH/USDT',
+            'BINANCE:ADAUSDT': 'ADA/USDT',
+            'BINANCE:DOTUSDT': 'DOT/USDT',
+            'BINANCE:BNBUSDT': 'BNB/USDT',
+            'BINANCE:XRPUSDT': 'XRP/USDT',
+            'BINANCE:SOLUSDT': 'SOL/USDT',
+            'BINANCE:DOGEUSDT': 'DOGE/USDT',
+            'BINANCE:MATICUSDT': 'MATIC/USDT',
+            'BINANCE:AVAXUSDT': 'AVAX/USDT',
+            'NASDAQ:AAPL': 'AAPL',
+            'NASDAQ:TSLA': 'TSLA',
+            'NASDAQ:MSFT': 'MSFT',
+            'NASDAQ:GOOGL': 'GOOGL',
+            'NASDAQ:AMZN': 'AMZN',
+            'NASDAQ:META': 'META',
+            'NASDAQ:NVDA': 'NVDA',
+            'SP:SPX': 'S&P 500',
+            'AMEX:SPY': 'SPY',
+            'NASDAQ:QQQ': 'QQQ',
+            'NYSE:IBM': 'IBM',
+            'NYSE:JPM': 'JPM'
+        };
+        return symbolMap[symbol] || symbol;
+    }
+
+    async function updatePriceFromAPI() {
+        try {
+            // Simulated API call
+            const price = Math.random() * 100 + 100;
+            const change = (Math.random() - 0.5) * 2;
+            const changePercent = (change / price * 100).toFixed(2);
+            const high = price + Math.random() * 2;
+            const low = price - Math.random() * 2;
+
+            const priceElement = document.getElementById('symbolPrice');
+            const changeElement = document.getElementById('symbolChange');
+            const rangeElement = document.getElementById('symbolRange');
+
+            priceElement.textContent = price.toFixed(4);
+            changeElement.textContent = `${change >= 0 ? '+' : ''}${changePercent}%`;
+            changeElement.className = change >= 0 ? 'positive' : 'negative';
+            rangeElement.textContent = `Range: ${low.toFixed(4)} - ${high.toFixed(4)}`;
+        } catch (error) {
+            console.error('Error updating price:', error);
+        }
+    }
+
+    function startRealTimePriceUpdates() {
+        if (priceUpdateInterval) {
+            clearInterval(priceUpdateInterval);
+        }
+        priceUpdateInterval = setInterval(updatePriceFromAPI, 5000);
+        updatePriceFromAPI();
+    }
+
+    function searchSymbol() {
+        const searchInput = document.getElementById('symbolSearch');
+        const searchTerm = searchInput.value.trim().toUpperCase();
+        if (!searchTerm) return;
+
+        const searchMap = {
+            'XAUUSD': 'OANDA:XAUUSD',
+            'GOLD': 'OANDA:XAUUSD',
+            'SILVER': 'OANDA:XAGUSD',
+            'GBPJPY': 'FX:GBPJPY',
+            'EURJPY': 'FX:EURJPY',
+            'USDCAD': 'FX:USDCAD',
+            'EURUSD': 'FX:EURUSD',
+            'GBPUSD': 'FX:GBPUSD',
+            'USDJPY': 'FX:USDJPY',
+            'BTC': 'BINANCE:BTCUSDT',
+            'BTCUSDT': 'BINANCE:BTCUSDT',
+            'BITCOIN': 'BINANCE:BTCUSDT',
+            'ETH': 'BINANCE:ETHUSDT',
+            'ETHUSDT': 'BINANCE:ETHUSDT',
+            'ETHEREUM': 'BINANCE:ETHUSDT',
+            'SPX': 'SP:SPX',
+            'SP500': 'SP:SPX',
+            'ES': 'CME_MINI:ES1!',
+            'AAPL': 'NASDAQ:AAPL',
+            'APPLE': 'NASDAQ:AAPL',
+            'TSLA': 'NASDAQ:TSLA',
+            'TESLA': 'NASDAQ:TSLA'
+        };
+
+        const symbol = searchMap[searchTerm] || searchTerm;
+        loadSymbol(symbol);
+        searchInput.value = '';
+    }
+
+    function updateChart() {
+        const timeframe = document.getElementById('timeframe').value;
+        currentInterval = timeframe;
+        if (widget) {
+            showLoader(true);
+            widget.chart().setResolution(timeframe);
+            setTimeout(() => showLoader(false), 500);
+        }
+    }
+
+    function setTimeframe(tf) {
+        document.getElementById('timeframe').value = tf;
+        updateChart();
+    }
+
+    function updateChartTheme() {
+        const theme = document.getElementById('chartTheme').value;
+        if (theme === currentTheme) return;
+        currentTheme = theme;
+        document.getElementById('tradingview_chart').innerHTML = '';
+        initializeChart();
+    }
+
+    // Watchlist Functions
+    function loadWatchlist() {
+        const watchlist = JSON.parse(localStorage.getItem('tradingDashboardWatchlist')) || [];
+        const watchlistList = document.getElementById('watchlistList');
+        watchlistList.innerHTML = '';
+
+        if (watchlist.length === 0) {
+            watchlistList.innerHTML = '<li class="list-group-item text-muted text-center">No symbols in watchlist</li>';
+            return;
+        }
+
+        watchlist.forEach(symbol => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item watchlist-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `
+                <span>${getSymbolDisplayName(symbol)}</span>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="loadSymbol('${symbol}')">Load</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeFromWatchlist('${symbol}')">Remove</button>
+                </div>
+            `;
+            watchlistList.appendChild(li);
+        });
+    }
+
+    function addToWatchlist() {
+        const input = document.getElementById('watchlistInput');
+        const symbol = input.value.trim().toUpperCase();
+
+        if (!symbol) {
+            showNotification('Please enter a symbol');
+            return;
+        }
+
+        let tvSymbol = symbol;
+        if (!symbol.includes(':')) {
+            if (symbol.includes('USD')) {
+                tvSymbol = `FX:${symbol}`;
+            } else if (symbol.includes('BTC') || symbol.includes('ETH')) {
+                tvSymbol = `BINANCE:${symbol}`;
+            } else {
+                tvSymbol = `NASDAQ:${symbol}`;
+            }
+        }
+
+        let watchlist = JSON.parse(localStorage.getItem('tradingDashboardWatchlist')) || [];
+
+        if (watchlist.includes(tvSymbol)) {
+            showNotification('Symbol already in watchlist');
+            return;
+        }
+
+        watchlist.push(tvSymbol);
+        localStorage.setItem('tradingDashboardWatchlist', JSON.stringify(watchlist));
+        loadWatchlist();
+        input.value = '';
+        showNotification(`Added ${getSymbolDisplayName(tvSymbol)} to watchlist`);
+    }
+
+    function removeFromWatchlist(symbol) {
+        let watchlist = JSON.parse(localStorage.getItem('tradingDashboardWatchlist')) || [];
+        watchlist = watchlist.filter(s => s !== symbol);
+        localStorage.setItem('tradingDashboardWatchlist', JSON.stringify(watchlist));
+        loadWatchlist();
+        showNotification(`Removed ${getSymbolDisplayName(symbol)} from watchlist`);
+    }
+
+    function clearWatchlist() {
+        if (confirm('Are you sure you want to clear the entire watchlist?')) {
+            localStorage.removeItem('tradingDashboardWatchlist');
+            loadWatchlist();
+            showNotification('Watchlist cleared');
+        }
+    }
+
+    // Positions Management
+    function updatePositionsDisplay() {
+        const table = document.getElementById('positionsTable');
+        const noPositionsMessage = document.getElementById('noPositionsMessage');
+        const totalPositions = document.getElementById('totalPositions');
+        const totalPnl = document.getElementById('totalPnl');
+        const totalMargin = document.getElementById('totalMargin');
+
+        if (positions.length === 0) {
+            table.innerHTML = '';
+            noPositionsMessage.style.display = 'block';
+            totalPositions.textContent = '0';
+            totalPnl.textContent = '$0.00';
+            totalPnl.className = 'fw-bold';
+            totalMargin.textContent = '$0.00';
+            return;
+        }
+
+        noPositionsMessage.style.display = 'none';
+        table.innerHTML = '';
+
+        let totalProfitLoss = 0;
+        let totalMarginUsed = 0;
+
+        positions.forEach(position => {
+            totalProfitLoss += position.pnl;
+            totalMarginUsed += position.margin || position.lot * 1000;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="fw-semibold">${position.symbol}</td>
+                <td>
+                    <span class="badge ${position.side === 'BUY' ? 'bg-success' : 'bg-danger'}">
+                        ${position.side}
+                    </span>
+                </td>
+                <td>${position.lot.toFixed(2)}</td>
+                <td>${typeof position.entry === 'number' ? position.entry.toFixed(4) : position.entry}</td>
+                <td>
+                    ${position.sl ?
+                        `<span class="text-danger">${typeof position.sl === 'number' ? position.sl.toFixed(4) : position.sl}</span>` :
+                        '<span class="text-muted">-</span>'}
+                </td>
+                <td>
+                    ${position.tp ?
+                        `<span class="text-success">${typeof position.tp === 'number' ? position.tp.toFixed(4) : position.tp}</span>` :
+                        '<span class="text-muted">-</span>'}
+                </td>
+                <td class="${position.pnl >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold'}">
+                    ${position.pnl >= 0 ? '+' : ''}$${Math.abs(position.pnl).toFixed(2)}
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-danger position-close-btn"
+                            onclick="closeTrade('${position.id}')"
+                            title="Close position">
+                        ✕
+                    </button>
+                </td>
+            `;
+            table.appendChild(row);
+        });
+
+        totalPositions.textContent = positions.length;
+        totalPnl.textContent = `${totalProfitLoss >= 0 ? '+' : ''}$${Math.abs(totalProfitLoss).toFixed(2)}`;
+        totalPnl.className = totalProfitLoss >= 0 ? 'text-success fw-bold' : 'text-danger fw-bold';
+        totalMargin.textContent = `$${totalMarginUsed.toFixed(2)}`;
+    }
+
+    function addPosition(position) {
+        const newPosition = {
+            id: position.id || 'POS_' + Date.now(),
+            symbol: position.symbol,
+            side: position.side,
+            lot: position.lot || 0.1,
+            entry: position.entry || getCurrentPrice(),
+            sl: position.sl || null,
+            tp: position.tp || null,
+            pnl: position.pnl || 0,
+            margin: position.margin || (position.lot || 0.1) * 1000,
+            timestamp: new Date().toISOString()
+        };
+
+        positions.push(newPosition);
+        updatePositionsDisplay();
+        showNotification(`${newPosition.side} position added for ${newPosition.symbol}`);
+    }
+
+    function closeTrade(tradeId) {
+        const positionIndex = positions.findIndex(pos => pos.id === tradeId);
+        if (positionIndex !== -1) {
+            const position = positions[positionIndex];
+            positions.splice(positionIndex, 1);
+            updatePositionsDisplay();
+            showNotification(`Closed ${position.side} position for ${position.symbol}`);
+        }
+    }
+
+    function closeAllTrades() {
+        if (positions.length === 0) {
+            showNotification('No positions to close', 'info');
+            return;
+        }
+
+        if (confirm(`Are you sure you want to close all ${positions.length} positions?`)) {
+            const closedCount = positions.length;
+            positions = [];
+            updatePositionsDisplay();
+            showNotification(`Closed all ${closedCount} positions`);
+        }
+    }
+
+    function getCurrentPrice() {
+        const priceText = document.getElementById('symbolPrice').textContent;
+        if (priceText && priceText !== 'Loading...') {
+            return parseFloat(priceText);
+        }
+        return Math.random() * 100 + 100;
+    }
+
+    function updateOrderPrice() {
+        const currentPrice = getCurrentPrice();
+        document.getElementById('orderPrice').value = currentPrice.toFixed(4);
+    }
+
+    // Order Functions
+    function placeOrder() {
+        const symbol = document.getElementById('orderSymbol').value;
+        const isBuy = document.getElementById('orderBuy').checked;
+        const qty = parseFloat(document.getElementById('orderQty').value);
+        const orderType = document.getElementById('orderType').value;
+        const price = orderType === 'market' ? null : parseFloat(document.getElementById('orderPrice').value);
+
+        if (!symbol) {
+            showNotification('Please select a symbol first', 'error');
+            return;
+        }
+
+        if (qty <= 0) {
+            showNotification('Quantity must be positive', 'error');
+            return;
+        }
+
+        if ((orderType === 'limit' || orderType === 'stop') && !price) {
+            showNotification('Please enter a price for limit/stop order', 'error');
+            return;
+        }
+
+        const side = isBuy ? 'BUY' : 'SELL';
+        const orderId = 'DEMO_' + Date.now();
+
+        const orderStatus = document.getElementById('orderStatus');
+        orderStatus.textContent = `Placing ${side} ${qty} lots ${orderType} order for ${symbol}...`;
+        orderStatus.className = 'text-info';
+
+        const entryPrice = orderType === 'market' ? getCurrentPrice() : price;
+
+        setTimeout(() => {
+            orderStatus.textContent = `✅ ${side} order #${orderId} filled for ${symbol}`;
+            orderStatus.className = 'text-success';
+
+            // Calculate random PnL for demo
+            const pnl = (Math.random() - 0.5) * qty * 100;
+
+            addPosition({
+                id: orderId,
+                symbol: symbol,
+                side: side,
+                lot: qty,
+                entry: entryPrice,
+                sl: entryPrice * (side === 'BUY' ? 0.995 : 1.005),
+                tp: entryPrice * (side === 'BUY' ? 1.01 : 0.99),
+                pnl: pnl
+            });
+
+            showNotification(`${side} order placed successfully!`);
+        }, 1500);
+    }
+
+    // Theme Management
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('dashboardTheme', theme);
+
+        const chartTheme = document.getElementById('chartTheme');
+        if (theme === 'dark' && chartTheme.value !== 'dark') {
+            chartTheme.value = 'dark';
+            updateChartTheme();
+        } else if (theme === 'light' && chartTheme.value !== 'light') {
+            chartTheme.value = 'light';
+            updateChartTheme();
+        }
+    }
+
+    function loadTheme() {
+        const savedTheme = localStorage.getItem('dashboardTheme') || 'dark';
+        document.getElementById('themeSwitcher').value = savedTheme;
+        setTheme(savedTheme);
+    }
+
+    // Notification System
+    function showNotification(message, type = 'success') {
+        const existing = document.querySelector('.custom-notification');
+        if (existing) existing.remove();
+
+        const notification = document.createElement('div');
+        notification.className = `custom-notification alert alert-${type === 'error' ? 'danger' : 'info'} position-fixed`;
+        notification.style.cssText = `
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease-out;
+        `;
+
+        notification.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <span>${message}</span>
+                <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    // Tools Column Functions
+    function toggleSection(sectionId) {
+        const section = event.target.closest('.tools-section');
+        const isActive = section.classList.contains('active');
+        const icon = section.querySelector('.tools-section-header i:last-child');
+
+        if (isActive) {
+            section.classList.remove('active');
+            icon.classList.remove('bi-chevron-down');
+            icon.classList.add('bi-chevron-right');
+        } else {
+            section.classList.add('active');
+            icon.classList.remove('bi-chevron-right');
+            icon.classList.add('bi-chevron-down');
+        }
+    }
+
+    function addIndicator(indicator) {
+        if (!widget) return;
+        showNotification(`Added ${indicator} indicator`);
+    }
+
+    function activateTool(tool) {
+        if (!widget) return;
+        showNotification(`Activated ${tool.replace('_', ' ')} tool`);
+    }
+
+    function clearAllIndicators() {
+        if (!widget) return;
+        showNotification('Cleared all indicators');
+    }
+
+    function clearAllDrawings() {
+        if (!widget) return;
+        showNotification('Cleared all drawings');
+    }
+
+    function takeScreenshot() {
+        if (!widget) return;
+        showNotification('Screenshot taken!');
+    }
+
+    function resetChart() {
+        if (!widget) return;
+        loadSymbol('FX:EURUSD');
+        setTimeframe('60');
+        showNotification('Chart reset to defaults');
+    }
+
+    function saveChartTemplate() {
+        showNotification('Chart template saved');
+    }
+
+    function loadChartTemplate() {
+        showNotification('Chart template loaded');
+    }
+
+    function toggleFullScreen() {
+        const chartContainer = document.querySelector('.chart-with-tools-container');
+        if (!document.fullscreenElement) {
+            chartContainer.requestFullscreen().catch(err => {
+                console.error('Error attempting to enable fullscreen:', err);
+            });
+            showNotification('Entered fullscreen mode');
+        } else {
+            document.exitFullscreen();
+            showNotification('Exited fullscreen mode');
+        }
+    }
+
+    function toggleGrid() {
+        showNotification('Grid toggled');
+    }
+
+    function toggleVolume() {
+        showNotification('Volume toggled');
+    }
+
+    function addStudy(study) {
+        showNotification(`Added ${study} study`);
+    }
+
+    // Prop Firm Rules
+    function loadPropFirmRules() {
+        const rules = [
+            { name: 'Daily Loss Limit', value: '5%', status: 'OK', color: 'success' },
+            { name: 'Max Drawdown', value: '10%', status: 'Watching', color: 'warning' },
+            { name: 'Profit Target', value: '8%', status: 'Pending', color: 'info' },
+            { name: 'Minimum Trading Days', value: '5/10', status: 'On Track', color: 'success' }
+        ];
+
+        const ruleElement = document.getElementById('ruleStatus');
+        ruleElement.innerHTML = rules.map(rule =>
+            `<span class="badge bg-${rule.color} me-1">${rule.name}: ${rule.value}</span>`
+        ).join('');
+    }
+
+    // Admin Risk Dashboard
+    function loadAdminRiskData() {
+        const traders = [
+            { name: 'John Doe', balance: 12540, dailyLoss: -320, phase: 'Evaluation', maxDrawdown: 8.2 },
+            { name: 'Jane Smith', balance: 8920, dailyLoss: -150, phase: 'Funded', maxDrawdown: 4.5 },
+            { name: 'Mike Johnson', balance: 15600, dailyLoss: 420, phase: 'Challenge', maxDrawdown: 9.1 },
+            { name: 'Sarah Williams', balance: 21000, dailyLoss: 850, phase: 'Funded', maxDrawdown: 3.2 }
+        ];
+
+        const tableBody = document.querySelector('#adminRiskTable tbody');
+        tableBody.innerHTML = '';
+
+        traders.forEach(trader => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${trader.name}</td>
+                <td>$${trader.balance.toLocaleString()}</td>
+                <td class="${trader.dailyLoss >= 0 ? 'text-success' : 'text-danger'}">${trader.dailyLoss >= 0 ? '+' : ''}$${Math.abs(trader.dailyLoss)}</td>
+                <td><span class="badge ${trader.phase === 'Funded' ? 'bg-success' : 'bg-warning'}">${trader.phase}</span></td>
+                <td>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar ${trader.maxDrawdown > 8 ? 'bg-danger' : trader.maxDrawdown > 6 ? 'bg-warning' : 'bg-success'}"
+                             style="width: ${trader.maxDrawdown * 10}%">
+                        </div>
+                    </div>
+                    <small>${trader.maxDrawdown}%</small>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // Update positions PnL in real-time
+    function updatePositionsPnL() {
+        if (positions.length === 0) return;
+
+        positions.forEach(position => {
+            const change = (Math.random() - 0.5) * 20;
+            position.pnl += change;
+
+            const maxPnL = position.lot * 500;
+            position.pnl = Math.max(-maxPnL, Math.min(maxPnL, position.pnl));
+        });
+
+        updatePositionsDisplay();
+    }
+
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize components
+        initializeChart();
+        loadWatchlist();
+        loadTheme();
+        loadPropFirmRules();
+        loadAdminRiskData();
+
+        // Event listeners
+        document.getElementById('searchBtn').addEventListener('click', searchSymbol);
+        document.getElementById('symbolSearch').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchSymbol();
+        });
+
+        document.getElementById('timeframe').addEventListener('change', updateChart);
+        document.getElementById('chartTheme').addEventListener('change', updateChartTheme);
+        document.getElementById('themeSwitcher').addEventListener('change', function() {
+            setTheme(this.value);
+        });
+
+        document.getElementById('addWatchlistBtn').addEventListener('click', addToWatchlist);
+        document.getElementById('watchlistInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addToWatchlist();
+        });
+
+        document.getElementById('clearWatchlistBtn').addEventListener('click', clearWatchlist);
+        document.getElementById('placeOrderBtn').addEventListener('click', placeOrder);
+
+        // Add demo positions
+        setTimeout(() => {
+            addPosition({
+                id: 'DEMO_001',
+                symbol: 'EUR/USD',
+                side: 'BUY',
+                lot: 1.5,
+                entry: 1.0850,
+                sl: 1.0800,
+                tp: 1.0950,
+                pnl: 42.50
+            });
+
+            addPosition({
+                id: 'DEMO_002',
+                symbol: 'XAU/USD',
+                side: 'SELL',
+                lot: 0.2,
+                entry: 2050.00,
+                sl: 2070.00,
+                tp: 2020.00,
+                pnl: -15.20
+            });
+
+            addPosition({
+                id: 'DEMO_003',
+                symbol: 'BTC/USDT',
+                side: 'BUY',
+                lot: 0.05,
+                entry: 89450.25,
+                sl: 85000.00,
+                tp: 95000.00,
+                pnl: 275.40
+            });
+
+            addPosition({
+                id: 'DEMO_004',
+                symbol: 'AAPL',
+                side: 'SELL',
+                lot: 10,
+                entry: 245.60,
+                sl: 250.00,
+                tp: 240.00,
+                pnl: -28.75
+            });
+        }, 2000);
+
+        // Auto-refresh
+        setInterval(() => {
+            updatePriceFromAPI();
+            loadAdminRiskData();
+        }, 30000);
+
+        // Update PnL every 10 seconds
+        pnlUpdateInterval = setInterval(updatePositionsPnL, 10000);
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (priceUpdateInterval) clearInterval(priceUpdateInterval);
+        if (pnlUpdateInterval) clearInterval(pnlUpdateInterval);
+    });
+
+    // Add CSS for notifications
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .custom-notification {
+            animation: slideIn 0.3s ease-out;
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>

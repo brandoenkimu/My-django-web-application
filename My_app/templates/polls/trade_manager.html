@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade Manager | Bentley BoldTrader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --bentley-black: #0A0A0A;
+            --bentley-dark: #121212;
+            --bentley-gray: #1A1A1A;
+            --bentley-light-gray: #2D2D2D;
+            --bentley-gold: #C9A86A;
+            --bentley-gold-dark: #9C8242;
+            --bentley-gold-light: #E8D9B5;
+            --success: #00C853;
+            --warning: #FF9800;
+            --danger: #FF5252;
+            --info: #2196F3;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --card-bg: #1A1A1A;
+            --border-color: #333333;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            background-color: var(--bentley-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bentley-black) 0%, #151515 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bentley-gold);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .logo-icon {
+            color: var(--bentley-gold);
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, var(--bentley-gold), var(--bentley-gold-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text span {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--bentley-gold);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Trade Dashboard */
+        .trade-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--bentley-gold), var(--bentley-gold-light));
+            transform: scaleX(0);
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--bentley-gold);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(201, 168, 106, 0.1), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--bentley-gold);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Trade Metrics */
+        .trade-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, var(--bentley-gray), var(--bentley-light-gray));
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent, rgba(201, 168, 106, 0.05));
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .metric-card:hover::before {
+            opacity: 1;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--bentley-gold);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-name {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-family: 'Source Code Pro', monospace;
+            position: relative;
+        }
+
+        .metric-change {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: transform var(--transition-speed) ease;
+            position: relative;
+        }
+
+        .metric-change:hover {
+            transform: scale(1.05);
+        }
+
+        .change-positive {
+            background-color: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .change-negative {
+            background-color: rgba(255, 82, 82, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        /* Bulk Actions */
+        .bulk-actions {
+            background-color: var(--bentley-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            transition: border-color var(--transition-speed) ease;
+        }
+
+        .bulk-actions:hover {
+            border-color: var(--bentley-gold);
+        }
+
+        .bulk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .bulk-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            padding: 0.8rem 1rem;
+            background-color: var(--bentley-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--bentley-gold);
+            box-shadow: 0 0 0 2px rgba(201, 168, 106, 0.1);
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23C9A86A' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px;
+            padding-right: 2.5rem;
+        }
+
+        /* Checkbox Groups */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--bentley-gold);
+            cursor: pointer;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .checkbox-group input[type="checkbox"]:hover {
+            transform: scale(1.1);
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: border-color var(--transition-speed) ease;
+        }
+
+        .table-container:hover {
+            border-color: var(--bentley-gold);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            transition: all var(--transition-speed) ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(201, 168, 106, 0.05);
+            color: var(--text-primary);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .status-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .status-active {
+            background-color: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-pending {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .status-closed {
+            background-color: rgba(158, 158, 158, 0.1);
+            color: var(--text-secondary);
+            border: 1px solid var(--text-secondary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            background-color: var(--bentley-gold);
+            color: var(--bentley-black);
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        .btn:hover {
+            background-color: var(--bentley-gold-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 106, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--bentley-gold);
+            border: 1px solid var(--bentley-gold);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(201, 168, 106, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #00B248;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #FF3838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 82, 82, 0.3);
+        }
+
+        .btn-small {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.3rem;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 1;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .trade-dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .bulk-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .trade-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .trade-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bentley-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bentley-gold);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bentley-gold-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo" onclick="window.location.href='/'">
+            <div class="logo-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="logo-text">BENTLEY<span>BOLDTRADER</span></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 20px; border: 1px solid var(--success); transition: all var(--transition-speed) ease; cursor: pointer;"
+                 onclick="toggleAutoManagement()" id="autoManageIndicator">
+                <div id="autoManageDot" style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--success);"></div>
+                <span id="autoManageText">AI-MANAGEMENT: ACTIVE</span>
+            </div>
+            <div style="color: var(--text-secondary); font-family: 'Source Code Pro', monospace;">
+                <span id="currentDateTime">January 17, 2026 15:45:22</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Quantum Trade Manager</h1>
+                <p class="page-subtitle">AI-powered trade management, execution, and optimization for 2026</p>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button class="btn" onclick="executeAIStrategy()" id="aiStrategyBtn">
+                    <i class="fas fa-robot"></i> Execute AI Strategy
+                </button>
+                <button class="btn-secondary" onclick="exportQuantumTrades()">
+                    <i class="fas fa-file-export"></i> Quantum Export
+                </button>
+                <button class="btn-secondary" onclick="showAICoach()">
+                    <i class="fas fa-chalkboard-teacher"></i> AI Coach
+                </button>
+            </div>
+        </div>
+
+        <!-- Trade Metrics -->
+        <div class="trade-metrics fade-in" id="tradeMetrics">
+            <!-- Metrics will be populated dynamically -->
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bulk-actions fade-in">
+            <div class="bulk-header">
+                <h3 style="color: var(--bentley-gold-light);">
+                    <i class="fas fa-bolt"></i> Quantum Bulk Management
+                </h3>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                        <span id="selectedCount">0</span> selected
+                    </div>
+                    <button class="btn-secondary btn-small" onclick="selectAllTrades()">
+                        <i class="fas fa-check-square"></i> All
+                    </button>
+                    <button class="btn-secondary btn-small" onclick="deselectAllTrades()">
+                        <i class="far fa-square"></i> None
+                    </button>
+                    <button class="btn-secondary btn-small" onclick="selectAIRecommended()">
+                        <i class="fas fa-robot"></i> AI Select
+                    </button>
+                </div>
+            </div>
+
+            <div class="bulk-controls">
+                <div class="form-group">
+                    <label class="form-label">Apply Quantum Action</label>
+                    <select class="form-control" id="bulkAction">
+                        <option value="">Choose quantum action...</option>
+                        <option value="close">Close with AI Optimization</option>
+                        <option value="stop-loss">Set Dynamic Stop Loss</option>
+                        <option value="take-profit">Set Smart Take Profit</option>
+                        <option value="trailing-stop">Enable Adaptive Trailing</option>
+                        <option value="hedge">Add AI Hedge Positions</option>
+                        <option value="rebalance">Rebalance with AI</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Filter by AI Analysis</label>
+                    <select class="form-control" id="bulkFilter">
+                        <option value="all">All Quantum Trades</option>
+                        <option value="profitable">AI-Profit Potential ≥ 70%</option>
+                        <option value="losing">AI-Risk Alert ≥ 60%</option>
+                        <option value="tech">Quantum Tech Sector</option>
+                        <option value="selected">AI-Selected Below</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">AI Execution Mode</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="aiOptimize" checked>
+                        <label for="aiOptimize">AI-Optimize executions</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="aiTime" checked>
+                        <label for="aiTime">Time with AI scheduling</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trade Dashboard -->
+        <div class="trade-dashboard fade-in">
+            <!-- Active Positions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-atom"></i> Quantum Positions</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;" id="positionsCount">17 Positions</span>
+                        <i class="fas fa-sync-alt" style="color: var(--bentley-gold); cursor: pointer;" onclick="refreshPositions()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;"></th>
+                                    <th>Symbol</th>
+                                    <th>Quantum Position</th>
+                                    <th>Entry</th>
+                                    <th>Current</th>
+                                    <th>AI P&L</th>
+                                    <th>Quantum Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activePositionsTable">
+                                <!-- Positions will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Management -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-tasks"></i> AI Order Management</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;" id="ordersCount">8 Pending</span>
+                        <i class="fas fa-bolt" style="color: var(--warning); cursor: pointer;" onclick="executeAllAIOrders()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Quantum ID</th>
+                                    <th>Symbol</th>
+                                    <th>AI Order Type</th>
+                                    <th>Quantum Status</th>
+                                    <th>AI Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="orderManagementTable">
+                                <!-- Orders will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn-secondary btn-small" onclick="createAIOrder()">
+                            <i class="fas fa-plus"></i> AI Order
+                        </button>
+                        <button class="btn-secondary btn-small" onclick="viewQuantumOrders()">
+                            <i class="fas fa-list"></i> Quantum View
+                        </button>
+                        <button class="btn-secondary btn-small" onclick="optimizeAllOrders()">
+                            <i class="fas fa-magic"></i> AI Optimize
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trade Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-bar"></i> Quantum Performance</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">AI-Analyzed</span>
+                        <i class="fas fa-chart-line" style="color: var(--info); cursor: pointer;" onclick="showPerformanceDetails()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="tradePerformanceChart"></canvas>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1.5rem;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);" id="winRate">72.4%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Quantum Win Rate</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);" id="todayPL">+$42,580</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Today's AI-P&L</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);" id="winLossRatio">1.82</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">AI Win/Loss Ratio</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--danger);" id="maxDrawdown">-4.2%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Quantum Drawdown</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Controls -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-shield-alt"></i> Quantum Risk Controls</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="status-badge status-active pulse">AI-ACTIVE</span>
+                        <i class="fas fa-brain" style="color: var(--info); cursor: pointer;" onclick="showRiskAI()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">AI Position Limits</h4>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border-color);">
+                            <span style="color: var(--text-secondary);">Max Position Size</span>
+                            <span style="color: var(--bentley-gold); font-weight: 600;">$75,000</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border-color);">
+                            <span style="color: var(--text-secondary);">Max Daily Loss (AI)</span>
+                            <span style="color: var(--danger); font-weight: 600;">-$15,000</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.3rem 0;">
+                            <span style="color: var(--text-secondary);">Quantum Drawdown</span>
+                            <span style="color: var(--warning); font-weight: 600;">8%</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">AI Auto-Close Rules</h4>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border-color);">
+                            <span style="color: var(--text-secondary);">Dynamic Stop Loss</span>
+                            <span style="color: var(--success); font-weight: 600;">AI-Adaptive</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border-color);">
+                            <span style="color: var(--text-secondary);">Smart Take Profit</span>
+                            <span style="color: var(--success); font-weight: 600;">Active</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 0.3rem 0;">
+                            <span style="color: var(--text-secondary);">Quantum Hedging</span>
+                            <span style="color: var(--info); font-weight: 600;">Enabled</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn-secondary" style="flex: 1;" onclick="configureAIRisk()">
+                            <i class="fas fa-cog"></i> AI Configure
+                        </button>
+                        <button class="btn-secondary" style="flex: 1;" onclick="viewQuantumRiskReport()">
+                            <i class="fas fa-chart-bar"></i> Quantum Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantum Trade History -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-history"></i> Quantum Trade History</h3>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">AI-Analyzed</span>
+                    <button class="btn-secondary btn-small" onclick="loadMoreHistory()">
+                        <i class="fas fa-arrow-down"></i> Load More
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Quantum Time</th>
+                                <th>Symbol</th>
+                                <th>AI Action</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Quantum P&L</th>
+                                <th>AI Status</th>
+                                <th>Analysis</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradeHistoryTable">
+                            <!-- History will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    <i class="fas fa-robot" style="color: var(--info);"></i> AI Analysis: <span id="aiInsight">Most trades executed with optimal timing</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trade Analytics -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chart-pie"></i> Quantum Trade Analytics</h3>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <button class="btn-secondary btn-small" onclick="runQuantumAnalytics()">
+                        <i class="fas fa-play"></i> Run Quantum Analysis
+                    </button>
+                    <button class="btn-secondary btn-small" onclick="exportAnalytics()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div>
+                        <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">AI Strategy Performance</h4>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Quantum Trend AI</span>
+                                    <span style="color: var(--success);">+24.8%</span>
+                                </div>
+                                <div style="height: 4px; background-color: var(--bentley-light-gray); border-radius: 2px; margin-top: 0.2rem;">
+                                    <div style="width: 90%; height: 100%; background-color: var(--success); border-radius: 2px;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Neural Mean Reversion</span>
+                                    <span style="color: var(--success);">+18.2%</span>
+                                </div>
+                                <div style="height: 4px; background-color: var(--bentley-light-gray); border-radius: 2px; margin-top: 0.2rem;">
+                                    <div style="width: 75%; height: 100%; background-color: var(--success); border-radius: 2px;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">AI Scalping Bot</span>
+                                    <span style="color: var(--warning);">+8.5%</span>
+                                </div>
+                                <div style="height: 4px; background-color: var(--bentley-light-gray); border-radius: 2px; margin-top: 0.2rem;">
+                                    <div style="width: 45%; height: 100%; background-color: var(--warning); border-radius: 2px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">Quantum Sector Performance</h4>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">AI Technology</span>
+                                    <span style="color: var(--success);">+28.4%</span>
+                                </div>
+                                <div style="height: 4px; background-color: var(--bentley-light-gray); border-radius: 2px; margin-top: 0.2rem;">
+                                    <div style="width: 95%; height: 100%; background-color: var(--success); border-radius: 2px;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Quantum Finance</span>
+                                    <span style="color: var(--success);">+15.3%</span>
+                                </div>
+                                <div style="height: 4px; background-color: var(--bentley-light-gray); border-radius: 2px; margin-top: 0.2rem;">
+                                    <div style="width: 60%; height: 100%; background-color: var(--success); border-radius: 2px;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Space Economy</span>
+                                    <span style="color: var(--info);">+42.8%</span>
+                                </div>
+                                <div style="height: 4px; background-color: var(--bentley-light-gray); border-radius: 2px; margin-top: 0.2rem;">
+                                    <div style="width: 100%; height: 100%; background-color: var(--info); border-radius: 2px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">AI Trade Insights</h4>
+                        <div style="background: rgba(201, 168, 106, 0.05); padding: 1rem; border-radius: 6px; border-left: 3px solid var(--bentley-gold);">
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                                <i class="fas fa-lightbulb" style="color: var(--bentley-gold); margin-right: 0.5rem;"></i>
+                                Quantum AI suggests increasing exposure to space economy (target: 15%) while reducing AI technology concentration by 20%.
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--success);">
+                                <i class="fas fa-robot"></i> Confidence: 92%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <div class="chart-container">
+                        <canvas id="analyticsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Trading Coach -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chalkboard-teacher"></i> Quantum AI Coach</h3>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="status-badge status-active">LIVE COACHING</span>
+                    <i class="fas fa-volume-up" style="color: var(--info); cursor: pointer;" onclick="toggleAudioCoach()"></i>
+                </div>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div style="background: rgba(33, 150, 243, 0.1); padding: 1rem; border-radius: 6px; border-left: 3px solid var(--info);">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-robot" style="color: var(--info);"></i>
+                            <h4 style="color: var(--info);">Market Insight</h4>
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                            Quantum volatility detected in AI sector. Recommended action: Hedge with 5% short positions in QAI index.
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(0, 200, 83, 0.1); padding: 1rem; border-radius: 6px; border-left: 3px solid var(--success);">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-chart-line" style="color: var(--success);"></i>
+                            <h4 style="color: var(--success);">Trade Opportunity</h4>
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                            Space tourism stocks showing 98% AI-buy signal. Expected move: +12-18% over next 5 sessions.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn-secondary" style="flex: 1;" onclick="viewAICoachDetails()">
+                        <i class="fas fa-graduation-cap"></i> Coach Details
+                    </button>
+                    <button class="btn" style="flex: 1;" onclick="applyAICoachRecommendations()">
+                        <i class="fas fa-play"></i> Apply AI Coaching
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global variables
+        let autoManagementEnabled = true;
+        let tradeMetricsInterval = null;
+        let tradePerformanceChart = null;
+        let analyticsChart = null;
+        let audioCoachEnabled = false;
+
+        // 2026 Trade Data
+        const TRADE_DATA_2026 = {
+            metrics: {
+                activeTrades: 17,
+                todayPL: 42580,
+                winRate: 72.4,
+                avgTradeSize: 28400
+            },
+
+            positions: [
+                { symbol: 'NVDA', position: 'AI-LONG', entry: '$450.20', current: '$485.20', pnl: '+$8,750', aiSignal: 'strong-buy' },
+                { symbol: 'AAPL', position: 'QUANTUM-LONG', entry: '$245.80', current: '$248.50', pnl: '+$1,350', aiSignal: 'hold' },
+                { symbol: 'TSLA', position: 'AI-SHORT', entry: '$385.20', current: '$382.10', pnl: '+$1,280', aiSignal: 'strong-sell' },
+                { symbol: 'SPACEX', position: 'QUANTUM-LONG', entry: '$425.60', current: '$430.80', pnl: '+$2,600', aiSignal: 'strong-buy' },
+                { symbol: 'GOOGL', position: 'AI-LONG', entry: '$195.45', current: '$194.80', pnl: '-$325', aiSignal: 'weak-hold' },
+                { symbol: 'QUANTUM', position: 'QUANTUM-LONG', entry: '$165.40', current: '$170.20', pnl: '+$2,400', aiSignal: 'buy' }
+            ],
+
+            orders: [
+                { id: 'QORD-7821', symbol: 'AAPL', type: 'AI Limit Buy @ $247.50', status: 'pending', aiConfidence: 85 },
+                { id: 'QORD-7820', symbol: 'TSLA', type: 'Quantum Stop Loss @ $378.50', status: 'active', aiConfidence: 92 },
+                { id: 'QORD-7819', symbol: 'MSFT', type: 'AI Take Profit @ $492.00', status: 'active', aiConfidence: 88 },
+                { id: 'QORD-7818', symbol: 'SPACEX', type: 'Quantum Market Buy', status: 'filled', aiConfidence: 95 },
+                { id: 'QORD-7817', symbol: 'NVDA', type: 'AI Trailing Stop @ 3.5%', status: 'active', aiConfidence: 90 },
+                { id: 'QORD-7816', symbol: 'BIOTECH', type: 'Quantum Hedge Order', status: 'pending', aiConfidence: 82 }
+            ],
+
+            history: [
+                { time: '15:23:45', symbol: 'SPACEX', action: 'AI-BUY', quantity: '100', price: '$425.60', pnl: '+$520', status: 'active', aiRating: 'A+' },
+                { time: '15:18:12', symbol: 'TSLA', action: 'QUANTUM-SELL', quantity: '50', price: '$382.10', pnl: '+$1,280', status: 'active', aiRating: 'A' },
+                { time: '15:15:33', symbol: 'QUANTUM', action: 'AI-BUY', quantity: '75', price: '$165.40', pnl: '+$2,400', status: 'active', aiRating: 'B+' },
+                { time: '14:55:47', symbol: 'BIOTECH', action: 'QUANTUM-SELL', quantity: '60', price: '$85.40', pnl: '+$825', status: 'closed', aiRating: 'A-' },
+                { time: '14:42:18', symbol: 'NVDA', action: 'AI-BUY', quantity: '40', price: '$480.20', pnl: '+$8,750', status: 'active', aiRating: 'A+' },
+                { time: '14:30:22', symbol: 'GREEN', action: 'QUANTUM-BUY', quantity: '120', price: '$42.80', pnl: '+$680', status: 'active', aiRating: 'B' }
+            ],
+
+            analytics: {
+                strategies: [
+                    { name: 'Quantum Trend AI', performance: 24.8 },
+                    { name: 'Neural Mean Reversion', performance: 18.2 },
+                    { name: 'AI Scalping Bot', performance: 8.5 }
+                ],
+                sectors: [
+                    { name: 'AI Technology', performance: 28.4 },
+                    { name: 'Quantum Finance', performance: 15.3 },
+                    { name: 'Space Economy', performance: 42.8 }
+                ]
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTradeManager();
+            startDateTimeUpdates();
+            startLiveUpdates();
+        });
+
+        function initializeTradeManager() {
+            // Initialize trade metrics
+            updateTradeMetrics();
+
+            // Initialize positions
+            populateActivePositions();
+
+            // Initialize orders
+            populateOrderManagement();
+
+            // Initialize trade history
+            populateTradeHistory();
+
+            // Initialize charts
+            initializeCharts();
+
+            // Initialize analytics
+            updateAnalytics();
+
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        function startDateTimeUpdates() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        }
+
+        function updateDateTime() {
+            const now = luxon.DateTime.now();
+            const dateTimeString = now.toFormat('MMMM dd, yyyy HH:mm:ss');
+            document.getElementById('currentDateTime').textContent = dateTimeString;
+        }
+
+        function startLiveUpdates() {
+            tradeMetricsInterval = setInterval(() => {
+                if (autoManagementEnabled) {
+                    updateLiveMetrics();
+                    updatePositions();
+                }
+            }, 10000); // Update every 10 seconds
+        }
+
+        function updateLiveMetrics() {
+            // Simulate live metric updates
+            TRADE_DATA_2026.metrics.todayPL += (Math.random() - 0.5) * 500;
+            TRADE_DATA_2026.metrics.winRate += (Math.random() - 0.5) * 0.2;
+            TRADE_DATA_2026.metrics.winRate = Math.max(60, Math.min(85, TRADE_DATA_2026.metrics.winRate));
+
+            updateTradeMetrics();
+        }
+
+        function updateTradeMetrics() {
+            const metrics = [
+                { name: 'Quantum Trades', value: TRADE_DATA_2026.metrics.activeTrades, change: '-2 from yesterday', trend: 'negative' },
+                { name: "Today's AI-P&L", value: `+$${TRADE_DATA_2026.metrics.todayPL.toLocaleString()}`, change: `+${(TRADE_DATA_2026.metrics.todayPL/1000).toFixed(1)}K`, trend: 'positive' },
+                { name: 'AI Win Rate', value: `${TRADE_DATA_2026.metrics.winRate.toFixed(1)}%`, change: '+3.2%', trend: 'positive' },
+                { name: 'Avg. Quantum Size', value: `$${TRADE_DATA_2026.metrics.avgTradeSize.toLocaleString()}`, change: '+$1,200', trend: 'positive' }
+            ];
+
+            const metricsContainer = document.getElementById('tradeMetrics');
+            metricsContainer.innerHTML = '';
+
+            metrics.forEach(metric => {
+                const metricCard = document.createElement('div');
+                metricCard.className = 'metric-card';
+                metricCard.onclick = () => showMetricDetail(metric.name);
+
+                metricCard.innerHTML = `
+                    <div class="metric-name">${metric.name}</div>
+                    <div class="metric-value" style="color: ${metric.trend === 'positive' ? 'var(--success)' : 'var(--text-primary)'};">${metric.value}</div>
+                    <div class="metric-change ${metric.trend === 'positive' ? 'change-positive' : 'change-negative'}">
+                        ${metric.change}
+                    </div>
+                `;
+
+                metricsContainer.appendChild(metricCard);
+            });
+        }
+
+        function populateActivePositions() {
+            const tableBody = document.getElementById('activePositionsTable');
+            tableBody.innerHTML = '';
+
+            TRADE_DATA_2026.positions.forEach(pos => {
+                const pnlColor = pos.pnl.startsWith('+') ? 'var(--success)' : 'var(--danger)';
+                const positionColor = pos.position.includes('LONG') ? 'var(--success)' : 'var(--danger)';
+                const aiSignalColor = pos.aiSignal === 'strong-buy' ? 'var(--success)' :
+                                    pos.aiSignal === 'strong-sell' ? 'var(--danger)' :
+                                    pos.aiSignal === 'buy' ? 'var(--success)' :
+                                    pos.aiSignal === 'sell' ? 'var(--danger)' : 'var(--warning)';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <input type="checkbox" class="trade-select" data-symbol="${pos.symbol}"
+                               data-ai="${pos.aiSignal}" onchange="updateSelectedCount()">
+                    </td>
+                    <td>
+                        <strong>${pos.symbol}</strong>
+                        <div style="font-size: 0.8rem; color: ${aiSignalColor}; margin-top: 0.2rem;">
+                            <i class="fas fa-robot"></i> ${pos.aiSignal.toUpperCase().replace('-', ' ')}
+                        </div>
+                    </td>
+                    <td style="color: ${positionColor}; font-weight: 600;">
+                        <i class="fas fa-${pos.position.includes('LONG') ? 'arrow-up' : 'arrow-down'}"></i> ${pos.position}
+                    </td>
+                    <td>${pos.entry}</td>
+                    <td>${pos.current}</td>
+                    <td style="color: ${pnlColor}; font-weight: 600;">
+                        ${pos.pnl}
+                        <div style="font-size: 0.8rem; color: ${pnlColor};">
+                            ${pos.pnl.startsWith('+') ? 'AI-Profit' : 'AI-Loss'}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-danger btn-small" onclick="closeAIPosition('${pos.symbol}')">
+                                <i class="fas fa-times"></i> AI Close
+                            </button>
+                            <button class="btn-secondary btn-small" onclick="manageQuantumPosition('${pos.symbol}')">
+                                <i class="fas fa-robot"></i> Quantum
+                            </button>
+                            <button class="btn-secondary btn-small" onclick="hedgePosition('${pos.symbol}')">
+                                <i class="fas fa-shield-alt"></i> Hedge
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            updateSelectedCount();
+        }
+
+        function updatePositions() {
+            // Simulate position updates
+            TRADE_DATA_2026.positions.forEach(pos => {
+                const randomChange = (Math.random() - 0.5) * 1;
+                const currentPrice = parseFloat(pos.current.replace('$', ''));
+                const newPrice = currentPrice * (1 + randomChange/100);
+                pos.current = `$${newPrice.toFixed(2)}`;
+
+                const entryPrice = parseFloat(pos.entry.replace('$', ''));
+                const pnlAmount = pos.position.includes('LONG') ? (newPrice - entryPrice) : (entryPrice - newPrice);
+                pos.pnl = pnlAmount >= 0 ? `+$${(pnlAmount * 100).toLocaleString('en-US', {minimumFractionDigits: 0})}` : `-$${Math.abs(pnlAmount * 100).toLocaleString('en-US', {minimumFractionDigits: 0})}`;
+            });
+
+            // Update display
+            populateActivePositions();
+        }
+
+        function populateOrderManagement() {
+            const tableBody = document.getElementById('orderManagementTable');
+            tableBody.innerHTML = '';
+
+            TRADE_DATA_2026.orders.forEach(order => {
+                const statusClass = order.status === 'active' ? 'status-active' :
+                                   order.status === 'pending' ? 'status-pending' : 'status-closed';
+
+                const statusText = order.status === 'active' ? 'AI-ACTIVE' :
+                                  order.status === 'pending' ? 'QUANTUM-PENDING' : 'AI-FILLED';
+
+                const confidenceColor = order.aiConfidence >= 90 ? 'var(--success)' :
+                                       order.aiConfidence >= 80 ? 'var(--warning)' : 'var(--danger)';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <code style="background: rgba(33, 150, 243, 0.1); color: var(--info);">#${order.id}</code>
+                    </td>
+                    <td><strong>${order.symbol}</strong></td>
+                    <td>${order.type}</td>
+                    <td>
+                        <span class="${statusClass}">${statusText}</span>
+                        <div style="font-size: 0.8rem; color: ${confidenceColor}; margin-top: 0.2rem;">
+                            AI Confidence: ${order.aiConfidence}%
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            ${order.status === 'pending' ? `
+                                <button class="btn-success btn-small" onclick="executeAIOrder('${order.id}')">
+                                    <i class="fas fa-play"></i> Quantum Execute
+                                </button>
+                            ` : ''}
+                            ${order.status !== 'filled' ? `
+                                <button class="btn-danger btn-small" onclick="cancelAIOrder('${order.id}')">
+                                    <i class="fas fa-times"></i> AI Cancel
+                                </button>
+                            ` : `
+                                <button class="btn-secondary btn-small" disabled>
+                                    <i class="fas fa-check"></i> AI-Completed
+                                </button>
+                            `}
+                            <button class="btn-secondary btn-small" onclick="optimizeOrder('${order.id}')">
+                                <i class="fas fa-magic"></i> Optimize
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            // Update orders count
+            const pendingOrders = TRADE_DATA_2026.orders.filter(o => o.status === 'pending').length;
+            document.getElementById('ordersCount').textContent = `${pendingOrders} Quantum Pending`;
+        }
+
+        function populateTradeHistory() {
+            const tableBody = document.getElementById('tradeHistoryTable');
+            tableBody.innerHTML = '';
+
+            TRADE_DATA_2026.history.forEach(trade => {
+                const actionColor = trade.action.includes('BUY') ? 'var(--success)' : 'var(--danger)';
+                const pnlColor = trade.pnl.startsWith('+') ? 'var(--success)' : 'var(--danger)';
+                const statusColor = trade.status === 'active' ? 'var(--success)' : 'var(--text-secondary)';
+                const aiRatingColor = trade.aiRating === 'A+' ? 'var(--success)' :
+                                     trade.aiRating === 'A' ? 'var(--success)' :
+                                     trade.aiRating === 'A-' ? 'var(--warning)' : 'var(--warning)';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        ${trade.time}
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">Quantum Timing</div>
+                    </td>
+                    <td><strong>${trade.symbol}</strong></td>
+                    <td style="color: ${actionColor}; font-weight: 600;">
+                        <i class="fas fa-${trade.action.includes('BUY') ? 'arrow-up' : 'arrow-down'}"></i> ${trade.action}
+                    </td>
+                    <td>${trade.quantity}</td>
+                    <td>${trade.price}</td>
+                    <td style="color: ${pnlColor}; font-weight: 600;">
+                        ${trade.pnl}
+                        <div style="font-size: 0.8rem; color: ${aiRatingColor};">
+                            AI Rating: ${trade.aiRating}
+                        </div>
+                    </td>
+                    <td><span style="color: ${statusColor}; font-weight: 600;">${trade.status.toUpperCase()}</span></td>
+                    <td>
+                        <button class="btn-secondary btn-small" onclick="analyzeTrade('${trade.symbol}', '${trade.time}')">
+                            <i class="fas fa-chart-line"></i> Analyze
+                        </button>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+
+            // Update AI insight
+            const insights = [
+                "Most trades executed with optimal quantum timing",
+                "AI strategy achieving 24.8% returns this quarter",
+                "Quantum predictions 92% accurate in current market",
+                "Space economy trades showing exceptional performance"
+            ];
+            document.getElementById('aiInsight').textContent = insights[Math.floor(Math.random() * insights.length)];
+        }
+
+        function initializeCharts() {
+            // Trade Performance Chart
+            const ctx = document.getElementById('tradePerformanceChart').getContext('2d');
+            if (tradePerformanceChart) tradePerformanceChart.destroy();
+
+            const symbols = TRADE_DATA_2026.positions.map(p => p.symbol);
+            const pnlValues = TRADE_DATA_2026.positions.map(p => parseFloat(p.pnl.replace(/[^0-9.-]+/g, '')));
+
+            tradePerformanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: symbols,
+                    datasets: [{
+                        label: 'Quantum P&L ($)',
+                        data: pnlValues,
+                        backgroundColor: pnlValues.map(val => val >= 0 ? 'rgba(0, 200, 83, 0.8)' : 'rgba(255, 82, 82, 0.8)'),
+                        borderColor: pnlValues.map(val => val >= 0 ? 'var(--success)' : 'var(--danger)'),
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 26, 0.9)',
+                            titleColor: 'var(--bentley-gold)',
+                            bodyColor: 'var(--text-primary)',
+                            borderColor: 'var(--bentley-gold)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Quantum P&L: $${context.raw.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Analytics Chart
+            const analyticsCtx = document.getElementById('analyticsChart').getContext('2d');
+            if (analyticsChart) analyticsChart.destroy();
+
+            analyticsChart = new Chart(analyticsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'AI Strategy Returns (%)',
+                            data: [8.2, 12.5, 15.8, 18.4, 21.2, 24.8, 22.1, 25.6, 28.4, 31.2, 35.4, 42.8],
+                            borderColor: '#C9A86A',
+                            backgroundColor: 'rgba(201, 168, 106, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Benchmark (%)',
+                            data: [5.4, 8.2, 10.5, 12.8, 14.2, 16.5, 15.8, 18.4, 20.2, 22.8, 25.4, 28.6],
+                            borderColor: '#2196F3',
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                            tension: 0.4,
+                            fill: false,
+                            borderWidth: 2,
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            // Bulk action select change
+            document.getElementById('bulkAction').addEventListener('change', function() {
+                if (this.value) {
+                    showNotification(`Quantum action selected: ${this.options[this.selectedIndex].text}`, 'info');
+                }
+            });
+
+            // Bulk filter change
+            document.getElementById('bulkFilter').addEventListener('change', function() {
+                if (this.value === 'selected') {
+                    updateSelectedCount();
+                }
+            });
+        }
+
+        function updateSelectedCount() {
+            const selected = document.querySelectorAll('.trade-select:checked').length;
+            document.getElementById('selectedCount').textContent = selected;
+        }
+
+        function toggleAutoManagement() {
+            autoManagementEnabled = !autoManagementEnabled;
+
+            const indicator = document.getElementById('autoManageIndicator');
+            const dot = document.getElementById('autoManageDot');
+            const text = document.getElementById('autoManageText');
+
+            if (autoManagementEnabled) {
+                indicator.style.backgroundColor = 'rgba(0, 200, 83, 0.1)';
+                indicator.style.borderColor = 'var(--success)';
+                dot.style.backgroundColor = 'var(--success)';
+                text.textContent = 'AI-MANAGEMENT: ACTIVE';
+                showNotification('Quantum AI management activated', 'success');
+            } else {
+                indicator.style.backgroundColor = 'rgba(158, 158, 158, 0.1)';
+                indicator.style.borderColor = 'var(--text-secondary)';
+                dot.style.backgroundColor = 'var(--text-secondary)';
+                text.textContent = 'AI-MANAGEMENT: OFF';
+                showNotification('Quantum AI management disabled', 'warning');
+            }
+        }
+
+        function selectAllTrades() {
+            document.querySelectorAll('.trade-select').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updateSelectedCount();
+            showNotification('All quantum trades selected', 'info');
+        }
+
+        function deselectAllTrades() {
+            document.querySelectorAll('.trade-select').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectedCount();
+            showNotification('All quantum trades deselected', 'info');
+        }
+
+        function selectAIRecommended() {
+            // Select trades with strong AI signals
+            document.querySelectorAll('.trade-select').forEach(checkbox => {
+                const aiSignal = checkbox.getAttribute('data-ai');
+                checkbox.checked = aiSignal.includes('strong') || aiSignal.includes('buy');
+            });
+            updateSelectedCount();
+            showNotification('AI-recommended trades selected', 'success');
+        }
+
+        function executeAIStrategy() {
+            const btn = document.getElementById('aiStrategyBtn');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Executing Quantum Strategy...';
+            btn.disabled = true;
+
+            showNotification('Executing quantum AI trading strategy...', 'info');
+
+            setTimeout(() => {
+                // Simulate strategy execution
+                const newTrade = {
+                    symbol: 'SPACEX',
+                    position: 'QUANTUM-LONG',
+                    entry: '$432.50',
+                    current: '$432.50',
+                    pnl: 'Open',
+                    aiSignal: 'strong-buy'
+                };
+
+                TRADE_DATA_2026.positions.push(newTrade);
+                TRADE_DATA_2026.metrics.activeTrades += 1;
+
+                populateActivePositions();
+                updateTradeMetrics();
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+                showNotification('Quantum AI strategy executed successfully. New SpaceX position added.', 'success');
+            }, 3000);
+        }
+
+        function exportQuantumTrades() {
+            showNotification('Exporting quantum trade data in AI format...', 'info');
+
+            setTimeout(() => {
+                showNotification('Quantum trade data exported successfully', 'success');
+            }, 1500);
+        }
+
+        function showAICoach() {
+            showNotification('Opening quantum AI coaching interface...', 'info');
+
+            const modalContent = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                    <div style="background: var(--card-bg); padding: 2rem; border-radius: 10px; border: 2px solid var(--bentley-gold); max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2 style="color: var(--bentley-gold);">
+                                <i class="fas fa-chalkboard-teacher"></i> Quantum AI Coach
+                            </h2>
+                            <button onclick="this.closest('div').remove()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">×</button>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">Current Market Analysis</h3>
+                            <div style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem;">
+                                <p>Quantum AI detects elevated volatility in AI technology sector. Recommended action: Reduce exposure by 20% and hedge with space economy positions.</p>
+                                <p><strong>AI Confidence:</strong> 92% | <strong>Expected Impact:</strong> +3.2% portfolio alpha</p>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">Trade Recommendations</h3>
+                            <div style="display: grid; gap: 1rem;">
+                                <div style="padding: 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 6px; border-left: 4px solid var(--success);">
+                                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">Increase Space Economy to 15%</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Space tourism revenue growing 45% YoY. Target: SPACEX, ORBIT, SPACE.</div>
+                                </div>
+                                <div style="padding: 1rem; background: rgba(255, 82, 82, 0.1); border-radius: 6px; border-left: 4px solid var(--danger);">
+                                    <div style="font-weight: 600; color: var(--danger); margin-bottom: 0.5rem;">Reduce AI Technology by 20%</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Regulatory uncertainty increasing. Take profits on NVDA, AAPL positions.</div>
+                                </div>
+                                <div style="padding: 1rem; background: rgba(255, 152, 0, 0.1); border-radius: 6px; border-left: 4px solid var(--warning);">
+                                    <div style="font-weight: 600; color: var(--warning); margin-bottom: 0.5rem;">Add Quantum Hedging Positions</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Market volatility at 22%. Add 5% hedge via QAI inverse ETF.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                            <button onclick="this.closest('div').remove()" class="btn-secondary">Close</button>
+                            <button onclick="applyAICoaching()" class="btn">Apply AI Coaching</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modal = document.createElement('div');
+            modal.innerHTML = modalContent;
+            document.body.appendChild(modal);
+        }
+
+        function applyAICoaching() {
+            showNotification('Applying quantum AI coaching recommendations...', 'info');
+
+            setTimeout(() => {
+                showNotification('AI coaching applied successfully. Portfolio optimized.', 'success');
+                document.querySelector('div[style*="position: fixed"]').remove();
+            }, 2000);
+        }
+
+        function closeAIPosition(symbol) {
+            const confirmed = confirm(`Quantum AI recommends closing ${symbol} position. Execute with AI optimization?`);
+            if (confirmed) {
+                showNotification(`Closing ${symbol} with quantum optimization...`, 'info');
+
+                // Simulate AI-optimized close
+                setTimeout(() => {
+                    // Remove position
+                    const index = TRADE_DATA_2026.positions.findIndex(p => p.symbol === symbol);
+                    if (index > -1) {
+                        TRADE_DATA_2026.positions.splice(index, 1);
+                        TRADE_DATA_2026.metrics.activeTrades -= 1;
+                        populateActivePositions();
+                        updateTradeMetrics();
+                    }
+
+                    showNotification(`${symbol} position closed with quantum optimization. +$2,150 AI profit captured.`, 'success');
+                }, 1500);
+            }
+        }
+
+        function manageQuantumPosition(symbol) {
+            showNotification(`Opening quantum management for ${symbol}...`, 'info');
+        }
+
+        function hedgePosition(symbol) {
+            showNotification(`Adding AI hedge for ${symbol} position...`, 'info');
+        }
+
+        function executeAIOrder(orderId) {
+            const confirmed = confirm(`Execute quantum order ${orderId} with AI optimization?`);
+            if (confirmed) {
+                showNotification(`Executing ${orderId} with quantum timing...`, 'info');
+
+                setTimeout(() => {
+                    // Update order status
+                    const order = TRADE_DATA_2026.orders.find(o => o.id === orderId);
+                    if (order) {
+                        order.status = 'filled';
+                        populateOrderManagement();
+                    }
+
+                    showNotification(`Order ${orderId} executed successfully with optimal quantum timing`, 'success');
+                }, 2000);
+            }
+        }
+
+        function cancelAIOrder(orderId) {
+            const confirmed = confirm(`Cancel quantum order ${orderId}? AI suggests re-evaluation.`);
+            if (confirmed) {
+                showNotification(`Cancelling ${orderId}...`, 'warning');
+
+                setTimeout(() => {
+                    // Remove order
+                    const index = TRADE_DATA_2026.orders.findIndex(o => o.id === orderId);
+                    if (index > -1) {
+                        TRADE_DATA_2026.orders.splice(index, 1);
+                        populateOrderManagement();
+                    }
+
+                    showNotification(`Order ${orderId} cancelled. AI will suggest alternative.`, 'success');
+                }, 1500);
+            }
+        }
+
+        function optimizeOrder(orderId) {
+            showNotification(`Running quantum optimization for order ${orderId}...`, 'info');
+
+            setTimeout(() => {
+                showNotification(`Order ${orderId} optimized. New parameters: +2.8% expected profit`, 'success');
+            }, 1500);
+        }
+
+        function createAIOrder() {
+            showNotification('Creating new quantum AI order...', 'info');
+        }
+
+        function viewQuantumOrders() {
+            showNotification('Loading quantum order analytics...', 'info');
+        }
+
+        function optimizeAllOrders() {
+            showNotification('Running quantum optimization on all orders...', 'info');
+
+            setTimeout(() => {
+                showNotification('All orders quantum-optimized. Expected improvement: +3.2% efficiency', 'success');
+            }, 2500);
+        }
+
+        function refreshPositions() {
+            showNotification('Refreshing quantum positions with latest AI data...', 'info');
+
+            setTimeout(() => {
+                updatePositions();
+                showNotification('Quantum positions refreshed with latest 2026 data', 'success');
+            }, 1000);
+        }
+
+        function executeAllAIOrders() {
+            const pendingOrders = TRADE_DATA_2026.orders.filter(o => o.status === 'pending').length;
+            const confirmed = confirm(`Execute all ${pendingOrders} pending quantum orders with AI optimization?`);
+
+            if (confirmed) {
+                showNotification(`Executing ${pendingOrders} quantum orders...`, 'info');
+
+                setTimeout(() => {
+                    TRADE_DATA_2026.orders.forEach(o => {
+                        if (o.status === 'pending') o.status = 'filled';
+                    });
+                    populateOrderManagement();
+                    showNotification(`${pendingOrders} quantum orders executed successfully`, 'success');
+                }, 3000);
+            }
+        }
+
+        function showPerformanceDetails() {
+            showNotification('Opening quantum performance analytics...', 'info');
+        }
+
+        function configureAIRisk() {
+            showNotification('Opening quantum risk configuration...', 'info');
+        }
+
+        function viewQuantumRiskReport() {
+            showNotification('Generating quantum risk report...', 'info');
+
+            setTimeout(() => {
+                showNotification('Quantum risk report generated. Download available.', 'success');
+            }, 2000);
+        }
+
+        function loadMoreHistory() {
+            showNotification('Loading more quantum trade history...', 'info');
+
+            setTimeout(() => {
+                showNotification('Additional quantum history loaded', 'success');
+            }, 1500);
+        }
+
+        function analyzeTrade(symbol, time) {
+            showNotification(`Running quantum analysis for ${symbol} trade at ${time}...`, 'info');
+        }
+
+        function runQuantumAnalytics() {
+            showNotification('Running quantum trade analytics...', 'info');
+
+            setTimeout(() => {
+                updateAnalytics();
+                showNotification('Quantum analytics complete. New insights available.', 'success');
+            }, 2500);
+        }
+
+        function updateAnalytics() {
+            // Update analytics display
+            document.getElementById('winRate').textContent = `${TRADE_DATA_2026.metrics.winRate.toFixed(1)}%`;
+            document.getElementById('todayPL').textContent = `+$${TRADE_DATA_2026.metrics.todayPL.toLocaleString()}`;
+            document.getElementById('winLossRatio').textContent = '1.82';
+            document.getElementById('maxDrawdown').textContent = '-4.2%';
+        }
+
+        function exportAnalytics() {
+            showNotification('Exporting quantum analytics data...', 'info');
+
+            setTimeout(() => {
+                showNotification('Quantum analytics exported successfully', 'success');
+            }, 1500);
+        }
+
+        function toggleAudioCoach() {
+            audioCoachEnabled = !audioCoachEnabled;
+
+            const audioIcon = document.querySelector('.fa-volume-up');
+            if (audioCoachEnabled) {
+                audioIcon.style.color = 'var(--success)';
+                showNotification('Quantum audio coaching enabled', 'success');
+            } else {
+                audioIcon.style.color = 'var(--info)';
+                showNotification('Quantum audio coaching disabled', 'info');
+            }
+        }
+
+        function viewAICoachDetails() {
+            showNotification('Opening quantum coaching details...', 'info');
+        }
+
+        function applyAICoachRecommendations() {
+            showNotification('Applying quantum coaching recommendations...', 'info');
+
+            setTimeout(() => {
+                showNotification('AI coaching applied. Portfolio rebalanced for optimal performance.', 'success');
+            }, 3000);
+        }
+
+        function showRiskAI() {
+            showNotification('Opening quantum risk AI analysis...', 'info');
+        }
+
+        function showMetricDetail(metricName) {
+            showNotification(`Opening quantum details for ${metricName}`, 'info');
+        }
+
+        function executeBulkActions() {
+            const action = document.getElementById('bulkAction').value;
+            const filter = document.getElementById('bulkFilter').value;
+            const aiOptimize = document.getElementById('aiOptimize').checked;
+            const aiTime = document.getElementById('aiTime').checked;
+
+            if (!action) {
+                showNotification('Please select a quantum action', 'warning');
+                return;
+            }
+
+            const selectedCount = document.querySelectorAll('.trade-select:checked').length;
+
+            if (filter === 'selected' && selectedCount === 0) {
+                showNotification('No quantum trades selected', 'warning');
+                return;
+            }
+
+            const actionNames = {
+                'close': 'Close with AI Optimization',
+                'stop-loss': 'Set Dynamic Stop Loss',
+                'take-profit': 'Set Smart Take Profit',
+                'trailing-stop': 'Enable Adaptive Trailing',
+                'hedge': 'Add AI Hedge Positions',
+                'rebalance': 'Rebalance with AI'
+            };
+
+            const confirmation = confirm(`Apply "${actionNames[action]}" to ${filter === 'selected' ? selectedCount : 'all'} quantum trades?${aiOptimize ? '\n\nAI optimization enabled.' : ''}${aiTime ? '\nQuantum timing enabled.' : ''}`);
+
+            if (confirmation) {
+                showNotification(`Quantum bulk action "${actionNames[action]}" initiated...`, 'info');
+
+                setTimeout(() => {
+                    showNotification(`Quantum bulk action completed successfully`, 'success');
+
+                    // Reset form
+                    document.getElementById('bulkAction').value = '';
+                    document.getElementById('bulkFilter').value = 'all';
+                }, 3000);
+            }
+        }
+
+        function showNotification(message, type) {
+            // Remove existing notifications
+            document.querySelectorAll('.notification').forEach(n => n.remove());
+
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background-color: ${type === 'success' ? 'rgba(0, 200, 83, 0.9)' :
+                                  type === 'warning' ? 'rgba(255, 152, 0, 0.9)' :
+                                  type === 'danger' ? 'rgba(255, 82, 82, 0.9)' :
+                                  'rgba(33, 150, 243, 0.9)'};
+                color: white;
+                border-radius: 6px;
+                z-index: 1000;
+                animation: slideInRight 0.3s ease-out;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                max-width: 400px;
+                word-wrap: break-word;
+                cursor: pointer;
+            `;
+
+            // Add icon based on type
+            const icon = type === 'success' ? 'check-circle' :
+                        type === 'warning' ? 'exclamation-triangle' :
+                        type === 'danger' ? 'exclamation-circle' : 'info-circle';
+
+            notification.innerHTML = `
+                <i class="fas fa-${icon}" style="font-size: 1.2rem;"></i>
+                <span>${message}</span>
+            `;
+
+            notification.onclick = () => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            };
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOutRight 0.3s ease-out';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // Clean up intervals
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                if (tradeMetricsInterval) {
+                    clearInterval(tradeMetricsInterval);
+                    tradeMetricsInterval = null;
+                }
+            } else {
+                startLiveUpdates();
+            }
+        });
+    </script>
+</body>
+</html>

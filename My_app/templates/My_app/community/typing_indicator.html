@@ -1,0 +1,61 @@
+<!-- templates/search/typing_indicator.html -->
+<div class="typing-indicator" id="typingIndicator" style="display: none;">
+    <div class="typing-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <span class="typing-text">is typing...</span>
+</div>
+
+<style>
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 18px;
+    margin: 5px 0;
+    max-width: fit-content;
+    animation: fadeIn 0.2s ease;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    background: #4361ee;
+    border-radius: 50%;
+    animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.typing-text {
+    font-size: 12px;
+    color: #6c757d;
+    font-style: italic;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.6;
+    }
+    30% {
+        transform: translateY(-5px);
+        opacity: 1;
+    }
+}
+</style>

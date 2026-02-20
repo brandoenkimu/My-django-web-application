@@ -1,0 +1,1798 @@
+<!-- templates/community/post_detail.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title|default:post.author.username }}'s Post - TradingHub</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- TradingView Widget -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .post-header {
+            background: white;
+            border-bottom: 1px solid #eef2ff;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+            transform: translateX(-4px);
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .header-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .header-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .header-btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .header-btn-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .header-btn-secondary:hover {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        /* Main Content */
+        .post-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 32px;
+        }
+
+        @media (max-width: 1024px) {
+            .post-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Post Content */
+        .post-content-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .post-author-section {
+            padding: 24px;
+            border-bottom: 1px solid #eef2ff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .post-author {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .author-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #eef2ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .author-avatar:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .author-name:hover {
+            color: var(--primary);
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .post-time {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .post-category {
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .post-actions-top {
+            display: flex;
+            gap: 12px;
+        }
+
+        .post-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 10px;
+            background: #f8f9ff;
+            color: #64748b;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .post-action-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .post-action-btn.liked {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .post-action-btn.saved {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+
+        /* Post Body */
+        .post-body {
+            padding: 32px;
+        }
+
+        .post-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .post-text {
+            font-size: 16px;
+            color: #475569;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        .post-text p {
+            margin-bottom: 16px;
+        }
+
+        /* Trading Info */
+        .trading-info-section {
+            background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            border: 2px solid #e0e7ff;
+        }
+
+        .trading-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .trading-symbol {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .symbol-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .symbol-info h3 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .symbol-price {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .trade-direction {
+            background: var(--primary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .trade-direction.long {
+            background: var(--success);
+        }
+
+        .trade-direction.short {
+            background: var(--danger);
+        }
+
+        .trading-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .trading-stat {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #eef2ff;
+            transition: all 0.3s;
+        }
+
+        .trading-stat:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(67, 97, 238, 0.15);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .stat-value.positive {
+            color: var(--success);
+        }
+
+        .stat-value.negative {
+            color: var(--danger);
+        }
+
+        .risk-meter {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 2px solid #eef2ff;
+        }
+
+        .risk-meter-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .risk-level {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .risk-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .risk-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--warning), var(--danger));
+            width: 30%; /* Based on risk percentage */
+            transition: width 0.3s ease;
+        }
+
+        .risk-tags {
+            display: flex;
+            gap: 8px;
+        }
+
+        .risk-tag {
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Media Section */
+        .media-section {
+            margin: 24px 0;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .post-image {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+        }
+
+        .post-video {
+            width: 100%;
+            max-height: 500px;
+            border-radius: 12px;
+            background: #000;
+        }
+
+        /* Charts Section */
+        .charts-section {
+            margin: 32px 0;
+        }
+
+        .chart-container {
+            height: 400px;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid #eef2ff;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Post Tags */
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 24px 0;
+        }
+
+        .post-tag {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .post-tag:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Engagement Stats */
+        .engagement-stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 32px;
+            border-top: 1px solid #eef2ff;
+            border-bottom: 1px solid #eef2ff;
+            background: #fafafa;
+        }
+
+        .engagement-stat {
+            text-align: center;
+        }
+
+        .stat-count {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Post Actions */
+        .post-actions-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 24px;
+        }
+
+        .post-action-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: #f8f9ff;
+            color: #64748b;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .post-action-main:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .post-action-main.liked {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .post-action-main.liked:hover {
+            background: #fecaca;
+        }
+
+        .post-action-main.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Comments Section */
+        .comments-section {
+            padding: 32px;
+            background: #fafafa;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .comments-header {
+            margin-bottom: 24px;
+        }
+
+        .comments-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .comments-subtitle {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .comment-form {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .comment-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #eef2ff;
+            flex-shrink: 0;
+        }
+
+        .comment-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 16px 60px 16px 20px;
+            border: 2px solid #eef2ff;
+            border-radius: 12px;
+            font-size: 15px;
+            color: #475569;
+            resize: none;
+            min-height: 100px;
+            transition: all 0.3s;
+        }
+
+        .comment-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        .comment-submit {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .comment-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .comment-item {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid #eef2ff;
+            transition: all 0.3s;
+        }
+
+        .comment-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .comment-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .comment-author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .comment-author-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .comment-time {
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .comment-action-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .comment-action-btn:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .comment-text {
+            font-size: 15px;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .comment-likes {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .comment-replies {
+            margin-top: 20px;
+            padding-left: 32px;
+            border-left: 2px solid #eef2ff;
+        }
+
+        .show-replies-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .show-replies-btn:hover {
+            background: #f1f5f9;
+        }
+
+        /* Sidebar */
+        .post-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Author Profile Card */
+        .author-profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .author-profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #eef2ff;
+            margin: 0 auto 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .author-profile-avatar:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+        }
+
+        .author-profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .author-profile-username {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .author-profile-bio {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .author-profile-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .author-stat {
+            text-align: center;
+        }
+
+        .author-stat-number {
+            font-size: 20px;
+            font-weight: 800;
+            color: #1e293b;
+            display: block;
+        }
+
+        .author-stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .follow-author-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .follow-author-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .follow-author-btn.following {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        /* Related Posts */
+        .related-posts-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .related-posts-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .related-post-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .related-post-item:hover {
+            background: #f8f9ff;
+            transform: translateX(4px);
+        }
+
+        .related-post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .related-post-content {
+            flex: 1;
+        }
+
+        .related-post-author {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .related-post-text {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.4;
+        }
+
+        /* TradingView Widget */
+        .tradingview-widget {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            margin-top: 24px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .post-container {
+                padding: 16px;
+            }
+
+            .post-body {
+                padding: 20px;
+            }
+
+            .post-actions-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .comment-form {
+                flex-direction: column;
+            }
+
+            .comment-avatar {
+                align-self: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="post-header">
+        <div class="header-container">
+            <a href="{% url 'community_feed' %}" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+                Back to Feed
+            </a>
+            <h1 class="header-title">Post Details</h1>
+            <div class="header-actions">
+                <button class="header-btn header-btn-primary share-post-btn">
+                    <i class="fas fa-share"></i>
+                    Share
+                </button>
+                {% if post.author == user %}
+                <button class="header-btn header-btn-secondary" onclick="window.location.href='{% url 'edit_post' post.id %}'">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="post-container">
+        <!-- Left Column - Post Content -->
+        <div class="post-content-left">
+            <!-- Post Card -->
+            <div class="post-content-card">
+                <!-- Author Section -->
+                <div class="post-author-section">
+                    <div class="post-author">
+                        <img src="{{ post.author.profile.get_avatar_url }}"
+                             class="author-avatar"
+                             alt="{{ post.author.username }}"
+                             onclick="window.location.href='{% url 'user_profile' post.author.username %}'">
+                        <div class="author-info">
+                            <a href="{% url 'user_profile' post.author.username %}" class="author-name">
+                                {{ post.author.profile.get_display_name }}
+                            </a>
+                            <div class="post-meta">
+                                <span class="post-time">
+                                    <i class="far fa-clock"></i>
+                                    {{ post.created_at|timesince }} ago
+                                </span>
+                                <span class="post-category">{{ post.get_post_type_display }}</span>
+                                {% if post.is_edited %}
+                                <span class="text-muted">• Edited</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="post-actions-top">
+                        <button class="post-action-btn {% if user in post.likes.all %}liked{% endif %}"
+                                id="likePostBtn">
+                            <i class="fas fa-heart"></i>
+                            <span class="like-count">{{ post.likes_count }}</span>
+                        </button>
+                        <button class="post-action-btn {% if user in post.saves.all %}saved{% endif %}"
+                                id="savePostBtn">
+                            <i class="fas fa-bookmark"></i>
+                            Save
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Post Body -->
+                <div class="post-body">
+                    <h1 class="post-title">{{ post.title|default:"Trading Analysis" }}</h1>
+
+                    <div class="post-text">
+                        {{ post.content|linebreaks }}
+                    </div>
+
+                    <!-- Trading Information -->
+                    {% if post.trading_symbol or post.entry_price %}
+                    <div class="trading-info-section">
+                        <div class="trading-header">
+                            <div class="trading-symbol">
+                                <div class="symbol-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="symbol-info">
+                                    <h3>{{ post.trading_symbol }}</h3>
+                                    {% if post.current_price %}
+                                    <div class="symbol-price">Current: ${{ post.current_price }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if post.trade_direction %}
+                            <span class="trade-direction {{ post.trade_direction }}">
+                                {{ post.trade_direction|upper }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="trading-grid">
+                            {% if post.entry_price %}
+                            <div class="trading-stat">
+                                <div class="stat-label">Entry Price</div>
+                                <div class="stat-value">${{ post.entry_price }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if post.target_price %}
+                            <div class="trading-stat">
+                                <div class="stat-label">Target Price</div>
+                                <div class="stat-value positive">${{ post.target_price }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if post.stop_loss %}
+                            <div class="trading-stat">
+                                <div class="stat-label">Stop Loss</div>
+                                <div class="stat-value negative">${{ post.stop_loss }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if post.risk_reward_ratio %}
+                            <div class="trading-stat">
+                                <div class="stat-label">Risk/Reward</div>
+                                <div class="stat-value">1:{{ post.risk_reward_ratio }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Risk Meter -->
+                        <div class="risk-meter">
+                            <div class="risk-meter-label">
+                                <span class="risk-level">Risk Level: Medium</span>
+                                <span class="risk-percentage">30%</span>
+                            </div>
+                            <div class="risk-bar">
+                                <div class="risk-fill" style="width: 30%"></div>
+                            </div>
+                            <div class="risk-tags">
+                                {% if post.timeframe %}
+                                <span class="risk-tag">{{ post.timeframe }}</span>
+                                {% endif %}
+                                {% if post.position_size %}
+                                <span class="risk-tag">Size: {{ post.position_size }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Media -->
+                    {% if post.image %}
+                    <div class="media-section">
+                        <img src="{{ post.image.url }}" class="post-image" alt="Trade chart">
+                    </div>
+                    {% endif %}
+
+                    <!-- Charts -->
+                    {% if post.trading_symbol %}
+                    <div class="charts-section">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-area"></i>
+                            {{ post.trading_symbol }} Chart
+                        </div>
+                        <div class="chart-container" id="trading-chart"></div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Tags -->
+                    {% if post.tags %}
+                    <div class="post-tags">
+                        {% for tag in post.tags %}
+                        <a href="{% url 'search_posts' %}?q={{ tag }}" class="post-tag">#{{ tag }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Engagement Stats -->
+                <div class="engagement-stats">
+                    <div class="engagement-stat">
+                        <span class="stat-count" id="likesCount">{{ post.likes_count }}</span>
+                        <span class="stat-label">Likes</span>
+                    </div>
+                    <div class="engagement-stat">
+                        <span class="stat-count" id="commentsCount">{{ post.comments_count }}</span>
+                        <span class="stat-label">Comments</span>
+                    </div>
+                    <div class="engagement-stat">
+                        <span class="stat-count">{{ post.views_count }}</span>
+                        <span class="stat-label">Views</span>
+                    </div>
+                    <div class="engagement-stat">
+                        <span class="stat-count">{{ post.shares_count|default:"0" }}</span>
+                        <span class="stat-label">Shares</span>
+                    </div>
+                </div>
+
+                <!-- Post Actions -->
+                <div class="post-actions-bar">
+                    <button class="post-action-main {% if user in post.likes.all %}liked{% endif %}"
+                            id="mainLikeBtn" data-action="like">
+                        <i class="fas fa-heart"></i>
+                        Like
+                    </button>
+                    <button class="post-action-main" id="commentBtn">
+                        <i class="fas fa-comment"></i>
+                        Comment
+                    </button>
+                    <button class="post-action-main" id="shareBtn">
+                        <i class="fas fa-share"></i>
+                        Share
+                    </button>
+                    <button class="post-action-main {% if user in post.saves.all %}active{% endif %}"
+                            id="saveBtn" data-action="save">
+                        <i class="fas fa-bookmark"></i>
+                        Save
+                    </button>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="comments-section">
+                    <div class="comments-header">
+                        <h3 class="comments-title">Comments</h3>
+                        <p class="comments-subtitle">Join the discussion</p>
+                    </div>
+
+                    <!-- Comment Form -->
+                    <div class="comment-form">
+                        <img src="{{ user.profile.get_avatar_url }}"
+                             class="comment-avatar"
+                             alt="{{ user.username }}">
+                        <div class="comment-input-wrapper">
+                            <textarea class="comment-input"
+                                      placeholder="Add a comment..."
+                                      id="commentInput"></textarea>
+                            <button class="comment-submit" id="submitComment">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Comments List -->
+                    <div class="comments-list" id="commentsList">
+                        {% for comment in comments %}
+                        <div class="comment-item" id="comment-{{ comment.id }}">
+                            <div class="comment-header">
+                                <div class="comment-author">
+                                    <img src="{{ comment.author.profile.get_avatar_url }}"
+                                         class="comment-author-avatar"
+                                         alt="{{ comment.author.username }}">
+                                    <div class="comment-author-info">
+                                        <h4>{{ comment.author.username }}</h4>
+                                        <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
+                                    </div>
+                                </div>
+                                <div class="comment-actions">
+                                    {% if comment.author == user %}
+                                    <button class="comment-action-btn edit-comment-btn"
+                                            data-comment-id="{{ comment.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="comment-text">{{ comment.content }}</div>
+                            <div class="comment-likes">
+                                <button class="comment-action-btn like-comment-btn"
+                                        data-comment-id="{{ comment.id }}">
+                                    <i class="fas fa-heart"></i>
+                                    <span class="like-count">{{ comment.likes_count }}</span>
+                                </button>
+                                <button class="comment-action-btn reply-btn"
+                                        data-comment-id="{{ comment.id }}">
+                                    <i class="fas fa-reply"></i>
+                                    Reply
+                                </button>
+                            </div>
+
+                            <!-- Replies -->
+                            {% if comment.replies.all %}
+                            <div class="comment-replies">
+                                <button class="show-replies-btn">
+                                    Show {{ comment.replies.count }} replies
+                                </button>
+                                <div class="replies-list" style="display: none;">
+                                    {% for reply in comment.replies.all %}
+                                    <div class="comment-item reply-item">
+                                        <!-- Reply structure similar to comment -->
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No comments yet. Be the first to comment!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Sidebar -->
+        <div class="post-sidebar">
+            <!-- Author Profile -->
+            <div class="author-profile-card">
+                <img src="{{ post.author.profile.get_avatar_url }}"
+                     class="author-profile-avatar"
+                     alt="{{ post.author.username }}"
+                     onclick="window.location.href='{% url 'user_profile' post.author.username %}'">
+                <h3 class="author-profile-name">{{ post.author.profile.get_display_name }}</h3>
+                <p class="author-profile-username">@{{ post.author.username }}</p>
+                {% if post.author.profile.bio %}
+                <p class="author-profile-bio">{{ post.author.profile.bio|truncatechars:100 }}</p>
+                {% endif %}
+                <div class="author-profile-stats">
+                    <div class="author-stat">
+                        <span class="author-stat-number">{{ post.author.profile.followers_count }}</span>
+                        <span class="author-stat-label">Followers</span>
+                    </div>
+                    <div class="author-stat">
+                        <span class="author-stat-number">{{ post.author.profile.total_posts }}</span>
+                        <span class="author-stat-label">Posts</span>
+                    </div>
+                    <div class="author-stat">
+                        <span class="author-stat-number">{{ post.author.profile.reputation_score }}</span>
+                        <span class="author-stat-label">Rep</span>
+                    </div>
+                </div>
+                {% if post.author != user %}
+                <button class="follow-author-btn {% if is_following %}following{% endif %}"
+                        id="followAuthorBtn" data-user-id="{{ post.author.id }}">
+                    {% if is_following %}Following{% else %}Follow{% endif %}
+                </button>
+                {% endif %}
+            </div>
+
+            <!-- Related Posts -->
+            {% if related_posts %}
+            <div class="related-posts-card">
+                <h4 class="related-posts-title">Related Posts</h4>
+                {% for related_post in related_posts %}
+                <a href="{% url 'post_detail' related_post.id %}" class="related-post-item">
+                    <img src="{{ related_post.author.profile.get_avatar_url }}"
+                         class="related-post-avatar"
+                         alt="{{ related_post.author.username }}">
+                    <div class="related-post-content">
+                        <div class="related-post-author">{{ related_post.author.username }}</div>
+                        <div class="related-post-text">{{ related_post.content|truncatechars:60 }}</div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- TradingView Widget -->
+            {% if post.trading_symbol %}
+            <div class="tradingview-widget">
+                <div class="tradingview-widget-container">
+                    <div class="tradingview-widget-container__widget"></div>
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-info.js" async>
+                    {
+                        "symbol": "{{ post.trading_symbol }}",
+                        "width": "100%",
+                        "locale": "en",
+                        "colorTheme": "light",
+                        "isTransparent": false
+                    }
+                    </script>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Get CSRF Token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // Initialize TradingView Chart
+        {% if post.trading_symbol %}
+        new TradingView.widget({
+            "container_id": "trading-chart",
+            "width": "100%",
+            "height": 400,
+            "symbol": "{{ post.trading_symbol }}",
+            "interval": "D",
+            "timezone": "exchange",
+            "theme": "light",
+            "style": "1",
+            "locale": "en",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_side_toolbar": false,
+            "allow_symbol_change": true,
+            "details": true,
+            "studies": [
+                "MASimple@tv-basicstudies"
+            ],
+            "show_popup_button": true,
+            "popup_width": "1000",
+            "popup_height": "650"
+        });
+        {% endif %}
+
+        // Like/Unlike Post
+        const likePostBtn = document.getElementById('likePostBtn');
+        const mainLikeBtn = document.getElementById('mainLikeBtn');
+        const likesCount = document.getElementById('likesCount');
+        const postId = {{ post.id }};
+
+        function likePost() {
+            fetch(`/community/post/${postId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrftoken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const isLiked = data.is_liked;
+                    const count = data.likes_count;
+
+                    // Update UI
+                    likePostBtn.classList.toggle('liked', isLiked);
+                    mainLikeBtn.classList.toggle('liked', isLiked);
+                    likesCount.textContent = count;
+
+                    if (isLiked) {
+                        mainLikeBtn.innerHTML = '<i class="fas fa-heart"></i> Liked';
+                    } else {
+                        mainLikeBtn.innerHTML = '<i class="fas fa-heart"></i> Like';
+                    }
+
+                    // Update like count in top button
+                    likePostBtn.querySelector('.like-count').textContent = count;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        likePostBtn.addEventListener('click', likePost);
+        mainLikeBtn.addEventListener('click', likePost);
+
+        // Save/Unsave Post
+        const savePostBtn = document.getElementById('savePostBtn');
+        const saveBtn = document.getElementById('saveBtn');
+
+        function savePost() {
+            fetch('{% url "api_save_post" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ post_id: postId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'saved') {
+                    savePostBtn.classList.add('saved');
+                    saveBtn.classList.add('active');
+                    saveBtn.innerHTML = '<i class="fas fa-bookmark"></i> Saved';
+                } else {
+                    savePostBtn.classList.remove('saved');
+                    saveBtn.classList.remove('active');
+                    saveBtn.innerHTML = '<i class="fas fa-bookmark"></i> Save';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        savePostBtn.addEventListener('click', savePost);
+        saveBtn.addEventListener('click', savePost);
+
+        // Follow Author
+        const followAuthorBtn = document.getElementById('followAuthorBtn');
+
+        if (followAuthorBtn) {
+            followAuthorBtn.addEventListener('click', function() {
+                const userId = this.dataset.userId;
+
+                fetch('{% url "api_follow_user" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'following') {
+                        this.textContent = 'Following';
+                        this.classList.add('following');
+                    } else {
+                        this.textContent = 'Follow';
+                        this.classList.remove('following');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        }
+
+        // Add Comment
+        const commentInput = document.getElementById('commentInput');
+        const submitComment = document.getElementById('submitComment');
+        const commentsList = document.getElementById('commentsList');
+        const commentsCount = document.getElementById('commentsCount');
+
+        function addComment() {
+            const content = commentInput.value.trim();
+            if (!content) return;
+
+            fetch(`/community/post/${postId}/comment/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrftoken
+                },
+                body: `content=${encodeURIComponent(content)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear input
+                    commentInput.value = '';
+
+                    // Add comment to list
+                    const commentHTML = `
+                        <div class="comment-item" id="comment-${data.comment_id}">
+                            <div class="comment-header">
+                                <div class="comment-author">
+                                    <img src="${data.author_avatar}"
+                                         class="comment-author-avatar"
+                                         alt="{{ user.username }}">
+                                    <div class="comment-author-info">
+                                        <h4>{{ user.username }}</h4>
+                                        <span class="comment-time">just now</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comment-text">${content}</div>
+                            <div class="comment-likes">
+                                <button class="comment-action-btn like-comment-btn">
+                                    <i class="fas fa-heart"></i>
+                                    <span class="like-count">0</span>
+                                </button>
+                                <button class="comment-action-btn reply-btn">
+                                    <i class="fas fa-reply"></i>
+                                    Reply
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    if (commentsList.children.length === 1 && commentsList.children[0].classList.contains('text-center')) {
+                        commentsList.innerHTML = commentHTML;
+                    } else {
+                        commentsList.insertAdjacentHTML('afterbegin', commentHTML);
+                    }
+
+                    // Update comment count
+                    const currentCount = parseInt(commentsCount.textContent);
+                    commentsCount.textContent = currentCount + 1;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        submitComment.addEventListener('click', addComment);
+        commentInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                addComment();
+            }
+        });
+
+        // Like Comment
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.like-comment-btn')) {
+                const button = e.target.closest('.like-comment-btn');
+                const commentId = button.dataset.commentId;
+
+                fetch(`/community/comment/${commentId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const likeCount = button.querySelector('.like-count');
+                        const currentCount = parseInt(likeCount.textContent);
+                        likeCount.textContent = data.is_liked ? currentCount + 1 : currentCount - 1;
+
+                        if (data.is_liked) {
+                            button.classList.add('liked');
+                        } else {
+                            button.classList.remove('liked');
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+
+        // Show Replies
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.show-replies-btn')) {
+                const button = e.target.closest('.show-replies-btn');
+                const repliesList = button.nextElementSibling;
+                repliesList.style.display = repliesList.style.display === 'none' ? 'block' : 'none';
+                button.textContent = repliesList.style.display === 'none' ?
+                    `Show ${button.dataset.count} replies` : 'Hide replies';
+            }
+        });
+
+        // Share Post
+        const shareBtn = document.getElementById('shareBtn');
+        const sharePostBtn = document.querySelector('.share-post-btn');
+
+        function sharePost() {
+            const shareUrl = `${window.location.origin}/community/post/${postId}/`;
+            const title = '{{ post.title|default:"Trading Analysis" }}';
+
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    text: 'Check out this trading post on TradingHub',
+                    url: shareUrl
+                });
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('Post link copied to clipboard!');
+                });
+            }
+        }
+
+        shareBtn.addEventListener('click', sharePost);
+        sharePostBtn.addEventListener('click', sharePost);
+
+        // Focus comment input when clicking comment button
+        document.getElementById('commentBtn').addEventListener('click', function() {
+            commentInput.focus();
+            commentInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        // Real-time updates for comments and likes
+        function setupPostWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/post/${postId}/`;
+
+            try {
+                const ws = new WebSocket(wsUrl);
+
+                ws.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+
+                    if (data.type === 'new_comment') {
+                        addCommentFromWebSocket(data.comment);
+                    } else if (data.type === 'post_like_update') {
+                        updatePostLikes(data.likes_count);
+                    } else if (data.type === 'comment_like_update') {
+                        updateCommentLikes(data.comment_id, data.likes_count);
+                    }
+                };
+
+                ws.onclose = function() {
+                    console.log('Post WebSocket closed. Reconnecting...');
+                    setTimeout(setupPostWebSocket, 3000);
+                };
+
+            } catch (error) {
+                console.error('WebSocket error:', error);
+            }
+        }
+
+        function addCommentFromWebSocket(comment) {
+            const commentHTML = `
+                <div class="comment-item" id="comment-${comment.id}">
+                    <div class="comment-header">
+                        <div class="comment-author">
+                            <img src="${comment.author_avatar}"
+                                 class="comment-author-avatar"
+                                 alt="${comment.author_username}">
+                            <div class="comment-author-info">
+                                <h4>${comment.author_username}</h4>
+                                <span class="comment-time">just now</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="comment-text">${comment.content}</div>
+                    <div class="comment-likes">
+                        <button class="comment-action-btn like-comment-btn" data-comment-id="${comment.id}">
+                            <i class="fas fa-heart"></i>
+                            <span class="like-count">0</span>
+                        </button>
+                        <button class="comment-action-btn reply-btn" data-comment-id="${comment.id}">
+                            <i class="fas fa-reply"></i>
+                            Reply
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            if (commentsList.children.length === 1 && commentsList.children[0].classList.contains('text-center')) {
+                commentsList.innerHTML = commentHTML;
+            } else {
+                commentsList.insertAdjacentHTML('afterbegin', commentHTML);
+            }
+
+            // Update comment count
+            const currentCount = parseInt(commentsCount.textContent);
+            commentsCount.textContent = currentCount + 1;
+
+            // Show notification
+            showNotification('New comment from ' + comment.author_username);
+        }
+
+        function updatePostLikes(count) {
+            likesCount.textContent = count;
+            likePostBtn.querySelector('.like-count').textContent = count;
+        }
+
+        function showNotification(message) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'post-notification';
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-bell"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+
+            // Add CSS for notification
+            if (!document.querySelector('#notification-style')) {
+                const style = document.createElement('style');
+                style.id = 'notification-style';
+                style.textContent = `
+                    .post-notification {
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        background: white;
+                        padding: 16px 24px;
+                        border-radius: 12px;
+                        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        animation: slideInRight 0.3s ease-out;
+                        z-index: 9999;
+                        border-left: 4px solid var(--primary);
+                    }
+
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+
+                    .notification-content {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                    }
+
+                    .notification-content i {
+                        color: var(--primary);
+                        font-size: 18px;
+                    }
+
+                    .notification-content span {
+                        color: #1e293b;
+                        font-weight: 500;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Initialize WebSocket
+        setupPostWebSocket();
+
+        // Increment view count
+        fetch(`/community/post/${postId}/view/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            }
+        });
+    </script>
+</body>
+</html>

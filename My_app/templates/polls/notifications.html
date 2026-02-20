@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications | Bold Trading Hub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --admin-gradient: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+            --self-gradient: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+            --danger-gradient: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            --chat-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --user-gradient: linear-gradient(135deg, #8a2387 0%, #f27121 100%);
+            --info-gradient: linear-gradient(135deg, #3a8ffe 0%, #9651fb 100%);
+            --dark-bg: #1a1f36;
+            --light-bg: #f8fafc;
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --hover-shadow: 0 15px 40px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light-bg);
+            color: #374151;
+            overflow-x: hidden;
+        }
+
+        /* User Info Bar */
+        .user-info-bar {
+            background: white;
+            padding: 15px 30px;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .user-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-right: 12px;
+        }
+
+        .user-avatar-small.admin {
+            background: var(--admin-gradient);
+        }
+
+        .user-avatar-small.premium {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+
+        .user-greeting h4 {
+            margin: 0;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .user-greeting p {
+            margin: 3px 0 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        /* Role Badges */
+        .role-badge {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .role-admin {
+            background: var(--admin-gradient);
+            color: white;
+        }
+
+        .role-premium {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            color: white;
+        }
+
+        .role-user {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 50px 40px;
+            color: white;
+            border-radius: 0 0 25px 25px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section.admin {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+        }
+
+        .welcome-section.premium {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1%, transparent 1%);
+            background-size: 30px 30px;
+            opacity: 0.3;
+        }
+
+        .welcome-icon {
+            font-size: 4.5rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .welcome-text h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .welcome-text p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+        }
+
+        /* Stats Banner */
+        .stats-banner {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: -30px 40px 40px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-item {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .stat-number.all {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-number.unread {
+            background: var(--danger-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-number.trading {
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-number.system {
+            background: var(--admin-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-number.social {
+            background: var(--chat-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Notification Cards */
+        .notifications-container {
+            padding: 0 40px 40px;
+        }
+
+        .notification-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .notification-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .notification-card.unread {
+            border-left: 4px solid #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+        }
+
+        .notification-card.trading {
+            border-left: 4px solid #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(4, 120, 87, 0.03) 100%);
+        }
+
+        .notification-card.system {
+            border-left: 4px solid #ff7e5f;
+            background: linear-gradient(135deg, rgba(255, 126, 95, 0.03) 0%, rgba(254, 180, 123, 0.03) 100%);
+        }
+
+        .notification-card.social {
+            border-left: 4px solid #11998e;
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.03) 0%, rgba(56, 239, 125, 0.03) 100%);
+        }
+
+        .notification-card.urgent {
+            border-left: 4px solid #ff416c;
+            background: linear-gradient(135deg, rgba(255, 65, 108, 0.03) 0%, rgba(255, 75, 43, 0.03) 100%);
+            animation: pulse 2s infinite;
+        }
+
+        .notification-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .notification-card:hover::before {
+            opacity: 1;
+        }
+
+        .notification-card.trading:hover::before {
+            background: var(--success-gradient);
+        }
+
+        .notification-card.system:hover::before {
+            background: var(--admin-gradient);
+        }
+
+        .notification-card.social:hover::before {
+            background: var(--chat-gradient);
+        }
+
+        .notification-card.urgent:hover::before {
+            background: var(--danger-gradient);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .notification-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+
+        .notification-icon.trading {
+            background: var(--success-gradient);
+        }
+
+        .notification-icon.system {
+            background: var(--admin-gradient);
+        }
+
+        .notification-icon.social {
+            background: var(--chat-gradient);
+        }
+
+        .notification-icon.urgent {
+            background: var(--danger-gradient);
+        }
+
+        .notification-icon.info {
+            background: var(--info-gradient);
+        }
+
+        .notification-info {
+            flex: 1;
+        }
+
+        .notification-info h5 {
+            margin: 0;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .notification-info p {
+            margin: 3px 0 0;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .notification-time {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            background: #f9fafb;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .notification-content {
+            margin-bottom: 20px;
+        }
+
+        .notification-content h4 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .notification-message {
+            color: #4b5563;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .notification-action-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-mark-read {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-dismiss {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .notification-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+        }
+
+        .filter-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .filter-tag.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+        }
+
+        .filter-tag.trading {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .filter-tag.system {
+            border-color: #ff7e5f;
+            background: rgba(255, 126, 95, 0.1);
+            color: #ff7e5f;
+        }
+
+        .filter-tag.social {
+            border-color: #11998e;
+            background: rgba(17, 153, 142, 0.1);
+            color: #11998e;
+        }
+
+        .filter-tag.urgent {
+            border-color: #ff416c;
+            background: rgba(255, 65, 108, 0.1);
+            color: #ff416c;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: #9ca3af;
+        }
+
+        .empty-icon {
+            font-size: 6rem;
+            color: #e5e7eb;
+            margin-bottom: 25px;
+            opacity: 0.7;
+        }
+
+        .empty-state h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #6b7280;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .welcome-section {
+                padding: 40px 20px;
+                border-radius: 0 0 20px 20px;
+            }
+
+            .welcome-text h1 {
+                font-size: 2rem;
+            }
+
+            .stats-banner {
+                margin: -25px 20px 30px;
+                padding: 20px;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .stat-item {
+                width: 100%;
+            }
+
+            .notifications-container {
+                padding: 0 20px 40px;
+            }
+
+            .notification-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .notification-time {
+                align-self: flex-start;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .welcome-section {
+                padding: 30px 15px;
+            }
+
+            .welcome-text h1 {
+                font-size: 1.8rem;
+            }
+
+            .notification-card {
+                padding: 20px;
+            }
+
+            .notification-actions {
+                flex-direction: column;
+            }
+
+            .notification-action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Settings Toggle */
+        .settings-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .settings-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- User Info Bar -->
+    <div class="user-info-bar">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar-small" id="user-avatar">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="user-greeting">
+                        <h4>Notification Center
+                            <span class="role-badge" id="user-role-badge"></span>
+                        </h4>
+                        <p id="user-role-description">Stay updated with important alerts and announcements</p>
+                    </div>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary me-2" onclick="window.location.href='{% url 'messages' %}'">
+                        <i class="fas fa-envelope me-2"></i>Messages
+                    </button>
+                    <button class="btn btn-outline-warning me-2" onclick="openNotificationSettings()">
+                        <i class="fas fa-cog me-2"></i>Settings
+                    </button>
+                    <button class="btn btn-primary" onclick="window.location.href='{% url 'market_research'%}'">
+                        <i class="fas fa-chart-line me-2"></i>Trading Hub
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome Section -->
+    <div class="welcome-section" id="welcome-section">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="welcome-text">
+                    <h1 id="welcome-title">Notification Center</h1>
+                    <p id="welcome-description">Stay informed with trading alerts, system updates, and community notifications. Never miss important updates.</p>
+                </div>
+                <div class="welcome-icon d-none d-lg-block">
+                    <i class="fas fa-bell"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Banner -->
+    <div class="stats-banner">
+        <div class="stat-item" onclick="filterNotifications('all')">
+            <div class="stat-number all" id="total-notifications">24</div>
+            <div class="stat-label">Total Notifications</div>
+        </div>
+        <div class="stat-item" onclick="filterNotifications('unread')">
+            <div class="stat-number unread" id="unread-count">8</div>
+            <div class="stat-label">Unread</div>
+        </div>
+        <div class="stat-item" onclick="filterNotifications('trading')">
+            <div class="stat-number trading" id="trading-count">12</div>
+            <div class="stat-label">Trading Alerts</div>
+        </div>
+        <div class="stat-item" onclick="filterNotifications('system')">
+            <div class="stat-number system" id="system-count">5</div>
+            <div class="stat-label">System Updates</div>
+        </div>
+        <div class="stat-item" onclick="filterNotifications('social')">
+            <div class="stat-number social" id="social-count">7</div>
+            <div class="stat-label">Social Activity</div>
+        </div>
+    </div>
+
+    <!-- Notifications Container -->
+    <div class="notifications-container">
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-tags">
+                <button class="filter-tag active" onclick="filterNotifications('all')">All</button>
+                <button class="filter-tag" onclick="filterNotifications('unread')">Unread</button>
+                <button class="filter-tag trading" onclick="filterNotifications('trading')">Trading Alerts</button>
+                <button class="filter-tag system" onclick="filterNotifications('system')">System Updates</button>
+                <button class="filter-tag social" onclick="filterNotifications('social')">Social Activity</button>
+                <button class="filter-tag urgent" onclick="filterNotifications('urgent')">Urgent</button>
+                <button class="filter-tag" onclick="filterNotifications('read')">Read</button>
+            </div>
+            <div class="filter-actions">
+                <button class="btn btn-outline-secondary btn-sm" onclick="markAllAsRead()">
+                    <i class="fas fa-check-double me-2"></i>Mark All Read
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="clearAllNotifications()">
+                    <i class="fas fa-trash me-2"></i>Clear All
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="refreshNotifications()">
+                    <i class="fas fa-sync-alt me-2"></i>Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Notifications List -->
+        <div id="notifications-list">
+            <!-- Urgent Notification -->
+            <div class="notification-card urgent unread" data-notification-id="urgent-1" style="animation: slideIn 0.3s ease;">
+                <div class="notification-header">
+                    <div class="d-flex align-items-center">
+                        <div class="notification-icon urgent">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="notification-info">
+                            <h5>System Alert <span class="badge bg-danger ms-2">URGENT</span></h5>
+                            <p>Platform Maintenance</p>
+                        </div>
+                    </div>
+                    <div class="notification-time">
+                        <i class="far fa-clock me-1"></i>10 minutes ago
+                    </div>
+                </div>
+                <div class="notification-content">
+                    <h4>⚠️ Scheduled Maintenance Tonight</h4>
+                    <div class="notification-message">
+                        Important: Trading platform will be offline tonight from 2:00 AM to 4:00 AM UTC for critical system upgrades. Please close all open positions before maintenance begins.
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    <button class="notification-action-btn btn-view" onclick="viewNotification('urgent-1')">
+                        <i class="fas fa-external-link-alt"></i>View Details
+                    </button>
+                    <button class="notification-action-btn btn-mark-read" onclick="markAsRead('urgent-1')">
+                        <i class="fas fa-check"></i>Mark Read
+                    </button>
+                    <button class="notification-action-btn btn-dismiss" onclick="dismissNotification('urgent-1')">
+                        <i class="fas fa-times"></i>Dismiss
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trading Alert -->
+            <div class="notification-card trading unread" data-notification-id="trading-1" style="animation: slideIn 0.4s ease;">
+                <div class="notification-header">
+                    <div class="d-flex align-items-center">
+                        <div class="notification-icon trading">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="notification-info">
+                            <h5>Trading Alert</h5>
+                            <p>Market Opportunity Detected</p>
+                        </div>
+                    </div>
+                    <div class="notification-time">
+                        <i class="far fa-clock me-1"></i>25 minutes ago
+                    </div>
+                </div>
+                <div class="notification-content">
+                    <h4>📈 EUR/USD Breakout Alert</h4>
+                    <div class="notification-message">
+                        EUR/USD has broken above key resistance at 1.0950. Next target: 1.1020. RSI indicates strong bullish momentum. Volume is 45% above average.
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    <button class="notification-action-btn btn-view" onclick="viewTradingChart('EURUSD')">
+                        <i class="fas fa-chart-bar"></i>View Chart
+                    </button>
+                    <button class="notification-action-btn btn-mark-read" onclick="markAsRead('trading-1')">
+                        <i class="fas fa-check"></i>Mark Read
+                    </button>
+                    <button class="notification-action-btn btn-save" onclick="saveTradingAlert('trading-1')">
+                        <i class="fas fa-bookmark"></i>Save Alert
+                    </button>
+                </div>
+            </div>
+
+            <!-- Social Notification -->
+            <div class="notification-card social unread" data-notification-id="social-1" style="animation: slideIn 0.5s ease;">
+                <div class="notification-header">
+                    <div class="d-flex align-items-center">
+                        <div class="notification-icon social">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="notification-info">
+                            <h5>Community Update</h5>
+                            <p>New message in Trading Hub</p>
+                        </div>
+                    </div>
+                    <div class="notification-time">
+                        <i class="far fa-clock me-1"></i>1 hour ago
+                    </div>
+                </div>
+                <div class="notification-content">
+                    <h4>👥 New Message from Maria Rodriguez</h4>
+                    <div class="notification-message">
+                        "Thanks for the GBP/JPY analysis! I implemented your strategy and gained 2.3% today. Could you review my EUR/CHF setup?"
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    <button class="notification-action-btn btn-view" onclick="replyToMessage('social-1')">
+                        <i class="fas fa-reply"></i>Reply
+                    </button>
+                    <button class="notification-action-btn btn-mark-read" onclick="markAsRead('social-1')">
+                        <i class="fas fa-check"></i>Mark Read
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Update -->
+            <div class="notification-card system" data-notification-id="system-1" style="animation: slideIn 0.6s ease;">
+                <div class="notification-header">
+                    <div class="d-flex align-items-center">
+                        <div class="notification-icon system">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="notification-info">
+                            <h5>System Update</h5>
+                            <p>New Features Available</p>
+                        </div>
+                    </div>
+                    <div class="notification-time">
+                        <i class="far fa-clock me-1"></i>3 hours ago
+                    </div>
+                </div>
+                <div class="notification-content">
+                    <h4>🚀 Advanced Charting Tools Released</h4>
+                    <div class="notification-message">
+                        We've launched new advanced charting features including Fibonacci retracement tools, custom indicators, and multi-timeframe analysis. Update your app to access these features.
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    <button class="notification-action-btn btn-view" onclick="viewUpdateDetails('system-1')">
+                        <i class="fas fa-info-circle"></i>Learn More
+                    </button>
+                    <button class="notification-action-btn btn-mark-read" onclick="markAsRead('system-1')">
+                        <i class="fas fa-check"></i>Mark Read
+                    </button>
+                </div>
+            </div>
+
+            <!-- Trading Alert 2 -->
+            <div class="notification-card trading" data-notification-id="trading-2" style="animation: slideIn 0.7s ease;">
+                <div class="notification-header">
+                    <div class="d-flex align-items-center">
+                        <div class="notification-icon trading">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="notification-info">
+                            <h5>Market Analysis</h5>
+                            <p>Weekly Report Ready</p>
+                        </div>
+                    </div>
+                    <div class="notification-time">
+                        <i class="far fa-clock me-1"></i>5 hours ago
+                    </div>
+                </div>
+                <div class="notification-content">
+                    <h4>📊 Weekly Market Report Generated</h4>
+                    <div class="notification-message">
+                        Your personalized weekly market report is ready. Key findings: GBP shows strong momentum, Gold faces resistance at $1980, Crypto volatility expected to increase.
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    <button class="notification-action-btn btn-view" onclick="viewMarketReport()">
+                        <i class="fas fa-file-alt"></i>View Report
+                    </button>
+                    <button class="notification-action-btn btn-mark-read" onclick="markAsRead('trading-2')">
+                        <i class="fas fa-check"></i>Mark Read
+                    </button>
+                    <button class="notification-action-btn btn-save" onclick="downloadReport()">
+                        <i class="fas fa-download"></i>Download
+                    </button>
+                </div>
+            </div>
+
+            <!-- Social Notification 2 -->
+            <div class="notification-card social" data-notification-id="social-2" style="animation: slideIn 0.8s ease;">
+                <div class="notification-header">
+                    <div class="d-flex align-items-center">
+                        <div class="notification-icon social">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="notification-info">
+                            <h5>Achievement Unlocked</h5>
+                            <p>Trading Milestone</p>
+                        </div>
+                    </div>
+                    <div class="notification-time">
+                        <i class="far fa-clock me-1"></i>1 day ago
+                    </div>
+                </div>
+                <div class="notification-content">
+                    <h4>🏆 You've Reached 100 Trades!</h4>
+                    <div class="notification-message">
+                        Congratulations! You've successfully completed 100 trades with a 68% win rate. You're now in the top 15% of traders in our community.
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    <button class="notification-action-btn btn-view" onclick="viewAchievements()">
+                        <i class="fas fa-award"></i>View Stats
+                    </button>
+                    <button class="notification-action-btn btn-mark-read" onclick="markAsRead('social-2')">
+                        <i class="fas fa-check"></i>Mark Read
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state d-none">
+            <div class="empty-icon">
+                <i class="far fa-bell-slash"></i>
+            </div>
+            <h3>No Notifications Here</h3>
+            <p>You're all caught up! There are no notifications in this category.</p>
+            <div class="d-flex gap-3 justify-content-center">
+                <button class="btn btn-primary btn-lg" onclick="filterNotifications('all')">
+                    <i class="fas fa-bell me-2"></i>View All Notifications
+                </button>
+                <button class="btn btn-outline-primary btn-lg" onclick="checkForUpdates()">
+                    <i class="fas fa-sync-alt me-2"></i>Check for Updates
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Toggle -->
+    <div class="settings-toggle" onclick="openNotificationSettings()">
+        <i class="fas fa-cog"></i>
+    </div>
+
+    <!-- Notification Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--primary-gradient); color: white;">
+                    <h5 class="modal-title"><i class="fas fa-cog me-2"></i>Notification Settings</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="notification-settings-form">
+                        <div class="mb-4">
+                            <h5 class="mb-3">Notification Types</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="trading-alerts" checked>
+                                        <label class="form-check-label" for="trading-alerts">
+                                            <strong>Trading Alerts</strong>
+                                            <small class="d-block text-muted">Price alerts, breakouts, and market opportunities</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="system-updates" checked>
+                                        <label class="form-check-label" for="system-updates">
+                                            <strong>System Updates</strong>
+                                            <small class="d-block text-muted">Platform maintenance and feature updates</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="social-notifications" checked>
+                                        <label class="form-check-label" for="social-notifications">
+                                            <strong>Social Activity</strong>
+                                            <small class="d-block text-muted">Messages, achievements, and community updates</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="urgent-alerts" checked>
+                                        <label class="form-check-label" for="urgent-alerts">
+                                            <strong>Urgent Alerts</strong>
+                                            <small class="d-block text-muted">Critical system alerts and emergencies</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5 class="mb-3">Delivery Methods</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="in-app-notifications" checked>
+                                        <label class="form-check-label" for="in-app-notifications">
+                                            <strong>In-App Notifications</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="email-notifications" checked>
+                                        <label class="form-check-label" for="email-notifications">
+                                            <strong>Email Notifications</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="push-notifications">
+                                        <label class="form-check-label" for="push-notifications">
+                                            <strong>Push Notifications</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sms-notifications">
+                                        <label class="form-check-label" for="sms-notifications">
+                                            <strong>SMS Alerts</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5 class="mb-3">Trading Alert Preferences</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Minimum Price Change for Alert (%)</label>
+                                <input type="range" class="form-range" min="0.1" max="5" step="0.1" value="1" id="price-alert-threshold">
+                                <div class="d-flex justify-content-between">
+                                    <small>0.1%</small>
+                                    <small id="threshold-value">1%</small>
+                                    <small>5%</small>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Alert Frequency</label>
+                                <select class="form-select" id="alert-frequency">
+                                    <option value="realtime">Real-time (All alerts)</option>
+                                    <option value="hourly">Hourly Summary</option>
+                                    <option value="daily" selected>Daily Digest</option>
+                                    <option value="important">Important Only</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h5 class="mb-3">Quiet Hours</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Start Time</label>
+                                    <input type="time" class="form-control" id="quiet-start" value="22:00">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">End Time</label>
+                                    <input type="time" class="form-control" id="quiet-end" value="06:00">
+                                </div>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="override-urgent" checked>
+                                <label class="form-check-label" for="override-urgent">
+                                    Allow urgent alerts during quiet hours
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="resetSettings()">
+                        <i class="fas fa-undo me-1"></i>Reset to Defaults
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveNotificationSettings()">
+                        <i class="fas fa-save me-1"></i>Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Notification System
+        const notificationSystem = {
+            currentFilter: 'all',
+            notifications: [
+                {
+                    id: 'urgent-1',
+                    type: 'urgent',
+                    unread: true,
+                    title: '⚠️ Scheduled Maintenance Tonight',
+                    message: 'Important: Trading platform will be offline tonight from 2:00 AM to 4:00 AM UTC for critical system upgrades. Please close all open positions before maintenance begins.',
+                    category: 'system',
+                    priority: 'urgent',
+                    time: '10 minutes ago',
+                    icon: 'exclamation-triangle'
+                },
+                {
+                    id: 'trading-1',
+                    type: 'trading',
+                    unread: true,
+                    title: '📈 EUR/USD Breakout Alert',
+                    message: 'EUR/USD has broken above key resistance at 1.0950. Next target: 1.1020. RSI indicates strong bullish momentum. Volume is 45% above average.',
+                    category: 'trading',
+                    priority: 'high',
+                    time: '25 minutes ago',
+                    icon: 'chart-line'
+                },
+                {
+                    id: 'social-1',
+                    type: 'social',
+                    unread: true,
+                    title: '👥 New Message from Maria Rodriguez',
+                    message: '"Thanks for the GBP/JPY analysis! I implemented your strategy and gained 2.3% today. Could you review my EUR/CHF setup?"',
+                    category: 'social',
+                    priority: 'normal',
+                    time: '1 hour ago',
+                    icon: 'users'
+                },
+                {
+                    id: 'system-1',
+                    type: 'system',
+                    unread: false,
+                    title: '🚀 Advanced Charting Tools Released',
+                    message: 'We\'ve launched new advanced charting features including Fibonacci retracement tools, custom indicators, and multi-timeframe analysis. Update your app to access these features.',
+                    category: 'system',
+                    priority: 'normal',
+                    time: '3 hours ago',
+                    icon: 'cog'
+                },
+                {
+                    id: 'trading-2',
+                    type: 'trading',
+                    unread: false,
+                    title: '📊 Weekly Market Report Generated',
+                    message: 'Your personalized weekly market report is ready. Key findings: GBP shows strong momentum, Gold faces resistance at $1980, Crypto volatility expected to increase.',
+                    category: 'trading',
+                    priority: 'normal',
+                    time: '5 hours ago',
+                    icon: 'chart-pie'
+                },
+                {
+                    id: 'social-2',
+                    type: 'social',
+                    unread: false,
+                    title: '🏆 You\'ve Reached 100 Trades!',
+                    message: 'Congratulations! You\'ve successfully completed 100 trades with a 68% win rate. You\'re now in the top 15% of traders in our community.',
+                    category: 'social',
+                    priority: 'normal',
+                    time: '1 day ago',
+                    icon: 'trophy'
+                }
+            ],
+            settings: {
+                tradingAlerts: true,
+                systemUpdates: true,
+                socialNotifications: true,
+                urgentAlerts: true,
+                inAppNotifications: true,
+                emailNotifications: true,
+                pushNotifications: false,
+                smsNotifications: false,
+                priceAlertThreshold: 1,
+                alertFrequency: 'daily',
+                quietHours: {
+                    start: '22:00',
+                    end: '06:00',
+                    overrideUrgent: true
+                }
+            }
+        };
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            loadNotifications();
+            setupEventListeners();
+            simulateWebSocketConnection();
+        });
+
+        function setupEventListeners() {
+            // Price threshold slider
+            const thresholdSlider = document.getElementById('price-alert-threshold');
+            const thresholdValue = document.getElementById('threshold-value');
+            if (thresholdSlider) {
+                thresholdSlider.addEventListener('input', function() {
+                    thresholdValue.textContent = this.value + '%';
+                });
+            }
+        }
+
+        function loadNotifications() {
+            const notificationsList = document.getElementById('notifications-list');
+            const emptyState = document.getElementById('empty-state');
+
+            const filteredNotifications = filterNotificationsList();
+
+            if (filteredNotifications.length === 0) {
+                notificationsList.innerHTML = '';
+                emptyState.classList.remove('d-none');
+                return;
+            }
+
+            emptyState.classList.add('d-none');
+            notificationsList.innerHTML = '';
+
+            filteredNotifications.forEach((notification, index) => {
+                const notificationCard = createNotificationCard(notification, index);
+                notificationsList.appendChild(notificationCard);
+            });
+        }
+
+        function filterNotificationsList() {
+            const filter = notificationSystem.currentFilter;
+
+            return notificationSystem.notifications.filter(notification => {
+                if (filter === 'all') return true;
+                if (filter === 'unread') return notification.unread;
+                if (filter === 'read') return !notification.unread;
+                if (filter === 'trading') return notification.category === 'trading';
+                if (filter === 'system') return notification.category === 'system';
+                if (filter === 'social') return notification.category === 'social';
+                if (filter === 'urgent') return notification.priority === 'urgent';
+                return true;
+            });
+        }
+
+        function createNotificationCard(notification, index) {
+            const card = document.createElement('div');
+            const cardClass = `notification-card ${notification.category} ${notification.unread ? 'unread' : ''} ${notification.priority === 'urgent' ? 'urgent' : ''}`;
+            card.className = cardClass;
+            card.setAttribute('data-notification-id', notification.id);
+            card.style.animation = `slideIn ${0.3 + (index * 0.1)}s ease`;
+
+            const iconClass = notification.icon ? `fas fa-${notification.icon}` : 'fas fa-bell';
+
+            card.innerHTML = `
+                <div class="notification-header">
+                    <div class="d-flex align-items-center">
+                        <div class="notification-icon ${notification.category}">
+                            <i class="${iconClass}"></i>
+                        </div>
+                        <div class="notification-info">
+                            <h5>${notification.type === 'trading' ? 'Trading Alert' : notification.type === 'system' ? 'System Update' : notification.type === 'social' ? 'Community Update' : 'System Alert'}
+                                ${notification.priority === 'urgent' ? '<span class="badge bg-danger ms-2">URGENT</span>' : ''}
+                            </h5>
+                            <p>${notification.type === 'trading' ? 'Market Opportunity' : notification.type === 'system' ? 'Platform Update' : notification.type === 'social' ? 'Social Activity' : 'Important Alert'}</p>
+                        </div>
+                    </div>
+                    <div class="notification-time">
+                        <i class="far fa-clock me-1"></i>${notification.time}
+                    </div>
+                </div>
+                <div class="notification-content">
+                    <h4>${notification.title}</h4>
+                    <div class="notification-message">
+                        ${notification.message}
+                    </div>
+                </div>
+                <div class="notification-actions">
+                    <button class="notification-action-btn btn-view" onclick="viewNotification('${notification.id}')">
+                        <i class="fas fa-external-link-alt"></i>View Details
+                    </button>
+                    ${notification.unread ? `
+                        <button class="notification-action-btn btn-mark-read" onclick="markAsRead('${notification.id}')">
+                            <i class="fas fa-check"></i>Mark Read
+                        </button>
+                    ` : ''}
+                    <button class="notification-action-btn btn-dismiss" onclick="dismissNotification('${notification.id}')">
+                        <i class="fas fa-times"></i>Dismiss
+                    </button>
+                </div>
+            `;
+
+            card.addEventListener('click', function(e) {
+                if (!e.target.closest('.notification-actions')) {
+                    viewNotification(notification.id);
+                }
+            });
+
+            return card;
+        }
+
+        function filterNotifications(filterType) {
+            notificationSystem.currentFilter = filterType;
+
+            // Update filter tags
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+                tag.classList.remove('active');
+                if (tag.textContent.toLowerCase().includes(filterType)) {
+                    tag.classList.add('active');
+                }
+            });
+
+            loadNotifications();
+        }
+
+        function markAsRead(notificationId) {
+            const notification = notificationSystem.notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.unread = false;
+                updateStats();
+                loadNotifications();
+                showToast('Notification marked as read', 'success');
+            }
+        }
+
+        function markAllAsRead() {
+            notificationSystem.notifications.forEach(notification => {
+                notification.unread = false;
+            });
+            updateStats();
+            loadNotifications();
+            showToast('All notifications marked as read', 'success');
+        }
+
+        function dismissNotification(notificationId) {
+            if (confirm('Are you sure you want to dismiss this notification?')) {
+                const index = notificationSystem.notifications.findIndex(n => n.id === notificationId);
+                if (index > -1) {
+                    notificationSystem.notifications.splice(index, 1);
+                    updateStats();
+                    loadNotifications();
+                    showToast('Notification dismissed', 'info');
+                }
+            }
+        }
+
+        function clearAllNotifications() {
+            if (confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
+                notificationSystem.notifications = [];
+                updateStats();
+                loadNotifications();
+                showToast('All notifications cleared', 'info');
+            }
+        }
+
+        function refreshNotifications() {
+            showToast('Checking for new notifications...', 'info');
+
+            // Simulate receiving new notifications
+            setTimeout(() => {
+                const newNotification = {
+                    id: 'new-' + Date.now(),
+                    type: 'trading',
+                    unread: true,
+                    title: '📉 GBP/JPY Support Test',
+                    message: 'GBP/JPY is testing key support at 182.50. Watch for bounce or breakdown. Volume suggests potential reversal.',
+                    category: 'trading',
+                    priority: 'normal',
+                    time: 'Just now',
+                    icon: 'chart-line'
+                };
+
+                notificationSystem.notifications.unshift(newNotification);
+                updateStats();
+                loadNotifications();
+                showToast('New notification received!', 'info');
+            }, 1000);
+        }
+
+        function updateStats() {
+            const total = notificationSystem.notifications.length;
+            const unread = notificationSystem.notifications.filter(n => n.unread).length;
+            const trading = notificationSystem.notifications.filter(n => n.category === 'trading').length;
+            const system = notificationSystem.notifications.filter(n => n.category === 'system').length;
+            const social = notificationSystem.notifications.filter(n => n.category === 'social').length;
+
+            document.getElementById('total-notifications').textContent = total;
+            document.getElementById('unread-count').textContent = unread;
+            document.getElementById('trading-count').textContent = trading;
+            document.getElementById('system-count').textContent = system;
+            document.getElementById('social-count').textContent = social;
+        }
+
+        function viewNotification(notificationId) {
+            const notification = notificationSystem.notifications.find(n => n.id === notificationId);
+            if (notification) {
+                if (notification.unread) {
+                    notification.unread = false;
+                    updateStats();
+                }
+
+                // Show notification details in a modal or alert
+                alert(`Notification Details:\n\n${notification.title}\n\n${notification.message}\n\nTime: ${notification.time}`);
+            }
+        }
+
+        function viewTradingChart(symbol) {
+            showToast(`Opening ${symbol} chart...`, 'info');
+            // In a real app, this would open the trading chart
+            window.open(`chart.html?symbol=${symbol}`, '_blank');
+        }
+
+        function replyToMessage(notificationId) {
+            showToast('Opening reply window...', 'info');
+            // In a real app, this would open the messaging interface
+            window.location.href = 'messages.html';
+        }
+
+        function viewMarketReport() {
+            showToast('Opening weekly market report...', 'info');
+            // In a real app, this would open the report
+            window.open('market_report.pdf', '_blank');
+        }
+
+        function viewAchievements() {
+            showToast('Opening achievements dashboard...', 'info');
+            // In a real app, this would open the achievements page
+            window.open('achievements.html', '_blank');
+        }
+
+        function saveTradingAlert(notificationId) {
+            showToast('Trading alert saved to your watchlist', 'success');
+        }
+
+        function downloadReport() {
+            showToast('Downloading market report...', 'info');
+        }
+
+        function checkForUpdates() {
+            showToast('Checking for system updates...', 'info');
+            setTimeout(() => {
+                showToast('Your system is up to date', 'success');
+            }, 1500);
+        }
+
+        function openNotificationSettings() {
+            // Load current settings into the form
+            document.getElementById('trading-alerts').checked = notificationSystem.settings.tradingAlerts;
+            document.getElementById('system-updates').checked = notificationSystem.settings.systemUpdates;
+            document.getElementById('social-notifications').checked = notificationSystem.settings.socialNotifications;
+            document.getElementById('urgent-alerts').checked = notificationSystem.settings.urgentAlerts;
+            document.getElementById('in-app-notifications').checked = notificationSystem.settings.inAppNotifications;
+            document.getElementById('email-notifications').checked = notificationSystem.settings.emailNotifications;
+            document.getElementById('push-notifications').checked = notificationSystem.settings.pushNotifications;
+            document.getElementById('sms-notifications').checked = notificationSystem.settings.smsNotifications;
+            document.getElementById('price-alert-threshold').value = notificationSystem.settings.priceAlertThreshold;
+            document.getElementById('threshold-value').textContent = notificationSystem.settings.priceAlertThreshold + '%';
+            document.getElementById('alert-frequency').value = notificationSystem.settings.alertFrequency;
+            document.getElementById('quiet-start').value = notificationSystem.settings.quietHours.start;
+            document.getElementById('quiet-end').value = notificationSystem.settings.quietHours.end;
+            document.getElementById('override-urgent').checked = notificationSystem.settings.quietHours.overrideUrgent;
+
+            const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+            settingsModal.show();
+        }
+
+        function saveNotificationSettings() {
+            // Save settings from the form
+            notificationSystem.settings.tradingAlerts = document.getElementById('trading-alerts').checked;
+            notificationSystem.settings.systemUpdates = document.getElementById('system-updates').checked;
+            notificationSystem.settings.socialNotifications = document.getElementById('social-notifications').checked;
+            notificationSystem.settings.urgentAlerts = document.getElementById('urgent-alerts').checked;
+            notificationSystem.settings.inAppNotifications = document.getElementById('in-app-notifications').checked;
+            notificationSystem.settings.emailNotifications = document.getElementById('email-notifications').checked;
+            notificationSystem.settings.pushNotifications = document.getElementById('push-notifications').checked;
+            notificationSystem.settings.smsNotifications = document.getElementById('sms-notifications').checked;
+            notificationSystem.settings.priceAlertThreshold = parseFloat(document.getElementById('price-alert-threshold').value);
+            notificationSystem.settings.alertFrequency = document.getElementById('alert-frequency').value;
+            notificationSystem.settings.quietHours.start = document.getElementById('quiet-start').value;
+            notificationSystem.settings.quietHours.end = document.getElementById('quiet-end').value;
+            notificationSystem.settings.quietHours.overrideUrgent = document.getElementById('override-urgent').checked;
+
+            // Save to localStorage (simulating backend save)
+            localStorage.setItem('notificationSettings', JSON.stringify(notificationSystem.settings));
+
+            showToast('Notification settings saved successfully', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
+        }
+
+        function resetSettings() {
+            if (confirm('Reset all notification settings to defaults?')) {
+                notificationSystem.settings = {
+                    tradingAlerts: true,
+                    systemUpdates: true,
+                    socialNotifications: true,
+                    urgentAlerts: true,
+                    inAppNotifications: true,
+                    emailNotifications: true,
+                    pushNotifications: false,
+                    smsNotifications: false,
+                    priceAlertThreshold: 1,
+                    alertFrequency: 'daily',
+                    quietHours: {
+                        start: '22:00',
+                        end: '06:00',
+                        overrideUrgent: true
+                    }
+                };
+
+                // Update form
+                openNotificationSettings();
+                showToast('Settings reset to defaults', 'info');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} alert-dismissible fade show position-fixed`;
+            toast.style.cssText = `
+                bottom: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                max-width: 400px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                border: none;
+                border-radius: 10px;
+            `;
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle'} me-2" style="font-size: 1.2rem;"></i>
+                    <div style="flex: 1;">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" style="font-size: 0.8rem;"></button>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 3000);
+        }
+
+        function simulateWebSocketConnection() {
+            // Simulate real-time notifications
+            setInterval(() => {
+                // 10% chance of getting a new notification every 30 seconds
+                if (Math.random() < 0.1) {
+                    const types = ['trading', 'system', 'social'];
+                    const type = types[Math.floor(Math.random() * types.length)];
+
+                    const newNotification = {
+                        id: 'live-' + Date.now(),
+                        type: type,
+                        unread: true,
+                        title: type === 'trading' ? '📊 Live Market Update' : type === 'system' ? '🔄 System Notice' : '👋 Community Update',
+                        message: type === 'trading' ? 'New market data available for analysis.' : type === 'system' ? 'System performance optimized.' : 'New activity in your trading community.',
+                        category: type,
+                        priority: 'normal',
+                        time: 'Just now',
+                        icon: type === 'trading' ? 'chart-line' : type === 'system' ? 'cog' : 'users'
+                    };
+
+                    notificationSystem.notifications.unshift(newNotification);
+                    updateStats();
+
+                    if (notificationSystem.currentFilter === 'all' || notificationSystem.currentFilter === type || notificationSystem.currentFilter === 'unread') {
+                        loadNotifications();
+                    }
+
+                    // Show a subtle notification
+                    if (notificationSystem.settings.inAppNotifications) {
+                        showToast('New notification received', 'info');
+                    }
+                }
+            }, 30000); // Check every 30 seconds
+        }
+    </script>
+</body>
+</html>

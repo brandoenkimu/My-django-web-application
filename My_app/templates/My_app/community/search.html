@@ -1,0 +1,1791 @@
+<!-- templates/community/search.html -->
+{% load static %}
+{% load my_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Search - TradingHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3a0ca3;
+            --secondary: #7209b7;
+            --secondary-light: #9d4edd;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #ff9e00;
+            --info: #7209b7;
+
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #f1f3f5;
+            --bg-dark: #212529;
+
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-muted: #6c757d;
+            --text-light: #adb5bd;
+
+            --border-light: #e9ecef;
+            --border-medium: #dee2e6;
+            --border-dark: #ced4da;
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-2xl: 24px;
+            --radius-full: 50px;
+
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.12);
+            --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
+            --shadow-inner: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        /* Navbar */
+        .navbar-search {
+            background: white;
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Search Hero */
+        .search-hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 80px 0 40px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .search-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .search-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Search Box */
+        .search-box {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            z-index: 10;
+            margin-top: 2rem;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            z-index: 2;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem 1rem 3.5rem;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            background: var(--bg-primary);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Search Suggestions */
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            z-index: 1000;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+
+        .suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--bg-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.active {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--primary);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            object-fit: cover;
+        }
+
+        .suggestion-content {
+            flex: 1;
+        }
+
+        .suggestion-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .suggestion-username {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .suggestion-bio {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .suggestion-followers {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Filters */
+        .filters-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .filter-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .filter-select:hover {
+            border-color: var(--primary-light);
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        /* Quick Filters */
+        .quick-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-filter {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-filter:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .quick-filter.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Results Header */
+        .results-header {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .results-count {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .sort-select {
+            min-width: 200px;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-light);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        /* Results Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* User Card */
+        .user-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-light);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .user-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary);
+        }
+
+        .user-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 2rem 1.5rem 1rem;
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid white;
+            background: white;
+            position: absolute;
+            top: 50%;
+            left: 1.5rem;
+            transform: translateY(-50%);
+            object-fit: cover;
+            box-shadow: var(--shadow-md);
+        }
+
+        .user-verified {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .user-body {
+            padding: 4rem 1.5rem 1.5rem;
+            flex-grow: 1;
+        }
+
+        .user-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-username {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-bio {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-tag {
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .user-footer {
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .message-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .message-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .follow-btn {
+            background: white;
+            color: var(--text-primary);
+            border: 2px solid var(--border-medium);
+        }
+
+        .follow-btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-dark);
+        }
+
+        .follow-btn.following {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Online Status Badge */
+        .online-status {
+            font-size: 12px;
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .online-status i {
+            font-size: 10px;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border-radius: 18px;
+            margin: 5px 0;
+            max-width: fit-content;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .typing-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Sidebar */
+        .sidebar-section {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .trending-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .trending-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .trending-item:last-child {
+            border-bottom: none;
+        }
+
+        .trending-rank {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            min-width: 24px;
+        }
+
+        .trending-content {
+            flex: 1;
+        }
+
+        .trending-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .trending-stats {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .trending-action {
+            padding: 0.25rem 0.75rem;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .trending-action:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Tips */
+        .tip-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .tip-item:last-child {
+            border-bottom: none;
+        }
+
+        .tip-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .tip-content {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .no-results-icon {
+            font-size: 4rem;
+            color: var(--border-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .no-results-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .no-results-message {
+            color: var(--text-muted);
+            max-width: 400px;
+            margin: 0 auto 1.5rem;
+        }
+
+        /* Online Status Container */
+        .online-status-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .online-status-badge {
+            background: white;
+            padding: 10px 16px;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #28a745;
+            border: 2px solid #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .online-status-badge i {
+            font-size: 10px;
+        }
+
+        /* Notification Toast */
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+
+        .notification-success {
+            background: #4cc9f0;
+            color: white;
+        }
+
+        .notification-error {
+            background: #f72585;
+            color: white;
+        }
+
+        .notification-info {
+            background: #4361ee;
+            color: white;
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.6;
+            }
+            30% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+            }
+            50% {
+                box-shadow: 0 4px 20px rgba(40, 167, 69, 0.4);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .search-title {
+                font-size: 2rem;
+            }
+
+            .search-hero {
+                padding: 60px 0 30px;
+            }
+
+            .search-box {
+                padding: 1.5rem;
+                margin: 0 1rem;
+            }
+
+            .filters-container {
+                grid-template-columns: 1fr;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .sort-select {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .search-title {
+                font-size: 1.75rem;
+            }
+
+            .search-input {
+                padding: 0.875rem 1.25rem 0.875rem 3rem;
+            }
+
+            .search-btn {
+                position: relative;
+                right: auto;
+                top: auto;
+                transform: none;
+                width: 100%;
+                justify-content: center;
+                margin-top: 1rem;
+            }
+
+            .user-stats {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .user-footer {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-search navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'community_feed' %}">
+                <i class="fas fa-chart-line me-2"></i>Bold~TradingHub
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'user_profile' request.user.username %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-user me-1"></i>Profile
+                </a>
+                <a href="{% url 'notifications' %}" class="btn btn-light btn-sm position-relative">
+                    <i class="fas fa-bell"></i>
+                    {% if request.user.notifications.unread.exists %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ request.user.notifications.unread.count }}
+                    </span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Hero -->
+    <section class="search-hero">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="search-title">Connect with Traders Worldwide</h1>
+                <p class="search-subtitle">
+                    Find expert traders, discover strategies, and connect with like-minded professionals in our global trading community
+                </p>
+            </div>
+
+            <!-- Search Box -->
+            <div class="search-box">
+                <form method="GET" action="{% url 'search_users' %}">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text"
+                               class="search-input"
+                               name="q"
+                               value="{{ query|default:'' }}"
+                               placeholder="Search by username, name, trading style, or expertise...">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i>
+                            Search
+                        </button>
+                    </div>
+
+                    <!-- Advanced Filters -->
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <label class="filter-label">User Type</label>
+                            <select class="filter-select" name="type">
+                                <option value="">All Users</option>
+                                <option value="trader" {% if filter_params.type == 'trader' %}selected{% endif %}>Traders</option>
+                                <option value="analyst" {% if filter_params.type == 'analyst' %}selected{% endif %}>Analysts</option>
+                                <option value="mentor" {% if filter_params.type == 'mentor' %}selected{% endif %}>Mentors</option>
+                                <option value="institutional" {% if filter_params.type == 'institutional' %}selected{% endif %}>Institutional</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">Experience Level</label>
+                            <select class="filter-select" name="experience">
+                                <option value="">Any Experience</option>
+                                <option value="beginner" {% if filter_params.experience == 'beginner' %}selected{% endif %}>Beginner</option>
+                                <option value="intermediate" {% if filter_params.experience == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                                <option value="advanced" {% if filter_params.experience == 'advanced' %}selected{% endif %}>Advanced</option>
+                                <option value="professional" {% if filter_params.experience == 'professional' %}selected{% endif %}>Professional</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">Primary Market</label>
+                            <select class="filter-select" name="market">
+                                <option value="">All Markets</option>
+                                <option value="crypto" {% if filter_params.market == 'crypto' %}selected{% endif %}>Cryptocurrency</option>
+                                <option value="forex" {% if filter_params.market == 'forex' %}selected{% endif %}>Forex</option>
+                                <option value="stocks" {% if filter_params.market == 'stocks' %}selected{% endif %}>Stocks</option>
+                                <option value="commodities" {% if filter_params.market == 'commodities' %}selected{% endif %}>Commodities</option>
+                                <option value="indices" {% if filter_params.market == 'indices' %}selected{% endif %}>Indices</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-label">Location</label>
+                            <select class="filter-select" name="location">
+                                <option value="">Global</option>
+                                <option value="north_america" {% if filter_params.location == 'north_america' %}selected{% endif %}>North America</option>
+                                <option value="europe" {% if filter_params.location == 'europe' %}selected{% endif %}>Europe</option>
+                                <option value="asia" {% if filter_params.location == 'asia' %}selected{% endif %}>Asia</option>
+                                <option value="oceania" {% if filter_params.location == 'oceania' %}selected{% endif %}>Oceania</option>
+                                <option value="africa" {% if filter_params.location == 'africa' %}selected{% endif %}>Africa</option>
+                                <option value="south_america" {% if filter_params.location == 'south_america' %}selected{% endif %}>South America</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Quick Filters -->
+                    <div class="quick-filters">
+                        <div class="quick-filter {% if filter_params.quick_filter == 'all' or not filter_params.quick_filter %}active{% endif %}" data-filter="all">All Users</div>
+                        <div class="quick-filter {% if filter_params.quick_filter == 'online' %}active{% endif %}" data-filter="online">
+                            <i class="fas fa-circle text-success" style="font-size: 10px;"></i>
+                            Online Now
+                        </div>
+                        <div class="quick-filter {% if filter_params.quick_filter == 'verified' %}active{% endif %}" data-filter="verified">
+                            <i class="fas fa-check-circle text-primary"></i>
+                            Verified
+                        </div>
+                        <div class="quick-filter {% if filter_params.quick_filter == 'mentors' %}active{% endif %}" data-filter="mentors">
+                            <i class="fas fa-graduation-cap"></i>
+                            Mentors
+                        </div>
+                        <div class="quick-filter {% if filter_params.quick_filter == 'institutional' %}active{% endif %}" data-filter="institutional">
+                            <i class="fas fa-building"></i>
+                            Institutional
+                        </div>
+                        <div class="quick-filter {% if filter_params.quick_filter == 'top_traders' %}active{% endif %}" data-filter="top_traders">
+                            <i class="fas fa-trophy"></i>
+                            Top Traders
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="sort" id="sortInput" value="{{ filter_params.sort|default:'relevance' }}">
+
+                    <button type="reset" class="btn btn-outline-secondary w-100 mt-2" onclick="clearFilters(event)">
+                        <i class="fas fa-redo me-2"></i>Reset Filters
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <!-- Results Column -->
+            <div class="col-lg-8">
+                <!-- Results Header -->
+                <div class="results-header">
+                    <div class="results-title">
+                        Search Results
+                        {% if users %}
+                        <span class="results-count">{{ total_users }} users</span>
+                        {% endif %}
+                    </div>
+
+                    <select class="sort-select" id="sortSelect">
+                        <option value="relevance" {% if filter_params.sort == 'relevance' %}selected{% endif %}>Sort by: Relevance</option>
+                        <option value="followers" {% if filter_params.sort == 'followers' %}selected{% endif %}>Most Followers</option>
+                        <option value="recent" {% if filter_params.sort == 'recent' %}selected{% endif %}>Recently Active</option>
+                        <option value="performance" {% if filter_params.sort == 'performance' %}selected{% endif %}>Top Performance</option>
+                        <option value="joined" {% if filter_params.sort == 'joined' %}selected{% endif %}>Newest Members</option>
+                    </select>
+                </div>
+
+                {% if query or users %}
+                    {% if users %}
+                        <!-- Users Grid -->
+                        <div class="results-grid">
+                            {% for result_user in users %}
+                            <div class="user-card" data-user-id="{{ result_user.id }}" data-username="{{ result_user.username }}">
+                                <div class="user-header">
+                                    <img src="{{ result_user|get_avatar_url }}"
+                                         alt="{{ result_user.username }}"
+                                         class="user-avatar">
+
+                                    {% if result_user.profile.kyc_verified %}
+                                    <div class="user-verified" title="Verified Trader">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="user-body">
+                                    <div class="user-name">
+                                        {{ result_user|get_display_name }}
+                                        {% if result_user|is_online %}
+                                        <span class="online-status">
+                                            <i class="fas fa-circle"></i> Online
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="user-username">@{{ result_user.username }}</div>
+
+                                    {% if result_user.profile.bio %}
+                                    <div class="user-bio">{{ result_user.profile.bio|truncatechars:120 }}</div>
+                                    {% endif %}
+
+                                    <div class="user-stats">
+                                        <div class="stat-item">
+                                            <div class="stat-value">{{ result_user.profile.followers_count|format_large_number }}</div>
+                                            <div class="stat-label">Followers</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value">{{ result_user.profile.total_posts|format_large_number }}</div>
+                                            <div class="stat-label">Posts</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value">{{ result_user|get_trading_days }}</div>
+                                            <div class="stat-label">Days</div>
+                                        </div>
+                                    </div>
+
+                                    {% if result_user.profile.trading_style %}
+                                    <div class="user-tags">
+                                        <span class="user-tag">{{ result_user.profile.trading_style }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="user-footer">
+                                    <button class="action-btn message-btn" onclick="sendMessage('{{ result_user.id }}', '{{ result_user.username }}')">
+                                        <i class="fas fa-envelope"></i>
+                                        Message
+                                    </button>
+
+                                    {% if result_user != request.user %}
+                                    <button class="action-btn follow-btn {% if result_user|is_followed_by:request.user %}following{% endif %}"
+                                            data-user-id="{{ result_user.id }}"
+                                            onclick="toggleFollow(this, {{ result_user.id }})">
+                                        <i class="fas fa-user-plus"></i>
+                                        {% if result_user|is_followed_by:request.user %}
+                                            Following
+                                        {% else %}
+                                            Follow
+                                        {% endif %}
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <nav aria-label="Search results pagination">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in filter_params.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% for key, value in filter_params.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in filter_params.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    {% else %}
+                        <!-- No Results -->
+                        <div class="no-results">
+                            <div class="no-results-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3 class="no-results-title">No users found</h3>
+                            <p class="no-results-message">
+                                Try adjusting your search or filters to find what you're looking for.
+                            </p>
+                            <button class="btn btn-primary" onclick="clearFilters()">
+                                <i class="fas fa-redo me-2"></i>Clear All Filters
+                            </button>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <!-- Default View -->
+                    <div class="no-results">
+                        <div class="no-results-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 class="no-results-title">Start searching</h3>
+                        <p class="no-results-message">
+                            Enter a username, trading style, or expertise to find traders in our community.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Trending Traders -->
+                <div class="sidebar-section">
+                    <h6 class="section-title">
+                        <i class="fas fa-fire text-warning"></i>
+                        Trending Traders
+                    </h6>
+
+                    <ul class="trending-list">
+                        {% for user in trending_traders|slice:":5" %}
+                        <li class="trending-item">
+                            <div class="trending-rank">{{ forloop.counter }}</div>
+                            <img src="{{ user|get_avatar_url }}"
+                                 alt="{{ user.username }}"
+                                 class="rounded-circle me-2"
+                                 width="36" height="36">
+                            <div class="trending-content">
+                                <div class="trending-name">{{ user|get_display_name }}</div>
+                                <div class="trending-stats">
+                                    {{ user.profile.followers_count|format_large_number }} followers
+                                </div>
+                            </div>
+                            <a href="{% url 'user_profile' user.username %}" class="trending-action">View</a>
+                        </li>
+                        {% empty %}
+                        <li class="trending-item">
+                            <div class="trending-content text-muted">
+                                No trending traders yet
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Recently Active -->
+                <div class="sidebar-section">
+                    <h6 class="section-title">
+                        <i class="fas fa-circle text-success"></i>
+                        Recently Active
+                    </h6>
+
+                    <ul class="trending-list">
+                        {% for user in recently_active|slice:":5" %}
+                        <li class="trending-item">
+                            <div class="trending-rank">
+                                <i class="fas fa-circle text-success" style="font-size: 10px;"></i>
+                            </div>
+                            <img src="{{ user|get_avatar_url }}"
+                                 alt="{{ user.username }}"
+                                 class="rounded-circle me-2"
+                                 width="36" height="36">
+                            <div class="trending-content">
+                                <div class="trending-name">{{ user|get_display_name }}</div>
+                                <div class="trending-stats">
+                                    Active {{ user.user_status.last_seen|timesince }} ago
+                                </div>
+                            </div>
+                            <button class="trending-action" onclick="sendMessage('{{ user.id }}', '{{ user.username }}')">Message</button>
+                        </li>
+                        {% empty %}
+                        <li class="trending-item">
+                            <div class="trending-content text-muted">
+                                No recently active users
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Search Tips -->
+                <div class="sidebar-section">
+                    <h6 class="section-title">
+                        <i class="fas fa-lightbulb text-warning"></i>
+                        Search Tips
+                    </h6>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fas fa-at"></i>
+                        </div>
+                        <div class="tip-content">
+                            Use <strong>@username</strong> to search specific users
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fas fa-hashtag"></i>
+                        </div>
+                        <div class="tip-content">
+                            Use <strong>#tag</strong> to find traders by expertise
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fas fa-filter"></i>
+                        </div>
+                        <div class="tip-content">
+                            Use filters to narrow down by market or experience level
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Online Status Indicator -->
+    <div class="online-status-container" id="onlineStatus">
+        <div class="online-status-badge">
+            <i class="fas fa-circle"></i>
+            <span>Users Online: <span id="onlineCount">0</span></span>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        // Initialize Select2
+        $(document).ready(function() {
+            $('.filter-select').select2({
+                minimumResultsForSearch: 3,
+                placeholder: 'Select option',
+                width: '100%'
+            });
+
+            $('.sort-select').select2({
+                minimumResultsForSearch: Infinity,
+                width: '100%'
+            });
+
+            // Update hidden sort input when select changes
+            $('#sortSelect').on('change', function() {
+                $('#sortInput').val($(this).val());
+            });
+        });
+
+        // Real-time search with debouncing
+        let searchTimeout;
+        const searchInput = document.querySelector('.search-input');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+
+                if (query.length > 2) {
+                    searchTimeout = setTimeout(() => {
+                        fetchSearchSuggestions(query);
+                    }, 300);
+                } else {
+                    hideSuggestions();
+                }
+            });
+
+            // Handle keyboard navigation
+            searchInput.addEventListener('keydown', function(e) {
+                const suggestions = document.querySelectorAll('.suggestion-item');
+                const active = document.querySelector('.suggestion-item.active');
+
+                if (e.key === 'ArrowDown' && suggestions.length > 0) {
+                    e.preventDefault();
+                    navigateSuggestions('down', active, suggestions);
+                } else if (e.key === 'ArrowUp' && suggestions.length > 0) {
+                    e.preventDefault();
+                    navigateSuggestions('up', active, suggestions);
+                } else if (e.key === 'Enter' && active) {
+                    e.preventDefault();
+                    active.click();
+                } else if (e.key === 'Escape') {
+                    hideSuggestions();
+                }
+            });
+        }
+
+        // Quick filter buttons
+        document.querySelectorAll('.quick-filter').forEach(button => {
+            button.addEventListener('click', function() {
+                const filter = this.dataset.filter;
+                updateQuickFilter(filter);
+                applyFilters();
+            });
+        });
+
+        // Sort dropdown
+        const sortSelect = document.getElementById('sortSelect');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function() {
+                applyFilters();
+            });
+        }
+
+        // Advanced filter changes
+        document.querySelectorAll('.filter-select').forEach(select => {
+            select.addEventListener('change', applyFilters);
+        });
+
+        // Reset filters
+        function clearFilters(event) {
+            if (event) event.preventDefault();
+
+            // Clear input fields
+            document.querySelector('.search-input').value = '';
+
+            // Clear select fields
+            document.querySelectorAll('.filter-select').forEach(select => {
+                select.value = '';
+                if (select.classList.contains('select2-hidden-accessible')) {
+                    $(select).val(null).trigger('change');
+                }
+            });
+
+            // Reset quick filters
+            document.querySelectorAll('.quick-filter').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector('.quick-filter[data-filter="all"]').classList.add('active');
+
+            // Reset sort
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.value = 'relevance';
+                $(sortSelect).trigger('change');
+            }
+
+            // Reload page
+            window.location.href = window.location.pathname;
+        }
+
+        async function fetchSearchSuggestions(query) {
+            try {
+                const response = await fetch(`/api/search/suggestions/?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.suggestions && data.suggestions.length > 0) {
+                    showSuggestions(data.suggestions);
+                } else {
+                    hideSuggestions();
+                }
+            } catch (error) {
+                console.error('Error fetching suggestions:', error);
+            }
+        }
+
+        function showSuggestions(suggestions) {
+            hideSuggestions();
+
+            const container = document.createElement('div');
+            container.className = 'search-suggestions';
+
+            suggestions.forEach((suggestion, index) => {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+
+                if (index === 0) {
+                    item.classList.add('active');
+                }
+
+                item.innerHTML = `
+                    <img src="${suggestion.avatar}"
+                         alt="${suggestion.display_name}"
+                         class="suggestion-avatar">
+                    <div class="suggestion-content">
+                        <div class="suggestion-name">
+                            ${suggestion.display_name}
+                            ${suggestion.is_verified ?
+                                '<i class="fas fa-check-circle text-primary"></i>' :
+                                ''}
+                        </div>
+                        <div class="suggestion-username">@${suggestion.username}</div>
+                        <div class="suggestion-bio">${suggestion.bio_preview}</div>
+                    </div>
+                    <div class="suggestion-followers">
+                        <i class="fas fa-users"></i> ${formatNumber(suggestion.followers)}
+                    </div>
+                `;
+
+                // FIX: Use the correct URL pattern
+                item.addEventListener('click', function() {
+                    // Use profile/username/ instead of user/username/
+                    window.location.href = `/profile/${suggestion.username}/`;
+                });
+
+                item.addEventListener('mouseover', function() {
+                    document.querySelectorAll('.suggestion-item').forEach(s => s.classList.remove('active'));
+                    this.classList.add('active');
+                });
+
+                container.appendChild(item);
+            });
+
+            document.querySelector('.search-input-wrapper').appendChild(container);
+        }
+
+        function hideSuggestions() {
+            const existing = document.querySelector('.search-suggestions');
+            if (existing) {
+                existing.remove();
+            }
+        }
+
+        function navigateSuggestions(direction, active, suggestions) {
+            let index = -1;
+            if (active) {
+                index = Array.from(suggestions).indexOf(active);
+            }
+
+            if (direction === 'down') {
+                index = (index + 1) % suggestions.length;
+            } else {
+                index = (index - 1 + suggestions.length) % suggestions.length;
+            }
+
+            suggestions.forEach(s => s.classList.remove('active'));
+            suggestions[index].classList.add('active');
+            suggestions[index].scrollIntoView({ block: 'nearest' });
+        }
+
+        function updateQuickFilter(filter) {
+            document.querySelectorAll('.quick-filter').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            const activeBtn = document.querySelector(`.quick-filter[data-filter="${filter}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        function applyFilters() {
+            const form = document.querySelector('form');
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+
+            // Get all filter values
+            formData.forEach((value, key) => {
+                if (value) params.append(key, value);
+            });
+
+            // Get quick filter
+            const quickFilter = document.querySelector('.quick-filter.active');
+            if (quickFilter && quickFilter.dataset.filter !== 'all') {
+                params.append('quick_filter', quickFilter.dataset.filter);
+            }
+
+            // Get sort value
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect && sortSelect.value) {
+                params.append('sort', sortSelect.value);
+            }
+
+            // Update URL and reload
+            const newUrl = `${window.location.pathname}?${params.toString()}`;
+            window.location.href = newUrl;
+        }
+
+        async function toggleFollow(button, userId) {
+            const $btn = $(button);
+            const isFollowing = $btn.hasClass('following');
+
+            try {
+                const response = await fetch('/api/follow/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({user_id: userId})
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.is_following) {
+                        $btn.addClass('following').removeClass('follow-btn');
+                        $btn.html('<i class="fas fa-user-check"></i> Following');
+
+                        // Show notification
+                        showNotification('You are now following this user', 'success');
+                    } else {
+                        $btn.removeClass('following').addClass('follow-btn');
+                        $btn.html('<i class="fas fa-user-plus"></i> Follow');
+
+                        // Show notification
+                        showNotification('You have unfollowed this user', 'info');
+                    }
+
+                    // Update follower count if available
+                    if (data.followers_count) {
+                        const followersElement = $btn.closest('.user-card').find('.stat-value').first();
+                        if (followersElement.length) {
+                            followersElement.text(formatNumber(data.followers_count));
+                        }
+                    }
+                } else {
+                    showNotification(data.error || 'Something went wrong', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Network error. Please try again.', 'error');
+            }
+        }
+
+        async function sendMessage(userId, username) {
+            try {
+                // First call the API to create/get chat room
+                const response = await fetch(`/api/message/${username}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Redirect to chat with username instead of room ID
+                    window.location.href = `/community/messages/${username}/`;
+                } else {
+                    showNotification('Failed to start conversation', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('Network error. Please try again.', 'error');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existing = document.querySelector('.notification-toast');
+            if (existing) existing.remove();
+
+            // Create notification
+            const notification = document.createElement('div');
+            notification.className = `notification-toast notification-${type}`;
+
+            const icon = type === 'error' ? 'fas fa-exclamation-circle' :
+                         type === 'success' ? 'fas fa-check-circle' :
+                         'fas fa-info-circle';
+
+            notification.innerHTML = `
+                <i class="${icon}" style="font-size: 18px;"></i>
+                <span style="flex: 1;">${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) {
+                return (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'K';
+            }
+            return num;
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // WebSocket connection for real-time updates
+        let ws = null;
+        const currentUser = '{{ request.user.username }}';
+
+        function connectWebSocket() {
+            const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+            const wsUrl = `${wsScheme}://${window.location.host}/ws/search/${currentUser}/`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                console.log('WebSocket connected');
+                updateOnlineCount();
+            };
+
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+
+                if (data.type === 'online_count') {
+                    document.getElementById('onlineCount').textContent = data.count;
+                } else if (data.type === 'user_online') {
+                    showUserOnlineStatus(data.user);
+                } else if (data.type === 'user_offline') {
+                    showUserOfflineStatus(data.user);
+                } else if (data.type === 'typing') {
+                    showTypingIndicator(data.user_id);
+                }
+            };
+
+            ws.onclose = function() {
+                console.log('WebSocket disconnected. Reconnecting...');
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+        }
+
+        function updateOnlineCount() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({type: 'get_online_count'}));
+            }
+        }
+
+        function showUserOnlineStatus(username) {
+            const userCard = document.querySelector(`.user-card[data-username="${username}"]`);
+            if (userCard) {
+                const statusBadge = userCard.querySelector('.online-status');
+                if (!statusBadge) {
+                    const badge = document.createElement('span');
+                    badge.className = 'online-status';
+                    badge.innerHTML = '<i class="fas fa-circle"></i> Online';
+                    userCard.querySelector('.user-name').appendChild(badge);
+                }
+            }
+        }
+
+        function showUserOfflineStatus(username) {
+            const userCard = document.querySelector(`.user-card[data-username="${username}"]`);
+            if (userCard) {
+                const statusBadge = userCard.querySelector('.online-status');
+                if (statusBadge) {
+                    statusBadge.remove();
+                }
+            }
+        }
+
+        function showTypingIndicator(userId) {
+            const userCard = document.querySelector(`.user-card[data-user-id="${userId}"]`);
+            if (userCard) {
+                let indicator = userCard.querySelector('.typing-indicator');
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.className = 'typing-indicator';
+                    indicator.innerHTML = `
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span class="typing-text">is typing...</span>
+                    `;
+                    userCard.appendChild(indicator);
+                }
+
+                // Clear previous timeout
+                clearTimeout(window.typingTimeout);
+
+                // Hide after 3 seconds
+                window.typingTimeout = setTimeout(() => {
+                    indicator.remove();
+                }, 3000);
+            }
+        }
+
+        // Connect WebSocket when page loads
+        if (currentUser) {
+            connectWebSocket();
+        }
+    </script>
+</body>
+</html>

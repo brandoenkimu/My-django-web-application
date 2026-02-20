@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History - Live Updates</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --color-success: #28a745;
+            --color-warning: #ffc107;
+            --color-danger: #dc3545;
+            --color-info: #17a2b8;
+            --color-primary: #007bff;
+            --color-secondary: #6c757d;
+            --color-purple: #6f42c1;
+            --color-pink: #e83e8c;
+            --color-teal: #20c997;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-success);
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-completed {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--color-success);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .status-pending {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #856404;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .status-processing {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: var(--color-info);
+            border: 1px solid rgba(23, 162, 184, 0.3);
+        }
+
+        .balance-update {
+            animation: balancePulse 2s ease-in-out;
+        }
+
+        @keyframes balancePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .admin-modification {
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.1) 0%, rgba(232, 62, 140, 0.1) 100%);
+            border-left: 4px solid var(--color-purple);
+        }
+
+        .bonus-transaction {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(32, 201, 151, 0.1) 100%);
+            border-left: 4px solid var(--color-teal);
+        }
+
+        .refund-transaction {
+            background: linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(0, 123, 255, 0.1) 100%);
+            border-left: 4px solid var(--color-info);
+        }
+
+        .balance-change {
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .balance-increase {
+            color: var(--color-success);
+            animation: increaseGlow 1s ease-out;
+        }
+
+        @keyframes increaseGlow {
+            0% { text-shadow: 0 0 10px rgba(40, 167, 69, 0.5); }
+            100% { text-shadow: none; }
+        }
+
+        .balance-decrease {
+            color: var(--color-danger);
+            animation: decreaseGlow 1s ease-out;
+        }
+
+        @keyframes decreaseGlow {
+            0% { text-shadow: 0 0 10px rgba(220, 53, 69, 0.5); }
+            100% { text-shadow: none; }
+        }
+
+        .admin-badge {
+            background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-pink) 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .bonus-badge {
+            background: linear-gradient(135deg, var(--color-teal) 0%, var(--color-warning) 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .live-update-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .balance-history {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .balance-history-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f8f9fa;
+            font-size: 0.9rem;
+        }
+
+        .balance-history-item:last-child {
+            border-bottom: none;
+        }
+
+        .amount-display {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .currency-symbol {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .ws-status {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .ws-connected {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--color-success);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .ws-disconnected {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--color-danger);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        .ws-connecting {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #856404;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .admin-panel-toggle {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .admin-panel-toggle:hover {
+            transform: translateY(-2px);
+        }
+
+        .admin-panel {
+            border: 1px solid var(--color-purple);
+            border-radius: 10px;
+            background: rgba(111, 66, 193, 0.05);
+        }
+
+        .audit-log-item {
+            padding: 10px 15px;
+            border-left: 3px solid transparent;
+            margin-bottom: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .audit-log-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .audit-log-admin {
+            border-left-color: var(--color-purple);
+        }
+
+        .audit-log-system {
+            border-left-color: var(--color-info);
+        }
+
+        .audit-log-user {
+            border-left-color: var(--color-primary);
+        }
+
+        .real-time-updates {
+            background: linear-gradient(135deg, rgba(0, 123, 255, 0.1) 0%, rgba(32, 201, 151, 0.1) 100%);
+            border: 1px solid rgba(0, 123, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0">
+                            <span class="live-indicator"></span>
+                            Transaction History
+                            <small class="text-muted fs-6" id="last-update">
+                                <i class="fas fa-broadcast-tower ms-2"></i> Real-time Updates
+                            </small>
+                        </h2>
+                        <p class="text-muted mb-0">
+                            Live tracking with automatic balance updates
+                            <span class="ws-status ms-2" id="ws-status">Connecting...</span>
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'deposit' %}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>New Deposit
+                        </a>
+                        <a href="{% url 'withdraw' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-money-bill-wave me-2"></i>Withdraw
+                        </a>
+                        {% if request.user.is_staff %}
+                        <button class="btn btn-purple" onclick="toggleAdminPanel()">
+                            <i class="fas fa-user-shield me-2"></i>Admin Panel
+                        </button>
+                        {% endif %}
+                        <button class="btn btn-outline-secondary" onclick="refreshTransactions()" id="refresh-btn">
+                            <i class="fas fa-sync-alt" id="refresh-icon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Panel (Visible only to staff) -->
+        {% if request.user.is_staff %}
+        <div class="row mb-4" id="adminPanel" style="display: none;">
+            <div class="col-12">
+                <div class="card admin-panel">
+                    <div class="card-header bg-purple text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-user-shield me-2"></i>Administrator Panel</h5>
+                            <small>Manage user balances and transactions</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Balance Management -->
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-wallet me-2"></i>Balance Management</h6>
+                                <form id="balanceForm" class="mb-4">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="userSelect" class="form-label">Select User</label>
+                                        <select class="form-control" id="userSelect" required>
+                                            <option value="">Select a user...</option>
+                                            {% for user in all_users %}
+                                            <option value="{{ user.id }}">{{ user.username }} (Current: ${{ user.wallet.balance|default:"0.00" }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="actionType" class="form-label">Action</label>
+                                            <select class="form-control" id="actionType" required>
+                                                <option value="ADD">Add Funds</option>
+                                                <option value="SUBTRACT">Subtract Funds</option>
+                                                <option value="SET">Set Balance</option>
+                                                <option value="BONUS">Add Bonus</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="amount" class="form-label">Amount (USD)</label>
+                                            <input type="number" class="form-control" id="amount" step="0.01" min="0" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Description/Reason</label>
+                                        <textarea class="form-control" id="description" rows="2" required placeholder="Reason for this balance modification..."></textarea>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-purple">
+                                            <i class="fas fa-check-circle me-2"></i>Apply Balance Change
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Transaction Management -->
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-exchange-alt me-2"></i>Transaction Management</h6>
+                                <div class="mb-3">
+                                    <label for="transactionSearch" class="form-label">Search Transaction</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="transactionSearch" placeholder="Transaction ID or Reference">
+                                        <button class="btn btn-outline-purple" onclick="searchAdminTransaction()">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="transactionResult" class="mb-3"></div>
+
+                                <!-- Real-time Activity Log -->
+                                <h6 class="mt-4"><i class="fas fa-history me-2"></i>Live Activity Log</h6>
+                                <div class="balance-history">
+                                    <div id="activityLog">
+                                        <!-- Activity log will be populated via WebSocket -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Real-time Updates Alert -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card real-time-updates">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">
+                                    <i class="fas fa-bolt text-primary me-2"></i>
+                                    Real-time Balance & Transaction Updates
+                                </h6>
+                                <small class="text-muted">
+                                    All balance changes, bonuses, and admin modifications update instantly.
+                                    <span id="lastBalanceUpdate">Last update: Just now</span>
+                                </small>
+                            </div>
+                            <div>
+                                <span class="badge bg-primary me-2" id="connectionStatus">
+                                    <i class="fas fa-signal"></i> Connecting...
+                                </span>
+                                <button class="btn btn-sm btn-outline-primary" onclick="forceBalanceSync()">
+                                    <i class="fas fa-sync"></i> Sync Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Overview with Real-time Balance -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card border-0 bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 opacity-75">Wallet Balance</h6>
+                                <h2 class="card-title mb-0 balance-display" id="wallet-balance">
+                                    {% if request.user.wallet %}
+                                        ${{ request.user.wallet.balance|default:"0.00" }}
+                                    {% else %}
+                                        $0.00
+                                    {% endif %}
+                                </h2>
+                                <small class="opacity-75" id="balance-change">No recent changes</small>
+                            </div>
+                            <i class="fas fa-wallet fa-2x opacity-50"></i>
+                        </div>
+                        <div class="mt-3">
+                            <small class="d-block">
+                                <i class="fas fa-arrow-up me-1"></i>
+                                <span id="total-deposits">${{ total_deposits|default:"0.00" }}</span> total deposits
+                            </small>
+                            <small class="d-block mt-1">
+                                <i class="fas fa-arrow-down me-1"></i>
+                                <span id="total-withdrawals">${{ total_withdrawals|default:"0.00" }}</span> total withdrawals
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card border-0 bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 opacity-75">Completed</h6>
+                                <h2 class="card-title mb-0" id="completed-count">
+                                    {{ completed_count|default:"0" }}
+                                </h2>
+                                <small class="opacity-75">Today: <span id="completed-today">0</span></small>
+                            </div>
+                            <i class="fas fa-check-circle fa-2x opacity-50"></i>
+                        </div>
+                        <div class="progress mt-3" style="height: 4px;">
+                            <div class="progress-bar bg-light" style="width: {{ completion_rate|default:0 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card border-0 bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 opacity-75">Pending</h6>
+                                <h2 class="card-title mb-0" id="pending-count">
+                                    {{ pending_count|default:"0" }}
+                                </h2>
+                                <small class="opacity-75">Processing: <span id="processing-count">0</span></small>
+                            </div>
+                            <i class="fas fa-clock fa-2x opacity-50"></i>
+                        </div>
+                        <div class="mt-3">
+                            <small class="d-block">
+                                <i class="fas fa-hourglass-half me-1"></i>
+                                <span id="expiring-soon">0</span> expiring soon
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card border-0 bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-2 opacity-75">Bonuses & Modifications</h6>
+                                <h2 class="card-title mb-0" id="bonus-count">
+                                    {{ bonus_count|default:"0" }}
+                                </h2>
+                                <small class="opacity-75">Today: <span id="bonus-today">0</span></small>
+                            </div>
+                            <i class="fas fa-gift fa-2x opacity-50"></i>
+                        </div>
+                        <div class="mt-3">
+                            <small class="d-block">
+                                <i class="fas fa-plus-circle me-1"></i>
+                                <span id="total-bonus">${{ total_bonus|default:"0.00" }}</span> total bonus
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h6 class="mb-3">Filter Transactions</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge filter-badge bg-primary active" onclick="filterTransactions('all')">
+                                        <i class="fas fa-list me-1"></i>All
+                                    </span>
+                                    <span class="badge filter-badge bg-success" onclick="filterTransactions('COMPLETED')">
+                                        <i class="fas fa-check-circle me-1"></i>Completed
+                                    </span>
+                                    <span class="badge filter-badge bg-warning" onclick="filterTransactions('PENDING')">
+                                        <i class="fas fa-clock me-1"></i>Pending
+                                    </span>
+                                    <span class="badge filter-badge bg-info" onclick="filterTransactions('BONUS')">
+                                        <i class="fas fa-gift me-1"></i>Bonuses
+                                    </span>
+                                    <span class="badge filter-badge bg-purple" onclick="filterTransactions('ADMIN_MOD')">
+                                        <i class="fas fa-user-shield me-1"></i>Admin Mods
+                                    </span>
+                                    <span class="badge filter-badge bg-teal" onclick="filterTransactions('REFUND')">
+                                        <i class="fas fa-undo me-1"></i>Refunds
+                                    </span>
+                                    <span class="badge filter-badge bg-danger" onclick="filterTransactions('FAILED')">
+                                        <i class="fas fa-times-circle me-1"></i>Failed
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text"
+                                           class="form-control border-start-0"
+                                           placeholder="Search transactions..."
+                                           id="search-transactions"
+                                           onkeyup="searchTransactions()">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions List -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Recent Transactions</h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted small" id="last-check">
+                                    <i class="fas fa-clock me-1"></i>Last checked: Just now
+                                </span>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="fas fa-broadcast-tower me-1"></i>
+                                    <span id="live-count">0</span> live updates
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="transactions-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="180">Transaction Details</th>
+                                        <th width="120">Type</th>
+                                        <th width="120">Amount</th>
+                                        <th width="120">Status</th>
+                                        <th width="150">Date & Time</th>
+                                        <th width="150">Balance Change</th>
+                                        <th width="100" class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactions-body">
+                                    {% for txn in transactions %}
+                                    <tr id="txn-{{ txn.transaction_id }}"
+                                        class="transaction-row
+                                        {% if txn.transaction_type == 'BONUS' %}bonus-transaction
+                                        {% elif txn.transaction_type == 'ADMIN_MOD' %}admin-modification
+                                        {% elif txn.transaction_type == 'REFUND' %}refund-transaction
+                                        {% elif txn.status == 'PENDING' %}table-warning
+                                        {% elif txn.status == 'FAILED' %}table-danger
+                                        {% elif txn.status == 'COMPLETED' %}table-success
+                                        {% endif %}">
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold">
+                                                    {{ txn.reference }}
+                                                    {% if txn.transaction_type == 'BONUS' %}
+                                                    <span class="bonus-badge ms-2">BONUS</span>
+                                                    {% elif txn.transaction_type == 'ADMIN_MOD' %}
+                                                    <span class="admin-badge ms-2">ADMIN</span>
+                                                    {% endif %}
+                                                </span>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-hashtag me-1"></i>
+                                                    {{ txn.transaction_id|slice:8 }}
+                                                </small>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-user me-1"></i>
+                                                    {{ txn.user.username }}
+                                                </small>
+                                                {% if txn.description %}
+                                                <small class="text-muted mt-1">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    {{ txn.description|truncatechars:50 }}
+                                                </small>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if txn.transaction_type == 'DEPOSIT' %}
+                                                    <i class="fas fa-arrow-down text-success me-2"></i>
+                                                    <span>Deposit</span>
+                                                {% elif txn.transaction_type == 'WITHDRAWAL' %}
+                                                    <i class="fas fa-arrow-up text-danger me-2"></i>
+                                                    <span>Withdrawal</span>
+                                                {% elif txn.transaction_type == 'BONUS' %}
+                                                    <i class="fas fa-gift text-warning me-2"></i>
+                                                    <span>Bonus</span>
+                                                {% elif txn.transaction_type == 'ADMIN_MOD' %}
+                                                    <i class="fas fa-user-shield text-purple me-2"></i>
+                                                    <span>Admin Mod</span>
+                                                {% elif txn.transaction_type == 'REFUND' %}
+                                                    <i class="fas fa-undo text-info me-2"></i>
+                                                    <span>Refund</span>
+                                                {% else %}
+                                                    <i class="fas fa-exchange-alt text-secondary me-2"></i>
+                                                    <span>{{ txn.transaction_type|title }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="amount-display">
+                                                {% if txn.currency == 'USD' %}${% endif %}
+                                                {% if txn.currency == 'EUR' %}€{% endif %}
+                                                {% if txn.currency == 'GBP' %}£{% endif %}
+                                                {% if txn.currency == 'KES' %}KSh{% endif %}
+                                                {% if txn.currency == 'CNY' %}¥{% endif %}
+                                                {{ txn.amount }}
+                                            </div>
+                                            <small class="currency-symbol">{{ txn.currency }}</small>
+                                            {% if txn.fee_amount > 0 %}
+                                            <small class="text-danger d-block">
+                                                <i class="fas fa-tag me-1"></i>Fee: {{ txn.fee_amount }}
+                                            </small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="status-badge
+                                                    {% if txn.status == 'COMPLETED' %}status-completed
+                                                    {% elif txn.status == 'PENDING' %}status-pending
+                                                    {% elif txn.status == 'PROCESSING' %}status-processing
+                                                    {% elif txn.status == 'FAILED' %}status-failed
+                                                    {% endif %}">
+                                                    {% if txn.status == 'COMPLETED' %}
+                                                        <i class="fas fa-check-circle"></i>
+                                                    {% elif txn.status == 'PENDING' %}
+                                                        <i class="fas fa-clock"></i>
+                                                    {% elif txn.status == 'PROCESSING' %}
+                                                        <i class="fas fa-spinner fa-spin"></i>
+                                                    {% elif txn.status == 'FAILED' %}
+                                                        <i class="fas fa-times-circle"></i>
+                                                    {% endif %}
+                                                    {{ txn.get_status_display }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span>{{ txn.created_at|date:"M d, Y" }}</span>
+                                                <small class="text-muted">{{ txn.created_at|time:"H:i:s" }}</small>
+                                                {% if txn.updated_at != txn.created_at %}
+                                                <small class="text-muted">
+                                                    <i class="fas fa-sync me-1"></i>
+                                                    Updated: {{ txn.updated_at|time:"H:i" }}
+                                                </small>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if txn.balance_before and txn.balance_after %}
+                                            <div class="balance-change
+                                                {% if txn.balance_after > txn.balance_before %}balance-increase
+                                                {% else %}balance-decrease{% endif %}">
+                                                {% if txn.balance_after > txn.balance_before %}
+                                                <i class="fas fa-arrow-up me-1"></i>
+                                                {% else %}
+                                                <i class="fas fa-arrow-down me-1"></i>
+                                                {% endif %}
+                                                ${{ txn.balance_after|floatformat:2 }}
+                                                <br>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-history me-1"></i>
+                                                    Was: ${{ txn.balance_before|floatformat:2 }}
+                                                </small>
+                                            </div>
+                                            {% else %}
+                                            <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button"
+                                                        class="btn btn-outline-primary"
+                                                        onclick="viewTransaction('{{ txn.transaction_id }}')"
+                                                        title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                {% if txn.status == 'PENDING' and txn.transaction_type == 'DEPOSIT' %}
+                                                <button type="button"
+                                                        class="btn btn-outline-success"
+                                                        onclick="retryTransaction('{{ txn.transaction_id }}')"
+                                                        title="Retry Payment">
+                                                    <i class="fas fa-redo"></i>
+                                                </button>
+                                                {% endif %}
+                                                {% if txn.status == 'COMPLETED' and txn.transaction_type == 'DEPOSIT' %}
+                                                <button type="button"
+                                                        class="btn btn-outline-info"
+                                                        onclick="refundTransaction('{{ txn.transaction_id }}')"
+                                                        title="Request Refund">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr id="no-transactions">
+                                        <td colspan="7" class="text-center py-5">
+                                            <i class="fas fa-receipt fa-4x text-muted mb-3"></i>
+                                            <h4 class="text-muted">No transactions yet</h4>
+                                            <p class="text-muted">Your transaction history will appear here</p>
+                                            <a href="{% url 'deposit' %}" class="btn btn-primary">
+                                                <i class="fas fa-plus-circle me-2"></i>Make Your First Deposit
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Balance History -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0"><i class="fas fa-history me-2"></i>Recent Balance Changes</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="balance-history" id="balanceHistory">
+                            {% for change in recent_balance_changes|slice:":5" %}
+                            <div class="balance-history-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted">{{ change.timestamp|date:"M d, H:i" }}</small>
+                                        <div class="mt-1">
+                                            <strong>{{ change.description }}</strong>
+                                            {% if change.admin %}
+                                            <span class="badge bg-purple ms-2">Admin</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="{% if change.change > 0 %}text-success{% else %}text-danger{% endif %}">
+                                            {% if change.change > 0 %}+{% endif %}${{ change.change|floatformat:2 }}
+                                        </span>
+                                        <div class="text-muted small">
+                                            New: ${{ change.new_balance|floatformat:2 }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center py-3 text-muted">
+                                <i class="fas fa-history fa-2x mb-2"></i>
+                                <p>No balance changes yet</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0"><i class="fas fa-bell me-2"></i>Real-time Notifications</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="balance-history" id="liveNotifications">
+                            <!-- Notifications will appear here via WebSocket -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Update Toasts Container -->
+    <div id="liveUpdateToasts" class="live-update-toast"></div>
+
+    <!-- View Transaction Modal -->
+    <div class="modal fade" id="transactionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Transaction Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="transactionDetails">
+                    <!-- Content loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let ws = null;
+        let wsReconnectAttempts = 0;
+        const maxWsReconnectAttempts = 5;
+        let lastBalance = parseFloat(document.getElementById('wallet-balance').textContent.replace('$', ''));
+        let liveUpdateCount = 0;
+
+        // WebSocket connection
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/transactions/`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                console.log('WebSocket connected');
+                updateConnectionStatus('connected');
+                wsReconnectAttempts = 0;
+            };
+
+            ws.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleWebSocketMessage(data);
+                } catch (error) {
+                    console.error('Error parsing WebSocket message:', error);
+                }
+            };
+
+            ws.onclose = function() {
+                console.log('WebSocket disconnected');
+                updateConnectionStatus('disconnected');
+
+                // Attempt to reconnect
+                if (wsReconnectAttempts < maxWsReconnectAttempts) {
+                    wsReconnectAttempts++;
+                    setTimeout(connectWebSocket, 3000 * wsReconnectAttempts);
+                }
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                updateConnectionStatus('error');
+            };
+        }
+
+        // Handle WebSocket messages
+        function handleWebSocketMessage(data) {
+            switch(data.type) {
+                case 'BALANCE_UPDATE':
+                    handleBalanceUpdate(data);
+                    break;
+                case 'TRANSACTION_UPDATE':
+                    handleTransactionUpdate(data);
+                    break;
+                case 'ADMIN_MODIFICATION':
+                    handleAdminModification(data);
+                    break;
+                case 'BONUS_ADDED':
+                    handleBonusAdded(data);
+                    break;
+                case 'AUDIT_LOG':
+                    handleAuditLog(data);
+                    break;
+                case 'SYNC_REQUEST':
+                    handleSyncRequest(data);
+                    break;
+                default:
+                    console.log('Unknown message type:', data.type);
+            }
+        }
+
+        // Handle balance updates
+        function handleBalanceUpdate(data) {
+            const oldBalance = lastBalance;
+            const newBalance = parseFloat(data.balance);
+            const change = newBalance - oldBalance;
+
+            // Update balance display with animation
+            const balanceElement = document.getElementById('wallet-balance');
+            balanceElement.classList.add('balance-update');
+            balanceElement.textContent = `$${newBalance.toFixed(2)}`;
+
+            // Update change indicator
+            const changeElement = document.getElementById('balance-change');
+            if (change !== 0) {
+                changeElement.textContent = `${change > 0 ? '+' : ''}$${change.toFixed(2)}`;
+                changeElement.classList.add(change > 0 ? 'text-success' : 'text-danger');
+
+                setTimeout(() => {
+                    changeElement.textContent = 'No recent changes';
+                    changeElement.classList.remove('text-success', 'text-danger');
+                }, 5000);
+            }
+
+            // Add to balance history
+            addBalanceHistory({
+                timestamp: new Date().toISOString(),
+                description: data.reason || 'Balance update',
+                change: change,
+                new_balance: newBalance,
+                admin: data.admin || false
+            });
+
+            // Show notification
+            showLiveUpdate({
+                title: 'Balance Updated',
+                message: `${change > 0 ? '+' : ''}$${change.toFixed(2)} (Now: $${newBalance.toFixed(2)})`,
+                type: change > 0 ? 'success' : 'warning',
+                duration: 5000
+            });
+
+            lastBalance = newBalance;
+            liveUpdateCount++;
+            updateLiveCount();
+
+            // Update last update time
+            document.getElementById('lastBalanceUpdate').textContent =
+                `Last update: ${new Date().toLocaleTimeString()}`;
+        }
+
+        // Handle transaction updates
+        function handleTransactionUpdate(data) {
+            const transaction = data.transaction;
+
+            // Update or add transaction row
+            updateTransactionRow(transaction);
+
+            // Show notification
+            if (transaction.status === 'COMPLETED') {
+                showLiveUpdate({
+                    title: 'Transaction Completed',
+                    message: `${transaction.transaction_type} of $${transaction.amount} completed`,
+                    type: 'success',
+                    duration: 5000
+                });
+            }
+
+            liveUpdateCount++;
+            updateLiveCount();
+        }
+
+        // Handle admin modifications
+        function handleAdminModification(data) {
+            // Add admin modification to activity log
+            if (document.getElementById('activityLog')) {
+                const activityLog = document.getElementById('activityLog');
+                const logItem = document.createElement('div');
+                logItem.className = 'audit-log-item audit-log-admin';
+                logItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted">${new Date(data.timestamp).toLocaleTimeString()}</small>
+                            <div class="mt-1">
+                                <strong>${data.admin} modified ${data.user}'s balance</strong>
+                                <br>
+                                <small class="text-muted">${data.reason}</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="${data.change > 0 ? 'text-success' : 'text-danger'}">
+                                ${data.change > 0 ? '+' : ''}$${data.change.toFixed(2)}
+                            </span>
+                            <div class="text-muted small">
+                                New: $${data.new_balance.toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                activityLog.insertBefore(logItem, activityLog.firstChild);
+
+                // Keep only last 10 items
+                if (activityLog.children.length > 10) {
+                    activityLog.removeChild(activityLog.lastChild);
+                }
+            }
+
+            // Show notification
+            if (data.user_id === {% if request.user.id %}{{ request.user.id }}{% else %}0{% endif %}) {
+                showLiveUpdate({
+                    title: 'Admin Modification',
+                    message: `Your balance was modified by ${data.admin}: $${data.change > 0 ? '+' : ''}${data.change.toFixed(2)}`,
+                    type: 'info',
+                    duration: 5000
+                });
+            }
+        }
+
+        // Handle bonus added
+        function handleBonusAdded(data) {
+            // Add to bonus count
+            const bonusCount = document.getElementById('bonus-count');
+            const current = parseInt(bonusCount.textContent) || 0;
+            bonusCount.textContent = current + 1;
+
+            // Update today's bonus count
+            const bonusToday = document.getElementById('bonus-today');
+            const today = parseInt(bonusToday.textContent) || 0;
+            bonusToday.textContent = today + 1;
+
+            // Update total bonus
+            const totalBonus = document.getElementById('total-bonus');
+            const currentTotal = parseFloat(totalBonus.textContent.replace('$', '')) || 0;
+            const newTotal = currentTotal + parseFloat(data.amount);
+            totalBonus.textContent = `$${newTotal.toFixed(2)}`;
+
+            // Show notification
+            if (data.user_id === {% if request.user.id %}{{ request.user.id }}{% else %}0{% endif %}) {
+                showLiveUpdate({
+                    title: 'Bonus Added!',
+                    message: `You received a $${data.amount} bonus!`,
+                    type: 'success',
+                    duration: 5000
+                });
+            }
+        }
+
+        // Handle audit log
+        function handleAuditLog(data) {
+            addLiveNotification(data);
+        }
+
+        // Handle sync request
+        function handleSyncRequest(data) {
+            fetchLatestTransactions();
+        }
+
+        // Add balance history entry
+        function addBalanceHistory(change) {
+            const historyElement = document.getElementById('balanceHistory');
+            const historyItem = document.createElement('div');
+            historyItem.className = 'balance-history-item';
+            historyItem.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">${new Date(change.timestamp).toLocaleTimeString()}</small>
+                        <div class="mt-1">
+                            <strong>${change.description}</strong>
+                            ${change.admin ? '<span class="badge bg-purple ms-2">Admin</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="${change.change > 0 ? 'text-success' : 'text-danger'}">
+                            ${change.change > 0 ? '+' : ''}$${change.change.toFixed(2)}
+                        </span>
+                        <div class="text-muted small">
+                            New: $${change.new_balance.toFixed(2)}
+                        </div>
+                    </div>
+                </div>
+            `;
+            historyElement.insertBefore(historyItem, historyElement.firstChild);
+
+            // Keep only last 5 items
+            if (historyElement.children.length > 5) {
+                historyElement.removeChild(historyElement.lastChild);
+            }
+        }
+
+        // Add live notification
+        function addLiveNotification(notification) {
+            const notificationsElement = document.getElementById('liveNotifications');
+            if (!notificationsElement) return;
+
+            const notificationItem = document.createElement('div');
+            notificationItem.className = 'balance-history-item';
+            notificationItem.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-bell text-${notification.type || 'info'} me-2 mt-1"></i>
+                    <div>
+                        <small class="text-muted">${new Date().toLocaleTimeString()}</small>
+                        <div class="mt-1">
+                            <strong>${notification.title}</strong>
+                            <br>
+                            <small>${notification.message}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            notificationsElement.insertBefore(notificationItem, notificationsElement.firstChild);
+
+            // Keep only last 5 notifications
+            if (notificationsElement.children.length > 5) {
+                notificationsElement.removeChild(notificationsElement.lastChild);
+            }
+        }
+
+        // Show live update toast
+        function showLiveUpdate(data) {
+            const container = document.getElementById('liveUpdateToasts');
+            const toastId = 'toast-' + Date.now();
+
+            const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center text-bg-${data.type} border-0 mb-2" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <strong>${data.title}</strong><br>
+                            ${data.message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="document.getElementById('${toastId}').remove()"></button>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('afterbegin', toastHTML);
+
+            // Auto remove after duration
+            setTimeout(() => {
+                const toast = document.getElementById(toastId);
+                if (toast) {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, data.duration || 3000);
+        }
+
+        // Update connection status
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('ws-status');
+            const connectionElement = document.getElementById('connectionStatus');
+
+            const statusConfig = {
+                'connected': { text: 'Connected', class: 'ws-connected', icon: 'fa-check' },
+                'disconnected': { text: 'Disconnected', class: 'ws-disconnected', icon: 'fa-times' },
+                'connecting': { text: 'Connecting...', class: 'ws-connecting', icon: 'fa-spinner fa-spin' },
+                'error': { text: 'Error', class: 'ws-disconnected', icon: 'fa-exclamation-triangle' }
+            };
+
+            const config = statusConfig[status] || statusConfig.connecting;
+
+            statusElement.textContent = config.text;
+            statusElement.className = `ws-status ${config.class}`;
+
+            if (connectionElement) {
+                connectionElement.innerHTML = `<i class="fas ${config.icon}"></i> ${config.text}`;
+            }
+        }
+
+        // Update live update count
+        function updateLiveCount() {
+            const liveCountElement = document.getElementById('live-count');
+            if (liveCountElement) {
+                liveCountElement.textContent = liveUpdateCount;
+            }
+        }
+
+        // Toggle admin panel
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        // Submit balance form
+        document.getElementById('balanceForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const userId = document.getElementById('userSelect').value;
+            const action = document.getElementById('actionType').value;
+            const amount = document.getElementById('amount').value;
+            const description = document.getElementById('description').value;
+
+            if (!userId || !amount || !description) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/balance/modify/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        action: action,
+                        amount: parseFloat(amount),
+                        description: description
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showLiveUpdate({
+                        title: 'Balance Modified',
+                        message: `Successfully ${action.toLowerCase()}ed $${amount} to user`,
+                        type: 'success',
+                        duration: 3000
+                    });
+
+                    // Reset form
+                    this.reset();
+                } else {
+                    showLiveUpdate({
+                        title: 'Error',
+                        message: data.error || 'Failed to modify balance',
+                        type: 'danger',
+                        duration: 3000
+                    });
+                }
+            } catch (error) {
+                console.error('Error modifying balance:', error);
+                showLiveUpdate({
+                    title: 'Error',
+                    message: 'Failed to modify balance',
+                    type: 'danger',
+                    duration: 3000
+                });
+            }
+        });
+
+        // Force balance sync
+        async function forceBalanceSync() {
+            try {
+                const response = await fetch('/api/balance/sync/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken()
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showLiveUpdate({
+                        title: 'Sync Complete',
+                        message: 'Balance synchronized successfully',
+                        type: 'success',
+                        duration: 3000
+                    });
+
+                    // Update balance display
+                    document.getElementById('wallet-balance').textContent = `$${data.balance.toFixed(2)}`;
+                    lastBalance = data.balance;
+                }
+            } catch (error) {
+                console.error('Error syncing balance:', error);
+            }
+        }
+
+        // Get CSRF token
+        function getCSRFToken() {
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Connect to WebSocket
+            connectWebSocket();
+
+            // Set up periodic balance checks (fallback if WebSocket fails)
+            setInterval(fetchLatestTransactions, 30000); // Every 30 seconds
+
+            // Update last checked time
+            setInterval(() => {
+                const lastCheck = document.getElementById('last-check');
+                if (lastCheck) {
+                    lastCheck.innerHTML = `<i class="fas fa-clock me-1"></i>Last checked: ${new Date().toLocaleTimeString()}`;
+                }
+            }, 60000); // Every minute
+        });
+
+        // Existing functions from previous implementation
+        function refreshTransactions() {
+            const icon = document.getElementById('refresh-icon');
+            icon.classList.add('fa-spin');
+
+            fetchLatestTransactions();
+
+            setTimeout(() => {
+                icon.classList.remove('fa-spin');
+            }, 1000);
+        }
+
+        async function fetchLatestTransactions() {
+            // Your existing fetchLatestTransactions implementation
+        }
+
+        // Other existing functions...
+        function filterTransactions(status) {
+            // Your existing filterTransactions implementation
+        }
+
+        function searchTransactions() {
+            // Your existing searchTransactions implementation
+        }
+
+        function viewTransaction(transactionId) {
+            // Your existing viewTransaction implementation
+        }
+
+        // Add this to your existing function
+        function updateTransactionRow(transaction) {
+            // Your existing updateTransactionRow implementation
+            // Add admin modification highlighting
+        }
+    </script>
+</body>
+</html>

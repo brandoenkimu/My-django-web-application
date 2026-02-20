@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WITHDRAW FUNDS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .withdraw-method-icon {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+        .withdraw-details {
+            display: none;
+            margin-top: 20px;
+            padding: 25px;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .amount-preset .btn {
+            transition: all 0.2s ease;
+        }
+
+        .amount-preset .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .amount-preset .btn-check:checked + .btn {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.2);
+            background-color: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .withdraw-method-card {
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .withdraw-method-card:hover {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
+            transform: translateY(-3px);
+        }
+
+        .withdraw-method-card.selected {
+            border-color: #dc3545;
+            background: linear-gradient(135deg, #ffeaea 0%, #ffd6d6 100%);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.1);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 15px;
+            background: #dc3545;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-left: 10px;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #dc3545;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .input-error {
+            border-color: #dc3545 !important;
+            background-color: #fff5f5;
+        }
+
+        .success-alert, .error-alert {
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .fee-badge {
+            background: #17a2b8;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            margin-left: 5px;
+        }
+
+        .time-badge {
+            background: #28a745;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="mt-3 text-danger fw-bold" id="loadingMessage">Processing your withdrawal...</div>
+    </div>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-danger text-white py-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i> Withdraw Funds</h2>
+                            <span class="security-badge">
+                                <i class="fas fa-shield-alt"></i> Secure Transaction
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <!-- Balance Display -->
+                        <div class="balance-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="text-light mb-1">Available Balance</h5>
+                                    <h2 class="mb-0">$<span id="availableBalance">{{ user_wallet.balance|default:"0.00" }}</span></h2>
+                                    <small class="text-light opacity-75">Instant withdrawal available</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="badge bg-light text-danger p-2">
+                                        <i class="fas fa-wallet me-1"></i> Wallet
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-light">Min: $10 | Max: $5,000</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Alerts -->
+                        <div class="alert alert-success success-alert alert-dismissible fade show" role="alert" id="successAlert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span id="successMessage"></span>
+                            <button type="button" class="btn-close" onclick="hideAlert('successAlert')"></button>
+                        </div>
+
+                        <div class="alert alert-danger error-alert alert-dismissible fade show" role="alert" id="errorAlert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span id="errorMessage"></span>
+                            <button type="button" class="btn-close" onclick="hideAlert('errorAlert')"></button>
+                        </div>
+
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <!-- Info Box -->
+                        <div class="info-box mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-info-circle text-danger me-3 fa-lg"></i>
+                                <div>
+                                    <h6 class="mb-1">Withdrawal Information</h6>
+                                    <p class="mb-0 text-muted">
+                                        Processing time: 1-3 business days • Minimum withdrawal: $10 •
+                                        Fees may apply depending on the method
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form with AJAX submission -->
+                        <form id="withdrawForm" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <!-- Hidden fields for AJAX submission -->
+                            <input type="hidden" name="final_amount" id="finalAmount">
+                            <input type="hidden" name="withdraw_details" id="withdrawDetails">
+                            <input type="hidden" name="withdraw_method_type" id="withdrawMethodType">
+                            <input type="hidden" name="currency" id="hiddenCurrency" value="USD">
+                            <input type="hidden" name="withdraw_method" id="hiddenWithdrawMethod">
+
+                            <!-- Step 1: Amount -->
+                            <div class="step active" id="step1">
+                                <h4 class="mb-4"><span class="badge bg-danger me-2">1</span> Select Amount</h4>
+
+                                <!-- Amount Presets -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Choose Amount <span class="text-muted">(USD)</span></label>
+                                    <div class="row g-2">
+                                        <div class="col-6 col-sm-4 col-lg-3">
+                                            <input type="radio" class="btn-check amount-preset"
+                                                   name="amount_preset" id="amount_50" value="50">
+                                            <label class="btn btn-outline-danger w-100 py-3" for="amount_50" id="label_amount_50">
+                                                $50
+                                            </label>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-lg-3">
+                                            <input type="radio" class="btn-check amount-preset"
+                                                   name="amount_preset" id="amount_100" value="100">
+                                            <label class="btn btn-outline-danger w-100 py-3" for="amount_100" id="label_amount_100">
+                                                $100
+                                            </label>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-lg-3">
+                                            <input type="radio" class="btn-check amount-preset"
+                                                   name="amount_preset" id="amount_250" value="250">
+                                            <label class="btn btn-outline-danger w-100 py-3" for="amount_250" id="label_amount_250">
+                                                $250
+                                            </label>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-lg-3">
+                                            <input type="radio" class="btn-check amount-preset"
+                                                   name="amount_preset" id="amount_500" value="500">
+                                            <label class="btn btn-outline-danger w-100 py-3" for="amount_500" id="label_amount_500">
+                                                $500
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="error-message" id="amountPresetError"></div>
+                                </div>
+
+                                <!-- Custom Amount -->
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input type="radio" class="btn-check" name="amount_preset" id="amount_custom" value="custom">
+                                        <label class="form-check-label fw-bold" for="amount_custom">
+                                            Custom Amount
+                                        </label>
+                                    </div>
+                                    <div id="customAmountContainer" style="display: none;" class="mt-3">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-danger text-white"><i class="fas fa-dollar-sign"></i></span>
+                                            <input type="number" class="form-control" id="customAmount"
+                                                   placeholder="0.00"
+                                                   min="10" max="5000" step="0.01">
+                                            <span class="input-group-text">USD</span>
+                                        </div>
+                                        <div class="form-text">Enter amount between $10 and $5,000</div>
+                                        <div class="error-message" id="customAmountError"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Available Balance Check -->
+                                <div class="alert alert-warning" id="balanceWarning" style="display: none;">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <span id="balanceWarningText"></span>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-danger px-4" onclick="validateStep1()">
+                                        Continue <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Withdrawal Method -->
+                            <div class="step" id="step2">
+                                <h4 class="mb-4"><span class="badge bg-danger me-2">2</span> Select Withdrawal Method</h4>
+
+                                <!-- Withdrawal Method Cards -->
+                                <div class="row g-3" id="withdrawMethodsContainer">
+                                    <div class="col-md-6">
+                                        <div class="withdraw-method-card" data-method="bank" data-type="bank" onclick="selectWithdrawMethod('bank', 'bank')">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary text-white rounded-circle p-3 me-3">
+                                                    <i class="fas fa-university withdraw-method-icon"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">Bank Transfer</h6>
+                                                    <small class="text-muted">Direct to your bank account</small>
+                                                    <div class="mt-2">
+                                                        <span class="fee-badge">Fee: $5</span>
+                                                        <span class="time-badge">2-3 days</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="withdraw-method-card" data-method="paypal" data-type="gateway" onclick="selectWithdrawMethod('paypal', 'gateway')">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-info text-white rounded-circle p-3 me-3">
+                                                    <i class="fab fa-paypal withdraw-method-icon"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">PayPal</h6>
+                                                    <small class="text-muted">Instant to PayPal account</small>
+                                                    <div class="mt-2">
+                                                        <span class="fee-badge">Fee: 2%</span>
+                                                        <span class="time-badge">Instant</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="withdraw-method-card" data-method="mpesa" data-type="mobile" onclick="selectWithdrawMethod('mpesa', 'mobile')">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-success text-white rounded-circle p-3 me-3">
+                                                    <i class="fas fa-mobile-alt withdraw-method-icon"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">M-Pesa</h6>
+                                                    <small class="text-muted">Mobile money (Kenya only)</small>
+                                                    <div class="mt-2">
+                                                        <span class="fee-badge">Fee: 1%</span>
+                                                        <span class="time-badge">Instant</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="withdraw-method-card" data-method="skrill" data-type="gateway" onclick="selectWithdrawMethod('skrill', 'gateway')">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-warning text-white rounded-circle p-3 me-3">
+                                                    <i class="fas fa-money-bill-transfer withdraw-method-icon"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">Skrill</h6>
+                                                    <small class="text-muted">E-wallet transfer</small>
+                                                    <div class="mt-2">
+                                                        <span class="fee-badge">Fee: 1.5%</span>
+                                                        <span class="time-badge">Instant</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Withdrawal Method Specific Details -->
+                                <div id="bank-details" class="withdraw-details">
+                                    <h5><i class="fas fa-university text-primary me-2"></i> Bank Details</h5>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Account Holder Name</label>
+                                            <input type="text" class="form-control" id="accountName"
+                                                   placeholder="John Doe">
+                                            <div class="error-message" id="accountNameError"></div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Account Number</label>
+                                            <input type="text" class="form-control" id="accountNumber"
+                                                   placeholder="1234567890">
+                                            <div class="error-message" id="accountNumberError"></div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Bank Name</label>
+                                            <input type="text" class="form-control" id="bankName"
+                                                   placeholder="Example Bank">
+                                            <div class="error-message" id="bankNameError"></div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Routing Number / SWIFT</label>
+                                            <input type="text" class="form-control" id="routingNumber"
+                                                   placeholder="123456789">
+                                            <div class="error-message" id="routingNumberError"></div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">IBAN (International Only)</label>
+                                            <input type="text" class="form-control" id="iban"
+                                                   placeholder="GB29 NWBK 6016 1331 9268 19">
+                                            <div class="form-text">Required for international transfers</div>
+                                            <div class="error-message" id="ibanError"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="paypal-details" class="withdraw-details">
+                                    <h5><i class="fab fa-paypal text-info me-2"></i> PayPal Details</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">PayPal Email Address</label>
+                                        <input type="email" class="form-control" id="paypalEmail"
+                                               placeholder="your.email@example.com">
+                                        <div class="form-text">Enter the email address linked to your PayPal account</div>
+                                        <div class="error-message" id="paypalEmailError"></div>
+                                    </div>
+                                </div>
+
+                                <div id="mpesa-details" class="withdraw-details">
+                                    <h5><i class="fas fa-mobile-alt text-success me-2"></i> M-Pesa Details</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="mpesaPhone"
+                                               placeholder="2547XXXXXXXX"
+                                               pattern="^254[17]\d{8}$">
+                                        <div class="form-text">Enter your M-Pesa registered phone number</div>
+                                        <div class="error-message" id="mpesaPhoneError"></div>
+                                    </div>
+                                </div>
+
+                                <div id="skrill-details" class="withdraw-details">
+                                    <h5><i class="fas fa-money-bill-transfer text-warning me-2"></i> Skrill Details</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">Skrill Email Address</label>
+                                        <input type="email" class="form-control" id="skrillEmail"
+                                               placeholder="your.email@example.com">
+                                        <div class="form-text">Enter the email address linked to your Skrill account</div>
+                                        <div class="error-message" id="skrillEmailError"></div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="changeStep(1)">
+                                        <i class="fas fa-arrow-left me-2"></i> Back
+                                    </button>
+                                    <button type="button" class="btn btn-danger px-4" onclick="validateStep2()">
+                                        Continue <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Review & Confirm -->
+                            <div class="step" id="step3">
+                                <h4 class="mb-4"><span class="badge bg-danger me-2">3</span> Review & Confirm</h4>
+
+                                <!-- Summary Card -->
+                                <div class="card border-danger mb-4">
+                                    <div class="card-header bg-danger text-white">
+                                        <h5 class="mb-0">Withdrawal Summary</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <th width="40%">Amount:</th>
+                                                        <td><span id="summaryAmount" class="fw-bold">$0.00</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Method:</th>
+                                                        <td><span id="summaryMethod">Not selected</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Processing Time:</th>
+                                                        <td><span id="summaryTime" class="badge bg-info">Instant</span></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <th width="40%">Fee:</th>
+                                                        <td><span id="summaryFee" class="text-danger">$0.00</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>You Will Receive:</th>
+                                                        <td><span id="summaryReceive" class="fw-bold fs-5 text-success">$0.00</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Estimated Arrival:</th>
+                                                        <td><span id="summaryArrival" class="text-muted">Today</span></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Terms and Conditions -->
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="termsAccepted" required>
+                                        <label class="form-check-label" for="termsAccepted">
+                                            I confirm that the withdrawal details are correct and I agree to the
+                                            <a href="#" class="text-danger" data-bs-toggle="modal" data-bs-target="#termsModal">Withdrawal Terms</a>
+                                        </label>
+                                    </div>
+                                    <div class="error-message" id="termsError"></div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="changeStep(2)">
+                                        <i class="fas fa-arrow-left me-2"></i> Back
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-lg px-5" onclick="submitWithdrawal()">
+                                        <i class="fas fa-paper-plane me-2"></i> Submit Withdrawal
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-footer bg-light">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <i class="fas fa-shield-alt text-danger fs-4 mb-2"></i>
+                                <h6>Secure Transactions</h6>
+                                <small class="text-muted">Bank-level security</small>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <i class="fas fa-clock text-warning fs-4 mb-2"></i>
+                                <h6>24/7 Processing</h6>
+                                <small class="text-muted">Submit anytime</small>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <i class="fas fa-headset text-success fs-4 mb-2"></i>
+                                <h6>Support</h6>
+                                <small class="text-muted">Need help? Contact us</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms & Conditions Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Withdrawal Terms & Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="terms-box">
+                        <h6>Important Information</h6>
+                        <ol>
+                            <li>Withdrawals are processed within 1-3 business days.</li>
+                            <li>Bank transfers may take 3-5 business days to reflect in your account.</li>
+                            <li>Fees are deducted from the withdrawal amount.</li>
+                            <li>You must provide accurate withdrawal details.</li>
+                            <li>We reserve the right to verify your identity before processing.</li>
+                            <li>Minimum withdrawal amount is $10.</li>
+                            <li>Maximum withdrawal per transaction is $5,000.</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">I Understand</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Current step tracking
+        let currentStep = 1;
+        let selectedWithdrawMethod = '';
+        let availableBalance = parseFloat(document.getElementById('availableBalance').textContent) || 0;
+
+        // Withdrawal method mapping
+        const withdrawMethods = {
+            'bank': {
+                name: 'Bank Transfer',
+                icon: 'university',
+                color: 'primary',
+                fee: 5, // Fixed fee
+                feeType: 'fixed',
+                time: '2-3 business days',
+                instant: false
+            },
+            'paypal': {
+                name: 'PayPal',
+                icon: 'paypal',
+                color: 'info',
+                fee: 2, // Percentage fee
+                feeType: 'percentage',
+                time: 'Instant',
+                instant: true
+            },
+            'mpesa': {
+                name: 'M-Pesa',
+                icon: 'mobile-alt',
+                color: 'success',
+                fee: 1, // Percentage fee
+                feeType: 'percentage',
+                time: 'Instant',
+                instant: true
+            },
+            'skrill': {
+                name: 'Skrill',
+                icon: 'money-bill-transfer',
+                color: 'warning',
+                fee: 1.5, // Percentage fee
+                feeType: 'percentage',
+                time: 'Instant',
+                instant: true
+            }
+        };
+
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Show/hide alerts
+        function showAlert(type, message) {
+            hideAllAlerts();
+            if (type === 'success') {
+                document.getElementById('successMessage').textContent = message;
+                document.getElementById('successAlert').style.display = 'block';
+            } else {
+                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('errorAlert').style.display = 'block';
+            }
+        }
+
+        function hideAlert(alertId) {
+            document.getElementById(alertId).style.display = 'none';
+        }
+
+        function hideAllAlerts() {
+            hideAlert('successAlert');
+            hideAlert('errorAlert');
+        }
+
+        // Clear all error messages
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+            document.querySelectorAll('.input-error').forEach(el => {
+                el.classList.remove('input-error');
+            });
+        }
+
+        // Show error on specific field
+        function showError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId + 'Error');
+            const inputEl = document.getElementById(fieldId);
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            }
+            if (inputEl) inputEl.classList.add('input-error');
+        }
+
+        // Check balance
+        function checkBalance(amount) {
+            const balanceWarning = document.getElementById('balanceWarning');
+            const warningText = document.getElementById('balanceWarningText');
+
+            if (amount > availableBalance) {
+                const needed = (amount - availableBalance).toFixed(2);
+                warningText.textContent = `Insufficient balance. You need $${needed} more to withdraw this amount.`;
+                balanceWarning.style.display = 'block';
+                return false;
+            } else if (amount === availableBalance) {
+                warningText.textContent = 'You are withdrawing your entire balance.';
+                balanceWarning.style.display = 'block';
+                return true;
+            } else {
+                balanceWarning.style.display = 'none';
+                return true;
+            }
+        }
+
+        // Toggle custom amount field
+        function toggleCustomAmount() {
+            const customChecked = document.getElementById('amount_custom').checked;
+            const customContainer = document.getElementById('customAmountContainer');
+
+            if (customChecked) {
+                customContainer.style.display = 'block';
+            } else {
+                customContainer.style.display = 'none';
+            }
+
+            updateSummary();
+        }
+
+        // Select withdrawal method
+        function selectWithdrawMethod(method, type) {
+            clearErrors();
+            selectedWithdrawMethod = method;
+
+            // Update selected card
+            document.querySelectorAll('.withdraw-method-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            const selectedCard = document.querySelector(`[data-method="${method}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+
+            // Update hidden field
+            document.getElementById('withdrawMethodType').value = type;
+            document.getElementById('hiddenWithdrawMethod').value = method;
+
+            // Show appropriate withdrawal details
+            toggleWithdrawDetails();
+        }
+
+        // Toggle withdrawal details based on selected method
+        function toggleWithdrawDetails() {
+            const method = selectedWithdrawMethod;
+
+            // Hide all withdrawal details
+            document.querySelectorAll('.withdraw-details').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            // Show selected method details
+            if (method === 'bank') {
+                document.getElementById('bank-details').style.display = 'block';
+            } else if (method === 'paypal') {
+                document.getElementById('paypal-details').style.display = 'block';
+            } else if (method === 'mpesa') {
+                document.getElementById('mpesa-details').style.display = 'block';
+            } else if (method === 'skrill') {
+                document.getElementById('skrill-details').style.display = 'block';
+            }
+
+            updateSummary();
+        }
+
+        // Update transaction summary
+        function updateSummary() {
+            // Get amount
+            let amount = 0;
+            const selectedAmount = document.querySelector('input[name="amount_preset"]:checked');
+
+            if (selectedAmount) {
+                if (selectedAmount.value === 'custom') {
+                    const customAmount = document.getElementById('customAmount').value;
+                    amount = parseFloat(customAmount) || 0;
+                } else {
+                    amount = parseFloat(selectedAmount.value) || 0;
+                }
+            }
+
+            // Check balance
+            checkBalance(amount);
+
+            // Get method info
+            const methodInfo = withdrawMethods[selectedWithdrawMethod] || {
+                name: 'Not selected',
+                fee: 0,
+                feeType: 'fixed',
+                time: '--',
+                instant: false
+            };
+
+            // Calculate fee
+            let fee = 0;
+            if (methodInfo.feeType === 'percentage') {
+                fee = (amount * methodInfo.fee) / 100;
+            } else {
+                fee = methodInfo.fee;
+            }
+
+            // Minimum fee check
+            if (methodInfo.feeType === 'percentage' && fee < 0.5) fee = 0.5;
+
+            // Calculate amount to receive
+            const receive = amount - fee;
+
+            // Update summary display
+            document.getElementById('summaryAmount').textContent = `$${amount.toFixed(2)}`;
+            document.getElementById('summaryMethod').textContent = methodInfo.name;
+            document.getElementById('summaryTime').textContent = methodInfo.time;
+            document.getElementById('summaryFee').textContent = `$${fee.toFixed(2)}`;
+            document.getElementById('summaryReceive').textContent = `$${receive.toFixed(2)}`;
+
+            // Estimate arrival date
+            const now = new Date();
+            if (methodInfo.instant) {
+                document.getElementById('summaryArrival').textContent = 'Today';
+            } else {
+                const arrivalDate = new Date(now);
+                arrivalDate.setDate(arrivalDate.getDate() + 3);
+                document.getElementById('summaryArrival').textContent = arrivalDate.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            }
+
+            // Set hidden fields for submission
+            document.getElementById('finalAmount').value = amount.toFixed(2);
+
+            // Build withdrawal details
+            const withdrawDetails = {
+                amount: amount.toFixed(2),
+                fee: fee.toFixed(2),
+                receive: receive.toFixed(2),
+                method: selectedWithdrawMethod,
+                method_name: methodInfo.name,
+                processing_time: methodInfo.time,
+                instant: methodInfo.instant,
+                timestamp: new Date().toISOString()
+            };
+
+            // Add method-specific details
+            if (selectedWithdrawMethod === 'bank') {
+                withdrawDetails.account_name = document.getElementById('accountName').value || '';
+                withdrawDetails.account_number = document.getElementById('accountNumber').value || '';
+                withdrawDetails.bank_name = document.getElementById('bankName').value || '';
+            } else if (selectedWithdrawMethod === 'paypal') {
+                withdrawDetails.email = document.getElementById('paypalEmail').value || '';
+            } else if (selectedWithdrawMethod === 'mpesa') {
+                withdrawDetails.phone = document.getElementById('mpesaPhone').value || '';
+            } else if (selectedWithdrawMethod === 'skrill') {
+                withdrawDetails.email = document.getElementById('skrillEmail').value || '';
+            }
+
+            document.getElementById('withdrawDetails').value = JSON.stringify(withdrawDetails);
+        }
+
+        // Validate Step 1
+        function validateStep1() {
+            clearErrors();
+            let isValid = true;
+
+            // Validate amount
+            const selectedAmount = document.querySelector('input[name="amount_preset"]:checked');
+            if (!selectedAmount) {
+                showError('amountPreset', 'Please select an amount');
+                isValid = false;
+            } else if (selectedAmount.value === 'custom') {
+                const customAmount = document.getElementById('customAmount').value;
+                const amount = parseFloat(customAmount) || 0;
+                if (!customAmount || amount < 10 || amount > 5000) {
+                    showError('customAmount', 'Please enter a valid amount between $10 and $5,000');
+                    isValid = false;
+                } else if (amount > availableBalance) {
+                    showError('customAmount', 'Insufficient balance');
+                    isValid = false;
+                }
+            } else {
+                const amount = parseFloat(selectedAmount.value) || 0;
+                if (amount < 10) {
+                    showError('amountPreset', 'Minimum withdrawal is $10');
+                    isValid = false;
+                } else if (amount > availableBalance) {
+                    showError('amountPreset', 'Insufficient balance');
+                    isValid = false;
+                }
+            }
+
+            if (isValid) {
+                changeStep(2);
+            }
+        }
+
+        // Validate Step 2
+        function validateStep2() {
+            clearErrors();
+            let isValid = true;
+
+            // Validate withdrawal method
+            if (!selectedWithdrawMethod) {
+                alert('Please select a withdrawal method');
+                isValid = false;
+                return;
+            }
+
+            // Validate method details
+            if (selectedWithdrawMethod === 'bank') {
+                const accountName = document.getElementById('accountName').value;
+                const accountNumber = document.getElementById('accountNumber').value;
+                const bankName = document.getElementById('bankName').value;
+
+                if (!accountName || accountName.trim().length < 2) {
+                    showError('accountName', 'Please enter account holder name');
+                    isValid = false;
+                }
+                if (!accountNumber || accountNumber.length < 5) {
+                    showError('accountNumber', 'Please enter valid account number');
+                    isValid = false;
+                }
+                if (!bankName || bankName.trim().length < 2) {
+                    showError('bankName', 'Please enter bank name');
+                    isValid = false;
+                }
+            } else if (selectedWithdrawMethod === 'paypal') {
+                const email = document.getElementById('paypalEmail').value;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email || !emailRegex.test(email)) {
+                    showError('paypalEmail', 'Please enter valid PayPal email');
+                    isValid = false;
+                }
+            } else if (selectedWithdrawMethod === 'mpesa') {
+                const phone = document.getElementById('mpesaPhone').value;
+                if (!phone || !phone.match(/^254[17]\d{8}$/)) {
+                    showError('mpesaPhone', 'Please enter valid M-Pesa phone number (2547XXXXXXXX)');
+                    isValid = false;
+                }
+            } else if (selectedWithdrawMethod === 'skrill') {
+                const email = document.getElementById('skrillEmail').value;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email || !emailRegex.test(email)) {
+                    showError('skrillEmail', 'Please enter valid Skrill email');
+                    isValid = false;
+                }
+            }
+
+            if (isValid) {
+                changeStep(3);
+            }
+        }
+
+        // Step navigation
+        function changeStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show target step
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+
+            // Update summary for step 3
+            if (step === 3) {
+                updateSummary();
+            }
+        }
+
+        // Submit withdrawal via AJAX
+        async function submitWithdrawal() {
+            clearErrors();
+            hideAllAlerts();
+
+            // Validate terms accepted
+            const termsAccepted = document.getElementById('termsAccepted').checked;
+            if (!termsAccepted) {
+                showError('terms', 'You must accept the terms and conditions');
+                return false;
+            }
+
+            // Validate final amount
+            const finalAmount = document.getElementById('finalAmount').value;
+            const amount = parseFloat(finalAmount) || 0;
+            if (!finalAmount || amount < 10 || amount > 5000) {
+                alert('Please complete all steps before submitting');
+                return false;
+            }
+
+            // Check balance
+            if (amount > availableBalance) {
+                showAlert('error', 'Insufficient balance for this withdrawal');
+                return false;
+            }
+
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('loadingMessage').textContent = 'Processing your withdrawal...';
+
+            try {
+                // Prepare data for submission
+                const formData = {
+                    amount: finalAmount,
+                    currency: document.getElementById('hiddenCurrency').value,
+                    withdraw_method: document.getElementById('hiddenWithdrawMethod').value,
+                    withdraw_details: document.getElementById('withdrawDetails').value,
+                    withdraw_method_type: document.getElementById('withdrawMethodType').value,
+                    terms_accepted: termsAccepted ? 'true' : 'false',
+                    csrfmiddlewaretoken: getCookie('csrftoken')
+                };
+
+                // Add method-specific data
+                if (selectedWithdrawMethod === 'bank') {
+                    formData.account_name = document.getElementById('accountName').value;
+                    formData.account_number = document.getElementById('accountNumber').value;
+                    formData.bank_name = document.getElementById('bankName').value;
+                    formData.routing_number = document.getElementById('routingNumber').value;
+                } else if (selectedWithdrawMethod === 'paypal') {
+                    formData.paypal_email = document.getElementById('paypalEmail').value;
+                } else if (selectedWithdrawMethod === 'mpesa') {
+                    formData.mpesa_phone = document.getElementById('mpesaPhone').value;
+                } else if (selectedWithdrawMethod === 'skrill') {
+                    formData.skrill_email = document.getElementById('skrillEmail').value;
+                }
+
+                // Send AJAX request
+                const response = await fetch('{% url "withdraw" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams(formData)
+                });
+
+                const result = await response.json();
+
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').style.display = 'none';
+
+                if (result.success) {
+                    showAlert('success', result.message || 'Withdrawal submitted successfully!');
+
+                    // Update available balance
+                    availableBalance -= amount;
+                    document.getElementById('availableBalance').textContent = availableBalance.toFixed(2);
+
+                    // Redirect to transactions page after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = result.redirect_url || '/transactions/';
+                    }, 3000);
+                } else {
+                    showAlert('error', result.error || 'Withdrawal failed. Please try again.');
+
+                    // If there are specific form errors
+                    if (result.errors) {
+                        for (const field in result.errors) {
+                            showError(field, result.errors[field][0]);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showAlert('error', 'An error occurred. Please try again.');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Amount preset event listeners
+            document.querySelectorAll('input[name="amount_preset"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    clearErrors();
+                    toggleCustomAmount();
+                    updateSummary();
+                });
+            });
+
+            // Custom amount event listener
+            document.getElementById('customAmount')?.addEventListener('input', function() {
+                clearErrors();
+                updateSummary();
+            });
+
+            // Input validation on blur
+            document.getElementById('mpesaPhone')?.addEventListener('blur', function() {
+                if (this.value && !this.value.match(/^254[17]\d{8}$/)) {
+                    showError('mpesaPhone', 'Invalid M-Pesa phone number format');
+                }
+            });
+
+            // Auto-select first withdrawal method
+            selectWithdrawMethod('bank', 'bank');
+
+            // Initialize summary
+            updateSummary();
+        });
+    </script>
+</body>
+</html>

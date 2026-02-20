@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - TradeMaster Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-color: #212529;
+            --light-color: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .legal-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .legal-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 10px;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer {
+            background-color: var(--dark-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .nav-link.active {
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .legal-content {
+                padding: 1.5rem;
+            }
+            .legal-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'base' %}">
+                <i class="bi bi-graph-up me-2"></i>Bentely-Brand-Dev
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'market_research' %}">Trading Platform</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'privacy_policy' %}">Privacy Policy</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'terms_of_service' %}">Terms of Service</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'contact1' %}">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'risk_disclosure' %}">Risk Disclosure</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="container py-5">
+        <div class="legal-header text-center">
+            <h1 class="display-5 fw-bold">Privacy Policy</h1>
+            <p class="lead">Last updated: January 7, 2026</p>
+        </div>
+
+        <div class="legal-content">
+            <p class="lead">This Privacy Policy explains how BoldTrader Pro collects, uses, discloses, and safeguards your information when you use our trading platform.</p>
+
+            <h3 class="section-title">Information We Collect</h3>
+            <p>We collect information you provide directly to us when you:</p>
+            <ul>
+                <li>Create an account on our trading platform</li>
+                <li>Make trades or transactions</li>
+                <li>Use our trading tools and analytics</li>
+                <li>Contact our customer support</li>
+                <li>Participate in surveys or promotions</li>
+            </ul>
+
+            <h3 class="section-title">How We Use Your Information</h3>
+            <p>We use the information we collect to:</p>
+            <ul>
+                <li>Provide, maintain, and improve our trading services</li>
+                <li>Process transactions and send related information</li>
+                <li>Send technical notices, updates, and security alerts</li>
+                <li>Respond to your comments and questions</li>
+                <li>Monitor and analyze trends, usage, and activities</li>
+                <li>Detect, investigate, and prevent fraudulent transactions</li>
+                <li>Comply with legal and regulatory requirements</li>
+            </ul>
+
+            <h3 class="section-title">Data Security</h3>
+            <p>We implement appropriate technical and organizational security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction. This includes encryption of sensitive data, secure socket layer (SSL) technology, and regular security audits.</p>
+
+            <h3 class="section-title">Data Retention</h3>
+            <p>We retain personal information for as long as necessary to fulfill the purposes for which we collected it, including for the purposes of satisfying any legal, accounting, or reporting requirements. Trading records are retained for a minimum of 5 years as required by financial regulations.</p>
+
+            <h3 class="section-title">Your Rights</h3>
+            <p>Depending on your location, you may have the right to:</p>
+            <ul>
+                <li>Access and receive a copy of your personal information</li>
+                <li>Rectify any inaccurate personal information</li>
+                <li>Request deletion of your personal information</li>
+                <li>Object to or restrict processing of your personal information</li>
+                <li>Data portability</li>
+            </ul>
+
+            <h3 class="section-title">Contact Us</h3>
+            <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:bentelybrandoen@gmail.com">privacy@brandboldtrading.com</a>.</p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>TradeMaster Pro</h5>
+                    <p>A professional trading platform for serious investors.</p>
+                </div>
+                <div class="col-md-2">
+                    <h5>Legal</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="p{% url 'privacy_policy' %}" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
+                        <li><a href="{% url 'terms_of_service' %}" class="text-white-50 text-decoration-none">Terms of Service</a></li>
+                        <li><a href="{% url 'risk_disclosure' %}" class="text-white-50 text-decoration-none">Risk Disclosure</a></li>
+                        <li><a href="#" class="text-white-50 text-decoration-none">Cookie Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'contact1' %}" class="text-white-50 text-decoration-none">Support Center</a></li>
+                        <li><a href="{% url 'contact1' %}" class="text-white-50 text-decoration-none">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="mt-4 mb-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">© 2026 BoldTrading. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">Trade responsibly. Trading involves risk of loss.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <a href="#" class="back-to-top">
+        <i class="bi bi-arrow-up"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const backToTopButton = document.querySelector('.back-to-top');
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopButton.style.display = 'flex';
+            } else {
+                backToTopButton.style.display = 'none';
+            }
+        });
+        backToTopButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

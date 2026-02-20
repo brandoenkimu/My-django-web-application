@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Center | Bentley BoldTrader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.0"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --bentley-black: #0A0A0A;
+            --bentley-dark: #121212;
+            --bentley-gray: #1A1A1A;
+            --bentley-light-gray: #2D2D2D;
+            --bentley-gold: #C9A86A;
+            --bentley-gold-dark: #9C8242;
+            --bentley-gold-light: #E8D9B5;
+            --success: #00C853;
+            --warning: #FF9800;
+            --danger: #FF5252;
+            --info: #2196F3;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --card-bg: #1A1A1A;
+            --border-color: #333333;
+            --live-green: #00FF88;
+            --purple: #9B59B6;
+            --cyan: #00BCD4;
+        }
+
+        body {
+            background-color: var(--bentley-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Live Status Bar */
+        .live-status-bar {
+            background: linear-gradient(90deg, #0A0A0A 0%, #121212 100%);
+            padding: 8px 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--live-green);
+        }
+
+        .live-pulse {
+            width: 10px;
+            height: 10px;
+            background-color: var(--live-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bentley-black) 0%, #151515 100%);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bentley-gold);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            color: var(--bentley-gold);
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, var(--bentley-gold), var(--bentley-gold-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text span {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--bentley-gold);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--bentley-gold), var(--bentley-gold-dark));
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(201, 168, 106, 0.1), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--bentley-gold);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Bot Status Cards */
+        .bot-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .bot-status-card {
+            background: linear-gradient(135deg, var(--bentley-gray), var(--bentley-light-gray));
+            border-radius: 8px;
+            padding: 1.2rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bot-status-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--bentley-gold);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .bot-status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--bentley-gold), var(--bentley-gold-light));
+        }
+
+        .bot-status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .bot-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bot-status {
+            padding: 0.3rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-running {
+            background-color: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-paused {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .status-stopped {
+            background-color: rgba(158, 158, 158, 0.1);
+            color: var(--text-secondary);
+            border: 1px solid var(--text-secondary);
+        }
+
+        .bot-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .stat-positive {
+            color: var(--success);
+        }
+
+        .stat-negative {
+            color: var(--danger);
+        }
+
+        /* Bot Builder */
+        .bot-builder {
+            background: linear-gradient(135deg, var(--bentley-gray), rgba(42, 42, 42, 0.8));
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .builder-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .builder-tab {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-weight: 600;
+            position: relative;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .builder-tab:hover {
+            background: rgba(201, 168, 106, 0.1);
+            color: var(--bentley-gold);
+        }
+
+        .builder-tab.active {
+            background: var(--bentley-gold);
+            color: var(--bentley-black);
+        }
+
+        .builder-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-control {
+            padding: 0.8rem 1rem;
+            background-color: var(--bentley-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--bentley-gold);
+            box-shadow: 0 0 0 2px rgba(201, 168, 106, 0.2);
+        }
+
+        select.form-control {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23C9A86A' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 12px;
+            padding-right: 2.5rem;
+        }
+
+        /* Strategy Editor */
+        .strategy-editor {
+            margin-top: 1.5rem;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .code-editor {
+            background-color: #0A0A0A;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 0.85rem;
+            min-height: 250px;
+            max-height: 300px;
+            overflow-y: auto;
+            color: var(--text-primary);
+        }
+
+        .code-line {
+            padding: 0.2rem 0;
+            padding-left: 0.5rem;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+            white-space: pre-wrap;
+        }
+
+        .code-line:hover {
+            background-color: rgba(201, 168, 106, 0.05);
+            border-left-color: var(--bentley-gold);
+        }
+
+        /* Performance Chart */
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: rgba(201, 168, 106, 0.05);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            background-color: var(--bentley-gold);
+            color: var(--bentley-black);
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            background-color: var(--bentley-gold-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--bentley-gold);
+            border: 1px solid var(--bentley-gold);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(201, 168, 106, 0.1);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-info {
+            background-color: var(--info);
+            color: white;
+        }
+
+        .btn-purple {
+            background-color: var(--purple);
+            color: white;
+        }
+
+        .btn-small {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        /* Live Updates */
+        .update-indicator {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: rgba(0, 200, 83, 0.2);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background-color: rgba(255, 152, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background-color: rgba(255, 82, 82, 0.2);
+            color: var(--danger);
+        }
+
+        .badge-info {
+            background-color: rgba(33, 150, 243, 0.2);
+            color: var(--info);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 2px solid var(--bentley-gold);
+            width: 100%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* AI Features */
+        .ai-suggestions {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .bot-status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .builder-form {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 1rem;
+            }
+
+            .live-status-bar {
+                padding: 8px 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Live Status Bar -->
+    <div class="live-status-bar">
+        <div class="live-indicator">
+            <div class="live-pulse"></div>
+            <span>AI AUTOMATION LIVE</span>
+        </div>
+        <div class="update-indicator">
+            <i class="fas fa-sync-alt fa-spin"></i>
+            <span>Last update: <span id="lastUpdateTime">17/01/2026 10:15:34</span></span>
+        </div>
+        <div style="color: var(--text-secondary);">
+            Bots Active: <span style="color: var(--success); font-weight: 600;" id="activeBotsCount">12</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="logo-text">BENTLEY<span>BOLDTRADER</span></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 20px; border: 1px solid var(--success);">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--success); animation: pulse 2s infinite;"></div>
+                <span>BOT P&L: <span id="totalBotPL">+$42,850</span></span>
+            </div>
+            <div style="color: var(--text-secondary);">
+                AI Mode: <span style="color: var(--success); font-weight: 600;">Active</span>
+            </div>
+            <button class="btn-secondary btn-small" onclick="toggleAutoMode()" id="autoModeBtn">
+                <i class="fas fa-brain"></i> AI Mode
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Automation Center</h1>
+                <p class="page-subtitle">Quantum AI Trading Bots | January 17, 2026 | Live Automation</p>
+            </div>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button class="btn" onclick="createAIBot()">
+                    <i class="fas fa-plus"></i> New AI Bot
+                </button>
+                <button class="btn-secondary" onclick="importQuantumStrategy()">
+                    <i class="fas fa-file-import"></i> Import Strategy
+                </button>
+                <button class="btn-info" onclick="openBacktester()">
+                    <i class="fas fa-vial"></i> Backtester
+                </button>
+                <button class="btn-purple" onclick="openMarketMaker()">
+                    <i class="fas fa-exchange-alt"></i> Market Maker
+                </button>
+            </div>
+        </div>
+
+        <!-- Bot Status Grid -->
+        <div class="bot-status-grid fade-in">
+            <div class="bot-status-card" onclick="manageBot('Quantum Momentum AI')">
+                <div class="bot-status-header">
+                    <div class="bot-name">
+                        <i class="fas fa-bolt"></i>
+                        Quantum Momentum AI
+                    </div>
+                    <div class="bot-status status-running">
+                        <i class="fas fa-circle"></i> RUNNING
+                    </div>
+                </div>
+                <div class="bot-stats">
+                    <div>
+                        <div class="stat-label">24h P&L</div>
+                        <div class="stat-value stat-positive">+$2,850</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Win Rate</div>
+                        <div class="stat-value">78.4%</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Trades</div>
+                        <div class="stat-value">18</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bot-status-card" onclick="manageBot('Neural Mean Reversion')">
+                <div class="bot-status-header">
+                    <div class="bot-name">
+                        <i class="fas fa-brain"></i>
+                        Neural Mean Reversion
+                    </div>
+                    <div class="bot-status status-running">
+                        <i class="fas fa-circle"></i> RUNNING
+                    </div>
+                </div>
+                <div class="bot-stats">
+                    <div>
+                        <div class="stat-label">24h P&L</div>
+                        <div class="stat-value stat-positive">+$1,420</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Win Rate</div>
+                        <div class="stat-value">72.8%</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Trades</div>
+                        <div class="stat-value">24</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bot-status-card" onclick="manageBot('Quantum Scalper Pro')">
+                <div class="bot-status-header">
+                    <div class="bot-name">
+                        <i class="fas fa-rocket"></i>
+                        Quantum Scalper Pro
+                    </div>
+                    <div class="bot-status status-paused">
+                        <i class="fas fa-pause-circle"></i> PAUSED
+                    </div>
+                </div>
+                <div class="bot-stats">
+                    <div>
+                        <div class="stat-label">24h P&L</div>
+                        <div class="stat-value stat-positive">+$980</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Win Rate</div>
+                        <div class="stat-value">65.8%</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Trades</div>
+                        <div class="stat-value">142</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bot-status-card" onclick="manageBot('AI Arbitrage Master')">
+                <div class="bot-status-header">
+                    <div class="bot-name">
+                        <i class="fas fa-balance-scale"></i>
+                        AI Arbitrage Master
+                    </div>
+                    <div class="bot-status status-running">
+                        <i class="fas fa-circle"></i> RUNNING
+                    </div>
+                </div>
+                <div class="bot-stats">
+                    <div>
+                        <div class="stat-label">24h P&L</div>
+                        <div class="stat-value stat-positive">+$3,150</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Win Rate</div>
+                        <div class="stat-value">82.4%</div>
+                    </div>
+                    <div>
+                        <div class="stat-label">Trades</div>
+                        <div class="stat-value">68</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid fade-in">
+            <!-- AI Bot Builder -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-tools"></i> Quantum AI Bot Builder</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <span class="badge badge-info">AI ASSIST</span>
+                        <span class="update-indicator">
+                            <i class="fas fa-magic"></i>
+                            <span>Auto-Tune</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="bot-builder">
+                        <div class="builder-tabs">
+                            <button class="builder-tab active" onclick="switchBuilderTab('quick')">Quick Setup</button>
+                            <button class="builder-tab" onclick="switchBuilderTab('advanced')">Advanced AI</button>
+                            <button class="builder-tab" onclick="switchBuilderTab('template')">Templates</button>
+                            <button class="builder-tab" onclick="switchBuilderTab('quantum')">
+                                <i class="fas fa-atom"></i> Quantum
+                            </button>
+                        </div>
+
+                        <div id="quickSetup" class="builder-form">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <span>Bot Name</span>
+                                    <span class="badge badge-info">AI SUGGESTED</span>
+                                </label>
+                                <input type="text" class="form-control" id="botName" placeholder="Enter bot name" value="Quantum Trend AI">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">AI Strategy Type</label>
+                                <select class="form-control" id="strategyType">
+                                    <option value="quantum-trend">Quantum Trend Following</option>
+                                    <option value="neural-mean">Neural Mean Reversion</option>
+                                    <option value="ai-scalping">AI Scalping</option>
+                                    <option value="quantum-arb">Quantum Arbitrage</option>
+                                    <option value="market-making">AI Market Making</option>
+                                    <option value="sentiment">Sentiment Analysis</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Trading Assets</label>
+                                <input type="text" class="form-control" id="tradingAssets" value="NVDA, IONQ, QSI, MSFT, AAPL">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">AI Risk Profile</label>
+                                <select class="form-control" id="riskLevel">
+                                    <option value="conservative">Conservative</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="aggressive" selected>Aggressive</option>
+                                    <option value="dynamic">Dynamic AI</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Daily Trading Limit</label>
+                                <select class="form-control" id="tradingLimit">
+                                    <option value="25k">$25,000</option>
+                                    <option value="50k" selected>$50,000</option>
+                                    <option value="100k">$100,000</option>
+                                    <option value="unlimited">No Limit (AI Managed)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">AI Stop-Loss Mode</label>
+                                <select class="form-control" id="stopLoss">
+                                    <option value="fixed">Fixed (8%)</option>
+                                    <option value="trailing" selected>Trailing AI</option>
+                                    <option value="volatility">Volatility Adjusted</option>
+                                    <option value="neural">Neural Network</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="ai-suggestions">
+                            <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">
+                                <i class="fas fa-lightbulb"></i> AI Recommendation
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                Based on current market conditions (VIX: 24.5), AI suggests quantum trend strategy with dynamic risk management for optimal returns.
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                            <button class="btn" onclick="deployAIBot()" style="flex: 1;">
+                                <i class="fas fa-rocket"></i> Deploy AI Bot
+                            </button>
+                            <button class="btn-secondary" onclick="simulateAIBot()" style="flex: 1;">
+                                <i class="fas fa-chart-line"></i> Simulate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantum Strategy Editor -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-code"></i> Quantum Strategy Editor</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <span class="badge badge-purple">QUANTUM</span>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Python 3.11</span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="strategy-editor">
+                        <div class="editor-header">
+                            <div style="color: var(--bentley-gold-light); font-weight: 600;">Quantum Trend AI Strategy v2.5</div>
+                            <button class="btn-purple btn-small" onclick="quantumOptimize()">
+                                <i class="fas fa-atom"></i> Quantum Optimize
+                            </button>
+                        </div>
+
+                        <div class="code-editor" id="codeEditor">
+                            <div class="code-line"># Bentley BoldTrader - Quantum AI Strategy</div>
+                            <div class="code-line"># Version: 2.5 | Date: 2026-01-17</div>
+                            <div class="code-line">import qiskit</div>
+                            <div class="code-line">from qiskit_machine_learning.algorithms import QSVC</div>
+                            <div class="code-line">import numpy as np</div>
+                            <div-line"></div>
+                            <div class="code-line">class QuantumTrendAI:</div>
+                            <div class="code-line">    def __init__(self, portfolio_size=0.15):</div>
+                            <div class="code-line">        self.portfolio_size = portfolio_size</div>
+                            <div class="code-line">        self.quantum_circuit = self.build_quantum_circuit()</div>
+                            <div class="code-line">        self.neural_layers = 3</div>
+                            <div-line"></div>
+                            <div class="code-line">    def build_quantum_circuit(self):</div>
+                            <div class="code-line">        """Build quantum circuit for market prediction"""</div>
+                            <div class="code-line">        qc = QuantumCircuit(5)</div>
+                            <div class="code-line">        qc.h(range(5))</div>
+                            <div class="code-line">        qc.cz(0, 2)</div>
+                            <div class="code-line">        qc.cz(1, 3)</div>
+                            <div class="code-line">        return qc</div>
+                            <div-line"></div>
+                            <div class="code-line">    def predict_market_trend(self, data):</div>
+                            <div class="code-line">        """Quantum-enhanced trend prediction"""</div>
+                            <div class="code-line">        quantum_features = self.extract_quantum_features(data)</div>
+                            <div class="code-line">        prediction = self.quantum_model.predict(quantum_features)</div>
+                            <div class="code-line">        confidence = self.calculate_quantum_confidence(prediction)</div>
+                            <div class="code-line">        return prediction, confidence</div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+                            <button class="btn-secondary btn-small" onclick="saveQuantumStrategy()">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button class="btn-info btn-small" onclick="backtestQuantumStrategy()">
+                                <i class="fas fa-vial"></i> Backtest
+                            </button>
+                            <button class="btn btn-small" onclick="deployQuantumStrategy()">
+                                <i class="fas fa-bolt"></i> Deploy Live
+                            </button>
+                            <button class="btn-purple btn-small" onclick="quantumValidate()">
+                                <i class="fas fa-check-circle"></i> Validate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Bot Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-line"></i> Live Bot Performance</h3>
+                    <div class="update-indicator">
+                        <i class="fas fa-sync-alt fa-spin"></i>
+                        <span>Streaming</span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="botPerformanceChart"></canvas>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1.5rem;">
+                        <div style="text-align: center; padding: 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 8px;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);" id="avgReturn">+9.8%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Avg. Monthly Return</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: rgba(155, 89, 182, 0.1); border-radius: 8px;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--purple);" id="winRate">78.4%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Win Rate</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: rgba(255, 152, 0, 0.1); border-radius: 8px;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--warning);" id="maxDrawdown">-3.8%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Max Drawdown</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: rgba(33, 150, 243, 0.1); border-radius: 8px;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--info);" id="sharpeRatio">2.15</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Sharpe Ratio</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active AI Bots Dashboard -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-list"></i> AI Bot Dashboard</h3>
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;" id="totalBotsCount">12 Total</span>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Bot Name</th>
+                                    <th>AI Strategy</th>
+                                    <th>Status</th>
+                                    <th>24h P&L</th>
+                                    <th>AI Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activeBotsTable">
+                                <!-- Bots will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+                        <button class="btn-secondary btn-small" onclick="pauseAllAI()">
+                            <i class="fas fa-pause"></i> Pause AI
+                        </button>
+                        <button class="btn-danger btn-small" onclick="stopAllAI()">
+                            <i class="fas fa-stop"></i> Stop AI
+                        </button>
+                        <button class="btn-success btn-small" onclick="startAllAI()">
+                            <i class="fas fa-play"></i> Start AI
+                        </button>
+                        <button class="btn-info btn-small" onclick="optimizeAllAI()">
+                            <i class="fas fa-cogs"></i> Optimize All
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantum Backtest Results -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-atom"></i> Quantum Backtest Results</h3>
+                <div style="display: flex; gap: 1rem;">
+                    <span class="badge badge-purple">QUANTUM SIMULATION</span>
+                    <button class="btn-purple btn-small" onclick="runQuantumBacktest()">
+                        <i class="fas fa-play"></i> Run New
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Quantum Strategy</th>
+                                <th>Period</th>
+                                <th>Return</th>
+                                <th>Sharpe</th>
+                                <th>Max DD</th>
+                                <th>Quantum Score</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="backtestResultsTable">
+                            <!-- Results will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Bot Analytics -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-chart-bar"></i> AI Bot Analytics</h3>
+                <div style="display: flex; gap: 0.5rem;">
+                    <span class="badge badge-success">LIVE</span>
+                    <div class="update-indicator">
+                        <i class="fas fa-sync-alt fa-spin"></i>
+                        <span>Real-time</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="botAnalyticsChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="strategyPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <h4 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">AI Performance Insights</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                        <div style="padding: 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 8px;">
+                            <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">
+                                <i class="fas fa-rocket"></i> Top Performer
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                Quantum Momentum AI: +$2,850 (24h) | 78.4% win rate
+                            </div>
+                        </div>
+
+                        <div style="padding: 1rem; background: rgba(255, 152, 0, 0.1); border-radius: 8px;">
+                            <div style="font-weight: 600; color: var(--warning); margin-bottom: 0.5rem;">
+                                <i class="fas fa-exclamation-triangle"></i> Optimization Needed
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                Neural Mean Reversion: Reduce position sizing by 15%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Quantum Bot Configuration Modal -->
+    <div class="modal" id="quantumBotModal">
+        <div class="modal-content">
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="color: var(--bentley-gold);" id="modalTitle">Quantum AI Bot Configuration</h3>
+                <button onclick="closeModal()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">×</button>
+            </div>
+            <div style="padding: 1.5rem;" id="modalContent">
+                <!-- Modal content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let botData = {
+            totalPL: 42850,
+            activeBots: 12,
+            avgReturn: 9.8,
+            winRate: 78.4,
+            maxDrawdown: 3.8,
+            sharpeRatio: 2.15
+        };
+
+        let quantumCharts = {};
+        let liveUpdatesActive = true;
+        let autoModeActive = true;
+        let updateInterval;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAutomationCenter();
+            startLiveUpdates();
+            populateActiveBotsTable();
+            populateBacktestResults();
+            updateDateTime();
+        });
+
+        function initializeAutomationCenter() {
+            updateBotMetrics();
+            initializeCharts();
+            setupBotStatusCards();
+        }
+
+        function updateDateTime() {
+            const now = luxon.DateTime.now();
+            const formatted = now.toFormat('dd/MM/yyyy HH:mm:ss');
+            document.getElementById('lastUpdateTime').textContent = formatted;
+
+            document.querySelector('.page-subtitle').textContent =
+                `Quantum AI Trading Bots | ${now.toFormat('dd LLLL yyyy')} | Live Automation`;
+        }
+
+        function updateBotMetrics() {
+            document.getElementById('totalBotPL').textContent = `+$${botData.totalPL.toLocaleString()}`;
+            document.getElementById('activeBotsCount').textContent = botData.activeBots;
+            document.getElementById('totalBotsCount').textContent = `${botData.activeBots} Total`;
+
+            document.getElementById('avgReturn').textContent = `+${botData.avgReturn.toFixed(1)}%`;
+            document.getElementById('winRate').textContent = `${botData.winRate.toFixed(1)}%`;
+            document.getElementById('maxDrawdown').textContent = `-${botData.maxDrawdown.toFixed(1)}%`;
+            document.getElementById('sharpeRatio').textContent = botData.sharpeRatio.toFixed(2);
+        }
+
+        function initializeCharts() {
+            // Bot Performance Chart
+            const performanceCtx = document.getElementById('botPerformanceChart').getContext('2d');
+            quantumCharts.performance = new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan 1', 'Jan 5', 'Jan 10', 'Jan 15', 'Jan 17'],
+                    datasets: [{
+                        label: 'Total Bot P&L ($)',
+                        data: [38000, 39200, 40500, 41500, 42850],
+                        borderColor: '#C9A86A',
+                        backgroundColor: 'rgba(201, 168, 106, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#C9A86A'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#B0B0B0',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 26, 0.9)',
+                            titleColor: '#E8D9B5',
+                            bodyColor: '#B0B0B0',
+                            borderColor: '#C9A86A',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `P&L: $${context.parsed.y.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                callback: function(value) {
+                                    return '$' + (value/1000).toFixed(0) + 'K';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Bot Analytics Chart
+            const analyticsCtx = document.getElementById('botAnalyticsChart').getContext('2d');
+            quantumCharts.analytics = new Chart(analyticsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Quantum Momentum', 'Neural Mean', 'Quantum Scalper', 'AI Arbitrage', 'Market Maker', 'Sentiment AI'],
+                    datasets: [{
+                        label: '24h Performance ($)',
+                        data: [2850, 1420, 980, 3150, 1250, 820],
+                        backgroundColor: [
+                            '#C9A86A',
+                            '#2196F3',
+                            '#00C853',
+                            '#9B59B6',
+                            '#FF9800',
+                            '#00BCD4'
+                        ],
+                        borderColor: [
+                            '#C9A86A',
+                            '#2196F3',
+                            '#00C853',
+                            '#9B59B6',
+                            '#FF9800',
+                            '#00BCD4'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                maxRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Strategy Performance Chart
+            const strategyCtx = document.getElementById('strategyPerformanceChart').getContext('2d');
+            quantumCharts.strategy = new Chart(strategyCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Trend Following', 'Mean Reversion', 'Scalping', 'Arbitrage', 'Market Making'],
+                    datasets: [{
+                        data: [38, 22, 18, 15, 7],
+                        backgroundColor: [
+                            '#C9A86A',
+                            '#2196F3',
+                            '#00C853',
+                            '#9B59B6',
+                            '#FF9800'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#1A1A1A'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#B0B0B0',
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.parsed}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupBotStatusCards() {
+            document.querySelectorAll('.bot-status-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const botName = this.querySelector('.bot-name').textContent.split('\n')[1]?.trim();
+                    if (botName) {
+                        manageBot(botName);
+                    }
+                });
+            });
+        }
+
+        function populateActiveBotsTable() {
+            const bots = [
+                { name: 'Quantum Momentum AI', strategy: 'Quantum Trend', status: 'running', pnl: '+$2,850' },
+                { name: 'Neural Mean Reversion', strategy: 'Neural Network', status: 'running', pnl: '+$1,420' },
+                { name: 'Quantum Scalper Pro', strategy: 'Quantum Scalping', status: 'paused', pnl: '+$980' },
+                { name: 'AI Arbitrage Master', strategy: 'Quantum Arbitrage', status: 'running', pnl: '+$3,150' },
+                { name: 'Market Maker AI', strategy: 'AI Market Making', status: 'running', pnl: '+$1,250' },
+                { name: 'Sentiment Analysis Bot', strategy: 'NLP Sentiment', status: 'running', pnl: '+$820' }
+            ];
+
+            const tableBody = document.getElementById('activeBotsTable');
+            tableBody.innerHTML = '';
+
+            bots.forEach(bot => {
+                const row = document.createElement('tr');
+
+                const statusClass = bot.status === 'running' ? 'status-running' :
+                                   bot.status === 'paused' ? 'status-paused' : 'status-stopped';
+
+                const statusText = bot.status === 'running' ? 'RUNNING' :
+                                  bot.status === 'paused' ? 'PAUSED' : 'STOPPED';
+
+                const pnlColor = bot.pnl.startsWith('+') ? 'var(--success)' : 'var(--danger)';
+
+                row.innerHTML = `
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-robot" style="color: var(--bentley-gold);"></i>
+                            <strong>${bot.name}</strong>
+                        </div>
+                    </td>
+                    <td>${bot.strategy}</td>
+                    <td>
+                        <span class="${statusClass}" style="display: inline-flex; align-items: center; gap: 4px; padding: 0.3rem 0.6rem;">
+                            <i class="fas fa-circle" style="font-size: 0.6rem;"></i>
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td style="color: ${pnlColor}; font-weight: 600; font-family: 'Source Code Pro', monospace;">
+                        ${bot.pnl}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 0.3rem;">
+                            <button class="btn-secondary btn-small" onclick="manageBot('${bot.name}')" title="Configure">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            ${bot.status === 'running' ? `
+                                <button class="btn-warning btn-small" onclick="pauseAIBot('${bot.name}')" title="Pause">
+                                    <i class="fas fa-pause"></i>
+                                </button>
+                            ` : `
+                                <button class="btn-success btn-small" onclick="startAIBot('${bot.name}')" title="Start">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            `}
+                            <button class="btn-info btn-small" onclick="optimizeAIBot('${bot.name}')" title="Optimize">
+                                <i class="fas fa-chart-line"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function populateBacktestResults() {
+            const results = [
+                { strategy: 'Quantum Trend AI v2.5', period: 'Jan 2025 - Jan 2026', return: '+32.8%', sharpe: '2.42', drawdown: '-4.2%', quantumScore: '92/100' },
+                { strategy: 'Neural Mean Reversion Pro', period: 'Jan 2025 - Jan 2026', return: '+24.2%', sharpe: '1.98', drawdown: '-5.8%', quantumScore: '85/100' },
+                { strategy: 'Quantum Arbitrage AI', period: 'Mar 2025 - Jan 2026', return: '+28.4%', sharpe: '2.15', drawdown: '-3.8%', quantumScore: '88/100' },
+                { strategy: 'AI Market Maker v3', period: 'Jan 2025 - Jan 2026', return: '+18.6%', sharpe: '1.68', drawdown: '-6.2%', quantumScore: '78/100' },
+                { strategy: 'Sentiment Trading AI', period: 'Jun 2025 - Jan 2026', return: '+22.4%', sharpe: '1.82', drawdown: '-4.8%', quantumScore: '82/100' }
+            ];
+
+            const tableBody = document.getElementById('backtestResultsTable');
+            tableBody.innerHTML = '';
+
+            results.forEach(result => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${result.strategy}</strong></td>
+                    <td>${result.period}</td>
+                    <td style="color: var(--success); font-weight: 600;">${result.return}</td>
+                    <td style="color: var(--success); font-weight: 600;">${result.sharpe}</td>
+                    <td style="color: var(--danger);">${result.drawdown}</td>
+                    <td>
+                        <span style="color: var(--purple); font-weight: 600;">${result.quantumScore}</span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 0.3rem;">
+                            <button class="btn-secondary btn-small" onclick="viewBacktestDetails('${result.strategy}')">
+                                <i class="fas fa-chart-bar"></i>
+                            </button>
+                            <button class="btn-purple btn-small" onclick="deployBacktestStrategy('${result.strategy}')">
+                                <i class="fas fa-bolt"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function startLiveUpdates() {
+            let countdown = 30;
+            updateInterval = setInterval(() => {
+                if (liveUpdatesActive) {
+                    countdown--;
+
+                    if (countdown <= 0) {
+                        updateLiveBotData();
+                        countdown = 30;
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateLiveBotData() {
+            if (!liveUpdatesActive) return;
+
+            // Simulate live updates
+            botData.totalPL += (Math.random() - 0.5) * 500;
+            botData.avgReturn += (Math.random() - 0.5) * 0.1;
+            botData.winRate += (Math.random() - 0.5) * 0.2;
+            botData.sharpeRatio += (Math.random() - 0.5) * 0.01;
+
+            // Update metrics
+            updateBotMetrics();
+            updateDateTime();
+
+            // Update charts
+            if (quantumCharts.performance) {
+                const newValue = botData.totalPL;
+                quantumCharts.performance.data.datasets[0].data[4] = newValue;
+                quantumCharts.performance.update('none');
+            }
+
+            showNotification('Bot performance data updated', 'info');
+        }
+
+        // UI Interaction Functions
+        function switchBuilderTab(tab) {
+            document.querySelectorAll('.builder-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            showNotification(`Switched to ${tab} configuration`, 'info');
+        }
+
+        function toggleAutoMode() {
+            autoModeActive = !autoModeActive;
+            const button = document.getElementById('autoModeBtn');
+
+            if (autoModeActive) {
+                button.innerHTML = '<i class="fas fa-brain"></i> AI Mode: ON';
+                button.className = 'btn-secondary btn-small';
+                showNotification('AI Automation Mode enabled', 'success');
+            } else {
+                button.innerHTML = '<i class="fas fa-brain"></i> AI Mode: OFF';
+                button.className = 'btn-danger btn-small';
+                showNotification('AI Automation Mode disabled', 'warning');
+            }
+        }
+
+        function createAIBot() {
+            showNotification('Creating new AI bot configuration...', 'info');
+
+            // Reset form with AI suggestions
+            document.getElementById('botName').value = 'Quantum Trend AI v3';
+            document.getElementById('strategyType').value = 'quantum-trend';
+            document.getElementById('tradingAssets').value = 'NVDA, IONQ, QSI, MSFT, AAPL';
+            document.getElementById('riskLevel').value = 'dynamic';
+            document.getElementById('tradingLimit').value = '100k';
+            document.getElementById('stopLoss').value = 'neural';
+
+            switchBuilderTab('quick');
+            document.querySelector('.bot-builder').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function importQuantumStrategy() {
+            showNotification('Opening quantum strategy importer...', 'info');
+
+            const modal = document.getElementById('quantumBotModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = 'Import Quantum Strategy';
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        Import quantum trading strategies from file or AI marketplace.
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="padding: 2rem; border: 2px dashed var(--border-color); border-radius: 8px; text-align: center; cursor: pointer;" onclick="uploadStrategyFile()">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--bentley-gold); margin-bottom: 1rem;"></i>
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">Upload File</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">.py, .json, .qasm</div>
+                        </div>
+
+                        <div style="padding: 2rem; border: 2px solid var(--purple); border-radius: 8px; text-align: center; cursor: pointer;" onclick="openQuantumMarketplace()">
+                            <i class="fas fa-store" style="font-size: 2rem; color: var(--purple); margin-bottom: 1rem;"></i>
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem;">Quantum Marketplace</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">AI-Powered Strategies</div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(155, 89, 182, 0.1); padding: 1rem; border-radius: 8px;">
+                        <div style="font-weight: 600; color: var(--purple); margin-bottom: 0.5rem;">Available Quantum Strategies</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                            • Quantum Trend Prediction<br>
+                            • Neural Market Making<br>
+                            • AI Arbitrage Networks<br>
+                            • Sentiment Analysis Models
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn-secondary" onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button class="btn-purple" onclick="importSelectedStrategy()">
+                        <i class="fas fa-download"></i> Import
+                    </button>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function uploadStrategyFile() {
+            showNotification('Opening file upload dialog...', 'info');
+        }
+
+        function openQuantumMarketplace() {
+            showNotification('Opening Quantum Strategy Marketplace...', 'info');
+        }
+
+        function importSelectedStrategy() {
+            showNotification('Quantum strategy imported successfully', 'success');
+            closeModal();
+        }
+
+        function deployAIBot() {
+            const botName = document.getElementById('botName').value;
+            const strategyType = document.getElementById('strategyType').value;
+            const tradingAssets = document.getElementById('tradingAssets').value;
+
+            if (!botName || !tradingAssets) {
+                showNotification('Please fill in all required fields', 'warning');
+                return;
+            }
+
+            const confirmed = confirm(`Deploy ${botName} with quantum AI strategy?`);
+
+            if (confirmed) {
+                showNotification(`${botName} deploying with quantum optimization...`, 'info');
+
+                setTimeout(() => {
+                    showNotification(`${botName} deployed successfully! Quantum tuning complete.`, 'success');
+
+                    // Update active bots count
+                    botData.activeBots++;
+                    updateBotMetrics();
+                    populateActiveBotsTable();
+                }, 2500);
+            }
+        }
+
+        function simulateAIBot() {
+            const botName = document.getElementById('botName').value;
+            showNotification(`Simulating ${botName} performance...`, 'info');
+
+            setTimeout(() => {
+                const modal = document.getElementById('quantumBotModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalContent = document.getElementById('modalContent');
+
+                modalTitle.textContent = 'AI Bot Simulation Results';
+                modalContent.innerHTML = `
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="color: var(--success); font-weight: 600; margin-bottom: 1rem;">
+                            <i class="fas fa-check-circle"></i> Simulation Complete
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                            <div style="text-align: center; padding: 1rem; background: var(--bentley-gray); border-radius: 8px;">
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Projected Return</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);">+28.4%</div>
+                            </div>
+                            <div style="text-align: center; padding: 1rem; background: var(--bentley-gray); border-radius: 8px;">
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Quantum Score</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: var(--purple);">92/100</div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(201, 168, 106, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                            <div style="font-weight: 600; color: var(--bentley-gold); margin-bottom: 0.5rem;">AI Recommendations</div>
+                            <ul style="color: var(--text-secondary); padding-left: 1.5rem;">
+                                <li>Optimize position sizing for current volatility (VIX: 24.5)</li>
+                                <li>Increase neural network layers from 3 to 5</li>
+                                <li>Add quantum error correction circuits</li>
+                                <li>Implement dynamic stop-loss based on market sentiment</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button class="btn-secondary" onclick="closeModal()">
+                            Close
+                        </button>
+                        <button class="btn" onclick="deployAIBot()">
+                            <i class="fas fa-rocket"></i> Deploy Now
+                        </button>
+                    </div>
+                `;
+
+                modal.style.display = 'flex';
+            }, 3000);
+        }
+
+        function quantumOptimize() {
+            showNotification('Running quantum circuit optimization...', 'info');
+
+            setTimeout(() => {
+                showNotification('Quantum optimization complete. Circuit depth reduced by 42%', 'success');
+            }, 2000);
+        }
+
+        function saveQuantumStrategy() {
+            showNotification('Quantum strategy saved to cloud', 'success');
+        }
+
+        function backtestQuantumStrategy() {
+            showNotification('Running quantum backtest simulation...', 'info');
+
+            setTimeout(() => {
+                showNotification('Quantum backtest completed. Results available in dashboard.', 'success');
+                populateBacktestResults();
+            }, 3500);
+        }
+
+        function deployQuantumStrategy() {
+            showNotification('Deploying quantum strategy to live trading...', 'info');
+
+            setTimeout(() => {
+                showNotification('Quantum strategy deployed successfully', 'success');
+            }, 2500);
+        }
+
+        function quantumValidate() {
+            showNotification('Validating quantum circuit integrity...', 'info');
+
+            setTimeout(() => {
+                showNotification('Quantum validation passed. Circuit integrity: 99.8%', 'success');
+            }, 1500);
+        }
+
+        function openBacktester() {
+            showNotification('Opening advanced backtesting suite...', 'info');
+
+            const modal = document.getElementById('quantumBotModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = 'Quantum Backtesting Suite';
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        Run advanced backtests with quantum simulation capabilities.
+                    </div>
+
+                    <div style="display: grid; gap: 1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">Strategy to Backtest</label>
+                            <select class="form-control">
+                                <option>Quantum Trend AI v2.5</option>
+                                <option>Neural Mean Reversion Pro</option>
+                                <option>Quantum Arbitrage Master</option>
+                                <option>Custom Strategy</option>
+                            </select>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" value="2025-01-01">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" value="2026-01-17">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Quantum Simulation Level</label>
+                            <select class="form-control">
+                                <option>Basic (Classical)</option>
+                                <option selected>Standard (Hybrid)</option>
+                                <option>Advanced (Quantum)</option>
+                                <option>Maximum (Quantum AI)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Initial Capital</label>
+                            <select class="form-control">
+                                <option>$10,000</option>
+                                <option>$50,000</option>
+                                <option selected>$100,000</option>
+                                <option>$250,000</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn-secondary" onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button class="btn-purple" onclick="runQuantumBacktest()">
+                        <i class="fas fa-play"></i> Run Quantum Backtest
+                    </button>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function openMarketMaker() {
+            showNotification('Opening AI Market Maker configuration...', 'info');
+
+            const modal = document.getElementById('quantumBotModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = 'AI Market Maker Configuration';
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="color: var(--text-secondary); margin-bottom: 1rem;">
+                        Configure AI-powered market making strategies with quantum optimization.
+                    </div>
+
+                    <div style="display: grid; gap: 1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">Market Making Strategy</label>
+                            <select class="form-control">
+                                <option>Basic Market Making</option>
+                                <option>Advanced AI Market Making</option>
+                                <option selected>Quantum Market Making</option>
+                                <option>Neural Market Making v3</option>
+                            </select>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Spread Target</label>
+                                <select class="form-control">
+                                    <option>0.1%</option>
+                                    <option>0.2%</option>
+                                    <option selected>0.3%</option>
+                                    <option>0.5%</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Inventory Limit</label>
+                                <select class="form-control">
+                                    <option>$10,000</option>
+                                    <option selected>$25,000</option>
+                                    <option>$50,000</option>
+                                    <option>$100,000</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Assets to Market Make</label>
+                            <input type="text" class="form-control" value="NVDA, TSLA, MSFT, AAPL, IONQ">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">AI Risk Management</label>
+                            <select class="form-control">
+                                <option>Conservative</option>
+                                <option selected>Balanced</option>
+                                <option>Aggressive</option>
+                                <option>Dynamic AI</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(0, 212, 170, 0.1); padding: 1rem; border-radius: 8px; margin-top: 1.5rem;">
+                        <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">Estimated Performance</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                            Based on current market conditions, AI estimates daily P&L of $800-$1,200 with 85% win rate.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn-secondary" onclick="closeModal()">
+                        Cancel
+                    </button>
+                    <button class="btn" onclick="deployMarketMaker()">
+                        <i class="fas fa-rocket"></i> Deploy Market Maker
+                    </button>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function deployMarketMaker() {
+            showNotification('Deploying AI Market Maker...', 'info');
+            setTimeout(() => {
+                showNotification('AI Market Maker deployed successfully', 'success');
+                closeModal();
+                botData.activeBots++;
+                updateBotMetrics();
+            }, 2000);
+        }
+
+        function manageBot(botName) {
+            showNotification(`Managing ${botName}...`, 'info');
+
+            const modal = document.getElementById('quantumBotModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+
+            modalTitle.textContent = `Manage: ${botName}`;
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="text-align: center; padding: 1rem; background: var(--bentley-gray); border-radius: 8px;">
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Status</div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);">RUNNING</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--bentley-gray); border-radius: 8px;">
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">24h P&L</div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);">+$2,850</div>
+                        </div>
+                    </div>
+
+                    <h4 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">Configuration</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Strategy Type</div>
+                            <div style="font-weight: 600;">Quantum Trend Following</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Assets</div>
+                            <div style="font-weight: 600;">NVDA, MSFT, AAPL, IONQ</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Risk Level</div>
+                            <div style="font-weight: 600; color: var(--warning);">Aggressive</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">AI Mode</div>
+                            <div style="font-weight: 600; color: var(--success);">Dynamic</div>
+                        </div>
+                    </div>
+
+                    <h4 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">Performance Metrics</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Total Trades</div>
+                            <div style="font-weight: 600;">142</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Win Rate</div>
+                            <div style="font-weight: 600; color: var(--success);">78.4%</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Avg. Trade</div>
+                            <div style="font-weight: 600; color: var(--success);">+$158</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Sharpe Ratio</div>
+                            <div style="font-weight: 600; color: var(--success);">2.15</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn-warning" onclick="pauseAIBot('${botName}')" style="flex: 1;">
+                        <i class="fas fa-pause"></i> Pause
+                    </button>
+                    <button class="btn-danger" onclick="stopAIBot('${botName}')" style="flex: 1;">
+                        <i class="fas fa-stop"></i> Stop
+                    </button>
+                    <button class="btn-info" onclick="optimizeAIBot('${botName}')" style="flex: 1;">
+                        <i class="fas fa-cogs"></i> Optimize
+                    </button>
+                </div>
+            `;
+
+            modal.style.display = 'flex';
+        }
+
+        function pauseAIBot(botName) {
+            showNotification(`${botName} paused for optimization`, 'warning');
+            closeModal();
+        }
+
+        function startAIBot(botName) {
+            showNotification(`${botName} started successfully`, 'success');
+            closeModal();
+        }
+
+        function stopAIBot(botName) {
+            const confirmed = confirm(`Stop ${botName}? This will close all positions.`);
+            if (confirmed) {
+                showNotification(`${botName} stopped`, 'success');
+                closeModal();
+            }
+        }
+
+        function optimizeAIBot(botName) {
+            showNotification(`Optimizing ${botName} with quantum AI...`, 'info');
+
+            setTimeout(() => {
+                showNotification(`${botName} optimized successfully. Performance improved by 18%`, 'success');
+                closeModal();
+            }, 2500);
+        }
+
+        function pauseAllAI() {
+            const confirmed = confirm('Pause all AI bots?');
+            if (confirmed) {
+                showNotification('All AI bots paused', 'warning');
+            }
+        }
+
+        function stopAllAI() {
+            const confirmed = confirm('Stop all AI bots? This will close all positions.');
+            if (confirmed) {
+                showNotification('All AI bots stopped', 'success');
+            }
+        }
+
+        function startAllAI() {
+            const confirmed = confirm('Start all paused AI bots?');
+            if (confirmed) {
+                showNotification('All AI bots started', 'success');
+            }
+        }
+
+        function optimizeAllAI() {
+            showNotification('Running quantum optimization on all AI bots...', 'info');
+
+            setTimeout(() => {
+                showNotification('All AI bots optimized. Average performance improvement: 12%', 'success');
+            }, 3000);
+        }
+
+        function runQuantumBacktest() {
+            showNotification('Running quantum backtest simulation...', 'info');
+
+            setTimeout(() => {
+                showNotification('Quantum backtest completed. Results updated in table.', 'success');
+                closeModal();
+            }, 4000);
+        }
+
+        function viewBacktestDetails(strategy) {
+            showNotification(`Viewing details for ${strategy}...`, 'info');
+        }
+
+        function deployBacktestStrategy(strategy) {
+            const confirmed = confirm(`Deploy ${strategy} to live trading?`);
+            if (confirmed) {
+                showNotification(`${strategy} deploying to live trading...`, 'info');
+
+                setTimeout(() => {
+                    showNotification(`${strategy} deployed successfully`, 'success');
+                }, 2000);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('quantumBotModal').style.display = 'none';
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? 'rgba(0, 200, 83, 0.9)' :
+                           type === 'warning' ? 'rgba(255, 152, 0, 0.9)' :
+                           type === 'danger' ? 'rgba(255, 82, 82, 0.9)' :
+                           type === 'info' ? 'rgba(33, 150, 243, 0.9)' :
+                           'rgba(155, 89, 182, 0.9)'};
+                color: white;
+                border-radius: 6px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                max-width: 300px;
+            `;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Initialize live updates every 30 seconds
+        setInterval(() => {
+            if (liveUpdatesActive) {
+                updateLiveBotData();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

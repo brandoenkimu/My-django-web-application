@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade Builder | Bentley-Brand-dev</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* All CSS remains exactly the same */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2d6bc9;
+            --accent-color: #00c9a7;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dark-mode {
+            --light-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-dark: #f1f5f9;
+            --text-light: #94a3b8;
+            --border-color: #334155;
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-text span {
+            color: var(--accent-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-icon {
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar-section h3 {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+
+        .module-list {
+            list-style: none;
+        }
+
+        .module-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .module-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .module-link:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+            color: var(--accent-color);
+        }
+
+        .module-link.active {
+            background-color: rgba(0, 201, 167, 0.15);
+            color: var(--accent-color);
+            font-weight: 600;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .module-icon {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon {
+            background-color: rgba(0, 201, 167, 0.1);
+            color: var(--accent-color);
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .card-content {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #00b397;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #265cbb;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-offline {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            color: var(--text-light);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Trade Builder specific styles */
+        .trade-builder-container {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .trade-config {
+            flex: 1;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .trade-preview {
+            flex: 1;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .leg-config {
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .leg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .leg-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .remove-leg {
+            color: var(--danger-color);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .risk-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .metric-positive {
+            color: var(--success-color);
+        }
+
+        .metric-negative {
+            color: var(--danger-color);
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .order-type-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .order-type-btn {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .order-type-btn.active {
+            background-color: rgba(0, 201, 167, 0.1);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .trade-builder-container {
+                flex-direction: column;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="logo-text">Bentley-<span>Brand-dev</span></div>
+        </div>
+
+        <div class="nav-links">
+            <a href="{% url 'base' %}" class="nav-link"><i class="fas fa-home nav-icon"></i>Dashboard</a>
+            <a href="{% url 'notifications' %}" class="nav-link"><i class="fas fa-bell nav-icon"></i>Alerts</a>
+            <a href="{% url 'algo_trading_platform' %}" class="nav-link"><i class="fas fa-chart-bar nav-icon"></i>Analytics</a>
+            <a href="{% url 'settings' %}" class="nav-link"><i class="fas fa-cog nav-icon"></i>Settings</a>
+        </div>
+
+        <div class="user-menu">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-avatar">
+                {{ user.username|first|upper }}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>Trading Modules</h3>
+                <ul class="module-list">
+                    <li class="module-item">
+                        <a href="{% url 'strategy_lab' %}" class="module-link">
+                            <i class="fas fa-flask module-icon"></i> Strategy Lab
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trade_builder' %}" class="module-link active">
+                            <i class="fas fa-tools module-icon"></i> Trade Builder
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'market_blueprint' %}" class="module-link">
+                            <i class="fas fa-map module-icon"></i> Market Blueprint
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'advanced_trading_tools' %}" class="module-link">
+                            <i class="fas fa-chart-bar module-icon"></i> Advanced Trading Tools
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Development Tools</h3>
+                <ul class="module-list">
+                    <li class="module-item">
+                        <a href="{% url 'indicator_workshop' %}" class="module-link">
+                            <i class="fas fa-ruler-combined module-icon"></i> Indicator Workshop
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trading_toolkit' %}" class="module-link">
+                            <i class="fas fa-toolbox module-icon"></i> Trading Toolkit
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'backtest_center' %}" class="module-link">
+                            <i class="fas fa-history module-icon"></i> Backtest Center
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trade_development' %}" class="module-link">
+                            <i class="fas fa-code-branch module-icon"></i> Trade Development
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Trade Stats</h3>
+                <div class="card">
+                    <div class="card-content">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span>Active Trades</span>
+                            <strong>18</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span>AI Optimized</span>
+                            <strong>14/18</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span>Today's P&L</span>
+                            <strong style="color: var(--success-color);">+$2,415</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Win Rate</span>
+                            <strong style="color: var(--success-color);">76.3%</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Trade Builder</h1>
+                    <p class="page-subtitle">Construct complex multi-leg trading strategies with AI-powered risk management | March 18, 2026</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary"><i class="fas fa-plus"></i> New Trade</button>
+                    <button class="btn btn-outline"><i class="fas fa-robot"></i> AI Suggest</button>
+                </div>
+            </div>
+
+            <div class="trade-builder-container fade-in">
+                <div class="trade-config">
+                    <h3 style="margin-bottom: 1.5rem;">Trade Configuration</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Symbol</label>
+                            <input type="text" class="form-control" value="NVDA" placeholder="Enter symbol">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Account</label>
+                            <select class="form-control">
+                                <option>Quantum AI Account</option>
+                                <option>Main Trading Account</option>
+                                <option>Risk Hedging Account</option>
+                                <option>Experimental Strategies</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="order-type-selector">
+                        <div class="order-type-btn active">AI Market</div>
+                        <div class="order-type-btn">Smart Limit</div>
+                        <div class="order-type-btn">Adaptive Stop</div>
+                        <div class="order-type-btn">Quantum OCO</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Trade Name</label>
+                        <input type="text" class="form-control" placeholder="e.g., Bull Call Spread AAPL" value="AI Optimized NVDA Synthetic Long">
+                    </div>
+
+                    <h4 style="margin: 1.5rem 0 1rem 0;">Trade Legs</h4>
+
+                    <div class="leg-config">
+                        <div class="leg-header">
+                            <div class="leg-title">Leg 1: Buy Call (AI-Selected)</div>
+                            <button class="remove-leg"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Action</label>
+                                <select class="form-control">
+                                    <option selected>Buy</option>
+                                    <option>Sell</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Type</label>
+                                <select class="form-control">
+                                    <option selected>Call</option>
+                                    <option>Put</option>
+                                    <option>Stock</option>
+                                    <option>Future</option>
+                                    <option>Crypto Derivative</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Quantity</label>
+                                <input type="number" class="form-control" value="25">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Price</label>
+                                <input type="number" class="form-control" value="850.25">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="leg-config">
+                        <div class="leg-header">
+                            <div class="leg-title">Leg 2: Sell Put (Hedge)</div>
+                            <button class="remove-leg"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Action</label>
+                                <select class="form-control">
+                                    <option selected>Sell</option>
+                                    <option>Buy</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Type</label>
+                                <select class="form-control">
+                                    <option selected>Put</option>
+                                    <option>Call</option>
+                                    <option>Stock</option>
+                                    <option>Future</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Quantity</label>
+                                <input type="number" class="form-control" value="25">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Price</label>
+                                <input type="number" class="form-control" value="825.50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-outline" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-plus"></i> Add Leg
+                    </button>
+
+                    <div style="margin-top: 2rem;">
+                        <h4>AI Risk Management</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Smart Stop Loss</label>
+                                <input type="number" class="form-control" value="795.00" placeholder="AI-calculated stop">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Dynamic Take Profit</label>
+                                <input type="number" class="form-control" value="925.00" placeholder="AI target">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">AI Risk Score</label>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <input type="range" class="form-control" min="1" max="10" step="0.5" value="7.5">
+                                <span style="color: var(--success-color);">7.5/10 (Optimal)</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Max AI-Adjusted Risk %</label>
+                            <input type="range" class="form-control" min="0.5" max="10" step="0.5" value="1.8">
+                            <span>1.8% of account (AI Optimized)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trade-preview">
+                    <h3 style="margin-bottom: 1.5rem;">Trade Preview</h3>
+
+                    <div class="risk-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Max Profit</div>
+                            <div class="metric-value metric-positive">$18,750</div>
+                            <div class="metric-label">+22.1% AI Projected</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Max Loss</div>
+                            <div class="metric-value metric-negative">-$6,125</div>
+                            <div class="metric-label">-7.2% Protected</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">AI Confidence</div>
+                            <div class="metric-value">84%</div>
+                            <div class="metric-label">Success Probability</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Risk/Reward</div>
+                            <div class="metric-value">1:3.06</div>
+                            <div class="metric-label">AI Optimized Ratio</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <h4>AI Trade Analysis</h4>
+                        <div style="background-color: rgba(0, 0, 0, 0.02); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Strategy Type:</span>
+                                <strong>Synthetic Long (AI Enhanced)</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Net Cost:</span>
+                                <strong>$24.75 per position</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Expiration:</span>
+                                <strong>June 20, 2026</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Capital Required:</span>
+                                <strong>$21,256</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Market Sentiment:</span>
+                                <strong style="color: var(--success-color);">Bullish (78%)</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>AI Recommendation:</span>
+                                <strong style="color: var(--success-color);">Strong Entry</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2rem;">
+                        <h4>Profit/Loss Projection</h4>
+                        <div style="height: 200px; width: 100%; background-color: rgba(0, 0, 0, 0.02); border-radius: 8px; margin-top: 1rem; display: flex; align-items: center; justify-content: center; color: var(--text-light); position: relative;">
+                            <div style="text-align: center;">
+                                <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 1rem; color: var(--accent-color);"></i>
+                                <p>AI-Generated P&L Curve</p>
+                                <div style="position: absolute; top: 10px; right: 10px; font-size: 0.8em;">
+                                    <span class="status-indicator status-active">Live Analysis</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button class="btn btn-primary" style="flex: 1;">
+                            <i class="fas fa-paper-plane"></i> Execute AI Order
+                        </button>
+                        <button class="btn btn-secondary" style="flex: 1;">
+                            <i class="fas fa-brain"></i> AI Validate
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card fade-in" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Recent Trades</h3>
+                        <p>Your recently built and executed trades | Updated: Today, 14:45</p>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <span class="status-indicator status-active">
+                            <i class="fas fa-sync-alt fa-spin"></i> Live Updates
+                        </span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Trade Name</th>
+                                <th>Symbol</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>P&L</th>
+                                <th>AI Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Quantum Hedged TSLA</strong></td>
+                                <td>TSLA</td>
+                                <td>AI Options</td>
+                                <td>Today, 11:24</td>
+                                <td><span class="status-indicator status-active"><i class="fas fa-bolt"></i> Active</span></td>
+                                <td style="color: var(--success-color);"><strong>+$1,842.50</strong></td>
+                                <td>92/100</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Clone</button>
+                                    <button class="btn btn-primary btn-sm">Manage</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>AI Iron Condor SPY</td>
+                                <td>SPY</td>
+                                <td>AI Condor</td>
+                                <td>Mar 16, 2026</td>
+                                <td><span class="status-indicator status-active">Active</span></td>
+                                <td style="color: var(--success-color);">+$2,815.75</td>
+                                <td>88/100</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Clone</button>
+                                    <button class="btn btn-primary btn-sm">Manage</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Crypto Arbitrage ETH</td>
+                                <td>ETH/USD</td>
+                                <td>Crypto Spread</td>
+                                <td>Mar 14, 2026</td>
+                                <td><span class="status-indicator status-pending">Closed</span></td>
+                                <td style="color: var(--success-color);">+$5,127.25</td>
+                                <td>94/100</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Rebuild</button>
+                                    <button class="btn btn-primary btn-sm">AI Clone</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>NVDA Earnings Play</td>
+                                <td>NVDA</td>
+                                <td>Earnings Strangle</td>
+                                <td>Mar 10, 2026</td>
+                                <td><span class="status-indicator status-pending">Closed</span></td>
+                                <td style="color: var(--success-color);">+$8,452.50</td>
+                                <td>96/100</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Template</button>
+                                    <button class="btn btn-primary btn-sm">AI Clone</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Forex AI Hedge</td>
+                                <td>EUR/USD</td>
+                                <td>Forex AI</td>
+                                <td>Mar 8, 2026</td>
+                                <td><span class="status-indicator status-active">Active</span></td>
+                                <td style="color: var(--danger-color);">-$425.75</td>
+                                <td>76/100</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Adjust</button>
+                                    <button class="btn btn-primary btn-sm">AI Optimize</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <div style="color: var(--text-light); font-size: 0.9em;">
+                        <i class="fas fa-chart-line"></i> Total P&L (30d): <strong style="color: var(--success-color);">+$42,815.25</strong> | Win Rate: 78.4%
+                    </div>
+                    <button class="btn btn-outline">View All Trades</button>
+                </div>
+            </div>
+
+            <div class="dashboard-cards" style="margin-top: 2rem;">
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon" style="background-color: rgba(147, 51, 234, 0.1); color: #9333ea;">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div>
+                            <h3 class="card-title">AI Trade Suggestions</h3>
+                            <p>Based on current market conditions</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div style="margin-bottom: 1rem;">
+                            <strong>MSFT:</strong> AI detects earnings volatility opportunity
+                            <div style="margin-top: 0.5rem;">
+                                <span class="status-indicator status-active">Confidence: 89%</span>
+                                <span class="status-indicator" style="margin-left: 0.5rem; background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">Risk: Medium</span>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <strong>BTC/USD:</strong> Momentum breakout detected
+                            <div style="margin-top: 0.5rem;">
+                                <span class="status-indicator status-active">Confidence: 82%</span>
+                                <span class="status-indicator" style="margin-left: 0.5rem; background-color: rgba(245, 158, 11, 0.1); color: var(--warning-color);">Risk: High</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-outline">Build Suggested Trade</button>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="card-title">Risk Monitor</h3>
+                            <p>Portfolio risk assessment</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Portfolio VAR (1d):</span>
+                            <strong style="color: var(--warning-color);">-2.4%</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Max Drawdown:</span>
+                            <strong style="color: var(--success-color);">-3.8%</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Correlation Risk:</span>
+                            <strong style="color: var(--success-color);">Low</strong>
+                        </div>
+                        <div style="margin-top: 1rem; background-color: rgba(0, 201, 167, 0.1); padding: 0.5rem; border-radius: 6px;">
+                            <i class="fas fa-check-circle" style="color: var(--success-color);"></i> AI Risk Score: <strong>8.2/10</strong> (Optimal)
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-outline">Risk Report</button>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success-color);">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h3 class="card-title">Quick Templates</h3>
+                            <p>Pre-built AI strategies</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <button class="btn btn-outline btn-sm">AI Iron Condor</button>
+                            <button class="btn btn-outline btn-sm">Bull Call Spread</button>
+                            <button class="btn btn-outline btn-sm">Bear Put Spread</button>
+                            <button class="btn btn-outline btn-sm">Crypto Hedge</button>
+                            <button class="btn btn-outline btn-sm">Earnings Play</button>
+                            <button class="btn btn-outline btn-sm">Delta Neutral</button>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary">More Templates</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+
+            if (document.body.classList.contains('dark-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        });
+
+        // Order type selection
+        document.querySelectorAll('.order-type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.order-type-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Remove leg functionality
+        document.querySelectorAll('.remove-leg').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.leg-config').remove();
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop();
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const linkHref = link.getAttribute('href');
+                if (linkHref === currentPage ||
+                   (currentPage === '' && linkHref === 'index.html') ||
+                   (currentPage === 'index.html' && linkHref === 'index.html')) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            const moduleLinks = document.querySelectorAll('.module-link');
+            moduleLinks.forEach(link => {
+                const linkHref = link.getAttribute('href');
+                if (linkHref === currentPage) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Update real-time data
+            function updateRealTimeData() {
+                const date = new Date();
+                const options = { month: 'long', day: 'numeric', year: 'numeric' };
+                const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                // Update the subtitle with real-time info
+                const subtitle = document.querySelector('.page-subtitle');
+                if (subtitle) {
+                    subtitle.textContent = `Construct complex multi-leg trading strategies with AI-powered risk management | ${date.toLocaleDateString('en-US', options)} ${timeString}`;
+                }
+            }
+
+            // Update every minute
+            updateRealTimeData();
+            setInterval(updateRealTimeData, 60000);
+        });
+    </script>
+</body>
+</html>

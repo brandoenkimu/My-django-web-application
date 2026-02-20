@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DEPOSIT FUNDS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .payment-method-icon {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        .payment-details {
+            display: none;
+            margin-top: 15px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .amount-preset .btn {
+            transition: all 0.2s ease;
+        }
+
+        .amount-preset .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .amount-preset .btn-check:checked + .btn {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .card-icons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 25px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .payment-method-card {
+            border: 2px solid transparent;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .payment-method-card:hover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        .payment-method-card.selected {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+
+        .currency-flag {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .terms-box {
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background: #f8f9fa;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: #28a745;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-left: 10px;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #0d6efd;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .input-error {
+            border-color: #dc3545 !important;
+        }
+
+        .success-alert, .error-alert {
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="mt-3 text-primary" id="loadingMessage">Processing your payment...</div>
+    </div>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-header bg-primary text-white py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h2 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i> Deposit Funds</h2>
+                            <span class="security-badge">
+                                <i class="fas fa-lock"></i> Secure Payment
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <!-- Dynamic Alerts -->
+                        <div class="alert alert-success success-alert alert-dismissible fade show" role="alert" id="successAlert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span id="successMessage"></span>
+                            <button type="button" class="btn-close" onclick="hideAlert('successAlert')"></button>
+                        </div>
+
+                        <div class="alert alert-danger error-alert alert-dismissible fade show" role="alert" id="errorAlert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span id="errorMessage"></span>
+                            <button type="button" class="btn-close" onclick="hideAlert('errorAlert')"></button>
+                        </div>
+
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-2"></i>
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <!-- Form with AJAX submission -->
+                        <form id="depositForm" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <!-- Hidden fields for AJAX submission -->
+                            <input type="hidden" name="final_amount" id="finalAmount">
+                            <input type="hidden" name="payment_details" id="paymentDetails">
+                            <input type="hidden" name="payment_method_type" id="paymentMethodType">
+                            <input type="hidden" name="currency" id="hiddenCurrency">
+                            <input type="hidden" name="payment_method" id="hiddenPaymentMethod">
+
+                            <!-- Step 1: Amount -->
+                            <div class="step active" id="step1">
+                                <h4 class="mb-4"><span class="badge bg-primary me-2">1</span> Select Amount</h4>
+
+                                <!-- Currency Selection -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Currency</label>
+                                    <select class="form-select" id="currencySelect" required>
+                                        <option value="">Select Currency</option>
+                                        <option value="USD">USD - US Dollar</option>
+                                        <option value="EUR">EUR - Euro</option>
+                                        <option value="GBP">GBP - British Pound</option>
+                                        <option value="KES">KES - Kenyan Shilling</option>
+                                        <option value="CNY">CNY - Chinese Yuan</option>
+                                    </select>
+                                    <div class="form-text">Select your preferred currency for the deposit</div>
+                                    <div class="error-message" id="currencyError"></div>
+                                </div>
+
+                                <!-- Amount Presets -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold">Choose Amount</label>
+                                    <div class="row g-2">
+                                        <div class="col-6 col-sm-4 col-lg-3">
+                                            <input type="radio" class="btn-check amount-preset"
+                                                   name="amount_preset" id="amount_50" value="50">
+                                            <label class="btn btn-outline-primary w-100 py-3" for="amount_50" id="label_amount_50">
+                                                $50
+                                            </label>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-lg-3">
+                                            <input type="radio" class="btn-check amount-preset"
+                                                   name="amount_preset" id="amount_100" value="100">
+                                            <label class="btn btn-outline-primary w-100 py-3" for="amount_100" id="label_amount_100">
+                                                $100
+                                            </label>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-lg-3">
+                                            <input type="radio" class="btn-check amount-preset"
+                                                   name="amount_preset" id="amount_200" value="200">
+                                            <label class="btn btn-outline-primary w-100 py-3" for="amount_200" id="label_amount_200">
+                                                $200
+                                            </label>
+                                        </div>
+                                        <div class="col-6 col-sm-4 col-lg-3">
+                                            <input type="radio" class="btn-check amount-preset"
+                                                   name="amount_preset" id="amount_500" value="500">
+                                            <label class="btn btn-outline-primary w-100 py-3" for="amount_500" id="label_amount_500">
+                                                $500
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="error-message" id="amountPresetError"></div>
+                                </div>
+
+                                <!-- Custom Amount -->
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input type="radio" class="btn-check" name="amount_preset" id="amount_custom" value="custom">
+                                        <label class="form-check-label fw-bold" for="amount_custom">
+                                            Custom Amount
+                                        </label>
+                                    </div>
+                                    <div id="customAmountContainer" style="display: none;" class="mt-3">
+                                        <div class="input-group">
+                                            <span class="input-group-text" id="currencySymbol">$</span>
+                                            <input type="number" class="form-control" id="customAmount"
+                                                   placeholder="0.00"
+                                                   min="1" max="10000" step="0.01">
+                                            <span class="input-group-text" id="currencyCode">USD</span>
+                                        </div>
+                                        <div class="form-text">Enter amount between 1 and 10,000</div>
+                                        <div class="error-message" id="customAmountError"></div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-primary" onclick="validateStep1()">
+                                        Continue <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Payment Method -->
+                            <div class="step" id="step2">
+                                <h4 class="mb-4"><span class="badge bg-primary me-2">2</span> Select Payment Method</h4>
+
+                                <!-- Payment Method Cards -->
+                                <div class="row g-3" id="paymentMethodsContainer">
+                                    <div class="col-md-6">
+                                        <div class="payment-method-card" data-method="mpesa" data-type="mobile" onclick="selectPaymentMethod('mpesa', 'mobile')">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-success text-white rounded-circle p-2 me-3">
+                                                    <i class="fas fa-mobile-alt payment-method-icon"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">M-Pesa</h6>
+                                                    <small class="text-muted">Mobile Money</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="payment-method-card" data-method="paypal" data-type="gateway" onclick="selectPaymentMethod('paypal', 'gateway')">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary text-white rounded-circle p-2 me-3">
+                                                    <i class="fab fa-paypal payment-method-icon"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">PayPal</h6>
+                                                    <small class="text-muted">E-wallet & Cards</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="payment-method-card" data-method="alipay" data-type="gateway" onclick="selectPaymentMethod('alipay', 'gateway')">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-info text-white rounded-circle p-2 me-3">
+                                                    <i class="fab fa-alipay payment-method-icon"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">Alipay</h6>
+                                                    <small class="text-muted">Chinese Payments</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="payment-method-card" data-method="card" data-type="card" onclick="selectPaymentMethod('card', 'card')">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-danger text-white rounded-circle p-2 me-3">
+                                                    <i class="fas fa-credit-card payment-method-icon"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">Credit/Debit Card</h6>
+                                                    <small class="text-muted">Visa, MasterCard</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Method Specific Details -->
+                                <div id="mpesa-details" class="payment-details">
+                                    <h5><i class="fas fa-mobile-alt text-success me-2"></i> M-Pesa Details</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="mpesaPhone"
+                                               placeholder="2547XXXXXXXX"
+                                               pattern="^254[17]\d{8}$">
+                                        <div class="form-text">Enter your M-Pesa registered phone number (format: 2547XXXXXXXX)</div>
+                                        <div class="error-message" id="mpesaPhoneError"></div>
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        You will receive an STK Push prompt on your phone to complete the payment.
+                                    </div>
+                                </div>
+
+                                <div id="card-details" class="payment-details">
+                                    <h5><i class="fas fa-credit-card me-2"></i> Card Details</h5>
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">Card Number</label>
+                                            <input type="text" class="form-control" id="cardNumber"
+                                                   placeholder="1234 5678 9012 3456"
+                                                   maxlength="19">
+                                            <div class="card-icons">
+                                                <div class="card-icon">
+                                                    <i class="fab fa-cc-mastercard"></i>
+                                                </div>
+                                                <div class="card-icon">
+                                                    <i class="fab fa-cc-visa"></i>
+                                                </div>
+                                            </div>
+                                            <div class="error-message" id="cardNumberError"></div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Expiry Date</label>
+                                            <input type="text" class="form-control" id="cardExpiry"
+                                                   placeholder="MM/YY"
+                                                   maxlength="5">
+                                            <div class="error-message" id="cardExpiryError"></div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">CVV</label>
+                                            <input type="text" class="form-control" id="cardCvv"
+                                                   placeholder="123"
+                                                   maxlength="4">
+                                            <div class="error-message" id="cardCvvError"></div>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label class="form-label">Name on Card</label>
+                                            <input type="text" class="form-control" id="cardName"
+                                                   placeholder="John Doe">
+                                            <div class="error-message" id="cardNameError"></div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-lock me-2"></i>
+                                        Your card details are encrypted and securely processed. We never store your CVV.
+                                    </div>
+                                </div>
+
+                                <div id="paypal-details" class="payment-details">
+                                    <div class="alert alert-warning">
+                                        <i class="fab fa-paypal me-2"></i>
+                                        You will be redirected to PayPal to complete your payment securely.
+                                    </div>
+                                </div>
+
+                                <div id="alipay-details" class="payment-details">
+                                    <div class="alert alert-info">
+                                        <i class="fab fa-alipay me-2"></i>
+                                        You will be redirected to Alipay to complete your payment.
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="changeStep(1)">
+                                        <i class="fas fa-arrow-left me-2"></i> Back
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="validateStep2()">
+                                        Continue <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Review & Confirm -->
+                            <div class="step" id="step3">
+                                <h4 class="mb-4"><span class="badge bg-primary me-2">3</span> Review & Confirm</h4>
+
+                                <!-- Summary Card -->
+                                <div class="card border-primary mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0">Transaction Summary</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <th width="40%">Amount:</th>
+                                                        <td><span id="summaryAmount" class="fw-bold">$0.00</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Currency:</th>
+                                                        <td><span id="summaryCurrency">USD</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Payment Method:</th>
+                                                        <td><span id="summaryMethod">Not selected</span></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <table class="table table-borderless">
+                                                    <tr>
+                                                        <th width="40%">Fee:</th>
+                                                        <td><span id="summaryFee" class="text-success">$0.00</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Total:</th>
+                                                        <td><span id="summaryTotal" class="fw-bold fs-5">$0.00</span></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>Estimated Time:</th>
+                                                        <td><span id="summaryTime" class="badge bg-info">Instant</span></td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Terms and Conditions -->
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="termsAccepted" required>
+                                        <label class="form-check-label" for="termsAccepted">
+                                            I agree to the <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a> and
+                                            <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
+                                        </label>
+                                    </div>
+                                    <div class="error-message" id="termsError"></div>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="changeStep(2)">
+                                        <i class="fas fa-arrow-left me-2"></i> Back
+                                    </button>
+                                    <button type="button" class="btn btn-success btn-lg" onclick="submitDeposit()">
+                                        <i class="fas fa-lock me-2"></i> Confirm & Pay
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="card-footer bg-light">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <i class="fas fa-shield-alt text-primary fs-4 mb-2"></i>
+                                <h6>Bank-Level Security</h6>
+                                <small class="text-muted">256-bit SSL encryption</small>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <i class="fas fa-bolt text-warning fs-4 mb-2"></i>
+                                <h6>Instant Processing</h6>
+                                <small class="text-muted">Most deposits are instant</small>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <i class="fas fa-headset text-success fs-4 mb-2"></i>
+                                <h6>24/7 Support</h6>
+                                <small class="text-muted">We're here to help</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms & Conditions Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Terms and Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="terms-box">
+                        <h6>Deposit Terms & Conditions</h6>
+                        <p>By proceeding with this deposit, you agree to the following:</p>
+                        <ol>
+                            <li>All deposits are final and non-refundable.</li>
+                            <li>You must be the authorized owner of the payment method used.</li>
+                            <li>We reserve the right to verify your identity and payment method.</li>
+                            <li>Deposits may be subject to verification and processing time.</li>
+                            <li>Any fees charged by payment providers are your responsibility.</li>
+                            <li>We use secure encryption to protect your payment information.</li>
+                        </ol>
+                        <p>For questions, contact support@example.com</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Privacy Policy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="terms-box">
+                        <h6>Privacy Policy for Payments</h6>
+                        <p>We are committed to protecting your privacy:</p>
+                        <ul>
+                            <li>We never store your full card details (CVV, full card number).</li>
+                            <li>Payment information is encrypted using industry-standard SSL.</li>
+                            <li>We comply with PCI DSS standards for card payments.</li>
+                            <li>Your data is not shared with third parties except for payment processing.</li>
+                            <li>You have the right to request deletion of your personal data.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Current step tracking
+        let currentStep = 1;
+        let selectedPaymentMethod = '';
+
+        // Payment method mapping
+        const paymentMethods = {
+            'mpesa': {
+                name: 'M-Pesa',
+                icon: 'mobile-alt',
+                color: 'success',
+                time: '2-5 minutes'
+            },
+            'paypal': {
+                name: 'PayPal',
+                icon: 'paypal',
+                color: 'primary',
+                time: 'Instant'
+            },
+            'alipay': {
+                name: 'Alipay',
+                icon: 'alipay',
+                color: 'info',
+                time: 'Instant'
+            },
+            'card': {
+                name: 'Credit/Debit Card',
+                icon: 'credit-card',
+                color: 'danger',
+                time: 'Instant'
+            }
+        };
+
+        // Currency symbols and codes
+        const currencyData = {
+            'USD': { symbol: '$', code: 'USD', decimal: 2 },
+            'EUR': { symbol: '€', code: 'EUR', decimal: 2 },
+            'GBP': { symbol: '£', code: 'GBP', decimal: 2 },
+            'KES': { symbol: 'KSh', code: 'KES', decimal: 0 },
+            'CNY': { symbol: '¥', code: 'CNY', decimal: 2 }
+        };
+
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Show/hide alerts
+        function showAlert(type, message) {
+            hideAllAlerts();
+            if (type === 'success') {
+                document.getElementById('successMessage').textContent = message;
+                document.getElementById('successAlert').style.display = 'block';
+            } else {
+                document.getElementById('errorMessage').textContent = message;
+                document.getElementById('errorAlert').style.display = 'block';
+            }
+        }
+
+        function hideAlert(alertId) {
+            document.getElementById(alertId).style.display = 'none';
+        }
+
+        function hideAllAlerts() {
+            hideAlert('successAlert');
+            hideAlert('errorAlert');
+        }
+
+        // Clear all error messages
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+            });
+            document.querySelectorAll('.input-error').forEach(el => {
+                el.classList.remove('input-error');
+            });
+        }
+
+        // Show error on specific field
+        function showError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId + 'Error');
+            const inputEl = document.getElementById(fieldId);
+            if (errorEl) errorEl.textContent = message;
+            if (inputEl) inputEl.classList.add('input-error');
+        }
+
+        // Format card number
+        function formatCardNumber(input) {
+            let value = input.value.replace(/\D/g, '');
+            let formatted = '';
+
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formatted += ' ';
+                }
+                formatted += value[i];
+            }
+
+            input.value = formatted.substring(0, 19);
+        }
+
+        // Format expiry date
+        function formatExpiryDate(input) {
+            let value = input.value.replace(/\D/g, '');
+
+            if (value.length >= 2) {
+                input.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            } else {
+                input.value = value;
+            }
+        }
+
+        // Validate expiry date
+        function validateExpiryDate(value) {
+            if (!value.match(/^\d{2}\/\d{2}$/)) return false;
+
+            const [month, year] = value.split('/');
+            const expMonth = parseInt(month, 10);
+            const expYear = parseInt('20' + year, 10);
+
+            if (expMonth < 1 || expMonth > 12) return false;
+
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const currentMonth = currentDate.getMonth() + 1;
+
+            if (expYear < currentYear) return false;
+            if (expYear === currentYear && expMonth < currentMonth) return false;
+
+            return true;
+        }
+
+        // Update currency display
+        function updateCurrencyDisplay() {
+            const currency = document.getElementById('currencySelect').value;
+            const currencyInfo = currencyData[currency] || currencyData.USD;
+
+            // Update currency symbol and code
+            document.getElementById('currencySymbol').textContent = currencyInfo.symbol;
+            document.getElementById('currencyCode').textContent = currencyInfo.code;
+
+            // Update amount preset labels
+            document.querySelectorAll('.amount-preset').forEach(preset => {
+                const value = preset.value;
+                const label = document.getElementById(`label_amount_${value}`);
+                if (label) {
+                    label.textContent = `${currencyInfo.symbol}${value}`;
+                }
+            });
+
+            // Update custom amount placeholder
+            const customInput = document.getElementById('customAmount');
+            if (customInput) {
+                customInput.placeholder = `0.${'0'.repeat(currencyInfo.decimal)}`;
+            }
+
+            // Update summary
+            updateSummary();
+        }
+
+        // Toggle custom amount field
+        function toggleCustomAmount() {
+            const customChecked = document.getElementById('amount_custom').checked;
+            const customContainer = document.getElementById('customAmountContainer');
+
+            if (customChecked) {
+                customContainer.style.display = 'block';
+            } else {
+                customContainer.style.display = 'none';
+            }
+
+            updateSummary();
+        }
+
+        // Select payment method
+        function selectPaymentMethod(method, type) {
+            clearErrors();
+            selectedPaymentMethod = method;
+
+            // Update selected card
+            document.querySelectorAll('.payment-method-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            const selectedCard = document.querySelector(`[data-method="${method}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+
+            // Update hidden field
+            document.getElementById('paymentMethodType').value = type;
+
+            // Show appropriate payment details
+            togglePaymentDetails();
+        }
+
+        // Toggle payment details based on selected method
+        function togglePaymentDetails() {
+            const paymentMethod = selectedPaymentMethod;
+
+            // Hide all payment details
+            document.querySelectorAll('.payment-details').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            // Show selected payment method details
+            if (paymentMethod === 'mpesa') {
+                document.getElementById('mpesa-details').style.display = 'block';
+            } else if (paymentMethod === 'paypal') {
+                document.getElementById('paypal-details').style.display = 'block';
+            } else if (paymentMethod === 'alipay') {
+                document.getElementById('alipay-details').style.display = 'block';
+            } else if (paymentMethod === 'card') {
+                document.getElementById('card-details').style.display = 'block';
+            }
+
+            updateSummary();
+        }
+
+        // Update transaction summary
+        function updateSummary() {
+            // Get amount
+            let amount = 0;
+            const selectedAmount = document.querySelector('input[name="amount_preset"]:checked');
+
+            if (selectedAmount) {
+                if (selectedAmount.value === 'custom') {
+                    const customAmount = document.getElementById('customAmount').value;
+                    amount = parseFloat(customAmount) || 0;
+                } else {
+                    amount = parseFloat(selectedAmount.value) || 0;
+                }
+            }
+
+            // Get currency
+            const currency = document.getElementById('currencySelect').value;
+            const currencyInfo = currencyData[currency] || currencyData.USD;
+
+            // Get payment method
+            const paymentMethod = selectedPaymentMethod;
+            const methodInfo = paymentMethods[paymentMethod] || { name: 'Not selected', time: '--' };
+
+            // Calculate fee (example: 2.9% + fixed fee)
+            let fee = 0;
+            if (paymentMethod === 'card') {
+                fee = (amount * 0.029) + (currency === 'KES' ? 30 : 0.30);
+            } else if (paymentMethod === 'paypal') {
+                fee = amount * 0.029;
+            } else if (paymentMethod === 'mpesa') {
+                fee = Math.min(amount * 0.01, 100); // Max fee of 100 KES
+            }
+            fee = Math.max(fee, 0);
+
+            // Format with correct decimal places
+            const decimalPlaces = currencyInfo.decimal;
+
+            // Calculate total
+            const total = amount + fee;
+
+            // Update summary display
+            document.getElementById('summaryAmount').textContent =
+                `${currencyInfo.symbol}${amount.toFixed(decimalPlaces)}`;
+            document.getElementById('summaryCurrency').textContent = currency;
+            document.getElementById('summaryMethod').textContent = methodInfo.name;
+            document.getElementById('summaryFee').textContent =
+                `${currencyInfo.symbol}${fee.toFixed(decimalPlaces)}`;
+            document.getElementById('summaryTotal').textContent =
+                `${currencyInfo.symbol}${total.toFixed(decimalPlaces)}`;
+            document.getElementById('summaryTime').textContent = methodInfo.time;
+
+            // Set hidden fields for submission
+            document.getElementById('finalAmount').value = total.toFixed(decimalPlaces);
+            document.getElementById('hiddenCurrency').value = currency;
+            document.getElementById('hiddenPaymentMethod').value = paymentMethod;
+
+            // Build payment details
+            const paymentDetails = {
+                amount: amount.toFixed(decimalPlaces),
+                currency: currency,
+                payment_method: paymentMethod,
+                fee: fee.toFixed(decimalPlaces),
+                total: total.toFixed(decimalPlaces),
+                timestamp: new Date().toISOString()
+            };
+
+            // Add payment-specific details
+            if (paymentMethod === 'mpesa') {
+                const phone = document.getElementById('mpesaPhone').value;
+                if (phone) {
+                    paymentDetails.phone_number = phone;
+                }
+            } else if (paymentMethod === 'card') {
+                const cardNumber = document.getElementById('cardNumber').value;
+                if (cardNumber) {
+                    paymentDetails.card_last_four = cardNumber.slice(-4);
+                    paymentDetails.card_name = document.getElementById('cardName').value || '';
+                }
+            }
+
+            document.getElementById('paymentDetails').value = JSON.stringify(paymentDetails);
+        }
+
+        // Validate Step 1
+        function validateStep1() {
+            clearErrors();
+            let isValid = true;
+
+            // Validate currency
+            const currency = document.getElementById('currencySelect').value;
+            if (!currency) {
+                showError('currency', 'Please select a currency');
+                isValid = false;
+            }
+
+            // Validate amount
+            const selectedAmount = document.querySelector('input[name="amount_preset"]:checked');
+            if (!selectedAmount) {
+                showError('amountPreset', 'Please select an amount');
+                isValid = false;
+            } else if (selectedAmount.value === 'custom') {
+                const customAmount = document.getElementById('customAmount').value;
+                if (!customAmount || parseFloat(customAmount) < 1 || parseFloat(customAmount) > 10000) {
+                    showError('customAmount', 'Please enter a valid amount between 1 and 10,000');
+                    isValid = false;
+                }
+            }
+
+            if (isValid) {
+                changeStep(2);
+            }
+        }
+
+        // Validate Step 2
+        function validateStep2() {
+            clearErrors();
+            let isValid = true;
+
+            // Validate payment method
+            if (!selectedPaymentMethod) {
+                alert('Please select a payment method');
+                isValid = false;
+                return;
+            }
+
+            // Validate payment details
+            if (selectedPaymentMethod === 'mpesa') {
+                const phone = document.getElementById('mpesaPhone').value;
+                if (!phone || !phone.match(/^254[17]\d{8}$/)) {
+                    showError('mpesaPhone', 'Please enter a valid M-Pesa phone number (2547XXXXXXXX)');
+                    isValid = false;
+                }
+            } else if (selectedPaymentMethod === 'card') {
+                const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+                const expiry = document.getElementById('cardExpiry').value;
+                const cvv = document.getElementById('cardCvv').value;
+                const name = document.getElementById('cardName').value;
+
+                if (!cardNumber || cardNumber.length < 15 || cardNumber.length > 16) {
+                    showError('cardNumber', 'Please enter a valid card number (15-16 digits)');
+                    isValid = false;
+                }
+
+                if (!validateExpiryDate(expiry)) {
+                    showError('cardExpiry', 'Please enter a valid expiry date (MM/YY)');
+                    isValid = false;
+                }
+
+                if (!cvv || !cvv.match(/^\d{3,4}$/)) {
+                    showError('cardCvv', 'Please enter a valid CVV (3-4 digits)');
+                    isValid = false;
+                }
+
+                if (!name || name.trim().length < 2) {
+                    showError('cardName', 'Please enter the name on card');
+                    isValid = false;
+                }
+            }
+
+            if (isValid) {
+                changeStep(3);
+            }
+        }
+
+        // Step navigation
+        function changeStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show target step
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+
+            // Update summary for step 3
+            if (step === 3) {
+                updateSummary();
+            }
+        }
+
+        // Submit deposit via AJAX
+        async function submitDeposit() {
+            clearErrors();
+            hideAllAlerts();
+
+            // Validate terms accepted
+            const termsAccepted = document.getElementById('termsAccepted').checked;
+            if (!termsAccepted) {
+                showError('terms', 'You must accept the terms and conditions');
+                return false;
+            }
+
+            // Validate final amount
+            const finalAmount = document.getElementById('finalAmount').value;
+            if (!finalAmount || parseFloat(finalAmount) <= 0) {
+                alert('Please complete all steps before submitting');
+                return false;
+            }
+
+            // Show loading overlay
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('loadingMessage').textContent = 'Processing your payment...';
+
+            try {
+                // Prepare data for submission
+                const formData = {
+                    currency: document.getElementById('hiddenCurrency').value,
+                    payment_method: document.getElementById('hiddenPaymentMethod').value,
+                    final_amount: finalAmount,
+                    payment_details: document.getElementById('paymentDetails').value,
+                    payment_method_type: document.getElementById('paymentMethodType').value,
+                    terms_accepted: termsAccepted ? 'true' : 'false',
+                    csrfmiddlewaretoken: getCookie('csrftoken')
+                };
+
+                // Add payment-specific data
+                if (selectedPaymentMethod === 'mpesa') {
+                    formData.mpesa_phone = document.getElementById('mpesaPhone').value;
+                } else if (selectedPaymentMethod === 'card') {
+                    formData.card_number = document.getElementById('cardNumber').value;
+                    formData.card_expiry = document.getElementById('cardExpiry').value;
+                    formData.card_cvv = document.getElementById('cardCvv').value;
+                    formData.card_name = document.getElementById('cardName').value;
+                }
+
+                // Send AJAX request
+                const response = await fetch('{% url "deposit" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams(formData)
+                });
+
+                const result = await response.json();
+
+                // Hide loading overlay
+                document.getElementById('loadingOverlay').style.display = 'none';
+
+                if (result.success) {
+                    showAlert('success', result.message || 'Deposit initiated successfully!');
+
+                    // Redirect to transactions page after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = result.redirect_url || '/transactions/';
+                    }, 2000);
+                } else {
+                    showAlert('error', result.error || 'Deposit failed. Please try again.');
+
+                    // If there are specific form errors
+                    if (result.errors) {
+                        for (const field in result.errors) {
+                            showError(field, result.errors[field][0]);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showAlert('error', 'An error occurred. Please try again.');
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up event listeners
+            document.getElementById('currencySelect').addEventListener('change', function() {
+                clearErrors();
+                updateCurrencyDisplay();
+            });
+
+            // Amount preset event listeners
+            document.querySelectorAll('input[name="amount_preset"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    clearErrors();
+                    toggleCustomAmount();
+                    updateSummary();
+                });
+            });
+
+            // Custom amount event listener
+            document.getElementById('customAmount')?.addEventListener('input', function() {
+                clearErrors();
+                updateSummary();
+            });
+
+            // Card input formatting
+            document.getElementById('cardNumber')?.addEventListener('input', function() {
+                clearErrors();
+                formatCardNumber(this);
+                updateSummary();
+            });
+
+            document.getElementById('cardExpiry')?.addEventListener('input', function() {
+                clearErrors();
+                formatExpiryDate(this);
+            });
+
+            // Input validation on blur
+            document.getElementById('mpesaPhone')?.addEventListener('blur', function() {
+                if (this.value && !this.value.match(/^254[17]\d{8}$/)) {
+                    showError('mpesaPhone', 'Invalid M-Pesa phone number format');
+                }
+            });
+
+            // Auto-select first payment method
+            selectPaymentMethod('mpesa', 'mobile');
+
+            // Initialize currency display
+            updateCurrencyDisplay();
+        });
+    </script>
+</body>
+</html>

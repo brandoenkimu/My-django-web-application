@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backtest Center | Bentley-Brand-dev</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base styles remain the same as template */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2d6bc9;
+            --accent-color: #00c9a7;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --backtest-blue: #3b82f6;
+            --backtest-purple: #8b5cf6;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dark-mode {
+            --light-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-dark: #f1f5f9;
+            --text-light: #94a3b8;
+            --border-color: #334155;
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-text span {
+            color: var(--accent-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-icon {
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar-section h3 {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+
+        .module-list {
+            list-style: none;
+        }
+
+        .module-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .module-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .module-link:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+            color: var(--accent-color);
+        }
+
+        .module-link.active {
+            background-color: rgba(0, 201, 167, 0.15);
+            color: var(--accent-color);
+            font-weight: 600;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .module-icon {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        /* Backtest Center specific styles */
+        .backtest-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .configuration-panel {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .results-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .chart-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            height: 400px;
+            position: relative;
+        }
+
+        .chart-placeholder {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        .chart-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .metrics-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric-card {
+            text-align: center;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .strategy-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .strategy-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .strategy-item:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+        }
+
+        .strategy-item.active {
+            background-color: rgba(0, 201, 167, 0.15);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .strategy-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .strategy-stats {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #00b397;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #265cbb;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .tool-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .progress-container {
+            margin-top: 1rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+        .trade-log {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            margin-top: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-header {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .log-item {
+            padding: 0.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.85rem;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .log-profit {
+            color: var(--success-color);
+        }
+
+        .log-loss {
+            color: var(--danger-color);
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .comparison-item {
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .backtest-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="logo-text">Bentley-<span>Brand-dev</span></div>
+        </div>
+
+        <div class="nav-links">
+            <a href="{% url 'base' %}" class="nav-link"><i class="fas fa-home nav-icon"></i>Dashboard</a>
+            <a href="{% url 'notifications' %}" class="nav-link"><i class="fas fa-bell nav-icon"></i>Alerts</a>
+            <a href="{% url 'algo_trading_platform' %}" class="nav-link"><i class="fas fa-chart-bar nav-icon"></i>Analytics</a>
+            <a href="{% url 'settings' %}" class="nav-link"><i class="fas fa-cog nav-icon"></i>Settings</a>
+        </div>
+
+        <div class="user-menu">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-avatar">
+                {{ user.username|first|upper }}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>Trading Modules</h3>
+                <ul class="module-list">
+                    <li class="module-item">
+                        <a href="{% url 'strategy_lab' %}" class="module-link">
+                            <i class="fas fa-flask module-icon"></i> Strategy Lab
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trade_builder' %}" class="module-link">
+                            <i class="fas fa-tools module-icon"></i> Trade Builder
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="m{% url 'market_blueprint' %}" class="module-link">
+                            <i class="fas fa-map module-icon"></i> Market Blueprint
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'advanced_trading_tools' %}" class="module-link">
+                            <i class="fas fa-chart-bar module-icon"></i> Advanced Trading Tools
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Development Tools</h3>
+                <ul class="module-list">
+                    <li class="module-item">
+                        <a href="{% url 'indicator_workshop' %}" class="module-link">
+                            <i class="fas fa-ruler-combined module-icon"></i> Indicator Workshop
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trading_toolkit' %}" class="module-link">
+                            <i class="fas fa-toolbox module-icon"></i> Trade Toolkit
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'backtest_center' %}" class="module-link active">
+                            <i class="fas fa-history module-icon"></i> Backtest Center
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trade_development' %}" class="module-link">
+                            <i class="fas fa-code-branch module-icon"></i> Trading Development
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Backtest Quick Access</h3>
+                <div class="card">
+                    <div class="card-content">
+                        <div style="margin-bottom: 1rem;">
+                            <button class="btn btn-primary btn-sm" style="width: 100%; margin-bottom: 0.5rem;" id="quickBacktest">
+                                <i class="fas fa-play"></i> Quick Backtest
+                            </button>
+                            <button class="btn btn-outline btn-sm" style="width: 100%;" id="loadTemplate">
+                                <i class="fas fa-folder-open"></i> Load Template
+                            </button>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                            <span><i class="fas fa-history"></i> Historical Data:</span>
+                            <strong style="color: var(--success-color);">10 Years</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <span><i class="fas fa-robot"></i> AI Accuracy:</span>
+                            <strong style="color: var(--success-color);">92%</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Backtest Center</h1>
+                    <p class="page-subtitle">Test trading strategies with historical data | AI-powered analysis and optimization</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" id="runBacktestBtn"><i class="fas fa-play"></i> Run Backtest</button>
+                    <button class="btn btn-outline"><i class="fas fa-download"></i> Export Results</button>
+                </div>
+            </div>
+
+            <div class="backtest-container fade-in">
+                <!-- Configuration Panel -->
+                <div class="configuration-panel">
+                    <h3 style="margin-bottom: 1rem;">Backtest Configuration</h3>
+
+                    <div class="form-group">
+                        <label class="form-label">Strategy Selection</label>
+                        <div class="strategy-list">
+                            <div class="strategy-item active">
+                                <div class="strategy-name">Moving Average Crossover</div>
+                                <div class="strategy-stats">Win Rate: 58% | Sharpe: 1.2</div>
+                            </div>
+                            <div class="strategy-item">
+                                <div class="strategy-name">RSI Mean Reversion</div>
+                                <div class="strategy-stats">Win Rate: 62% | Sharpe: 1.5</div>
+                            </div>
+                            <div class="strategy-item">
+                                <div class="strategy-name">Bollinger Breakout</div>
+                                <div class="strategy-stats">Win Rate: 55% | Sharpe: 0.9</div>
+                            </div>
+                            <div class="strategy-item">
+                                <div class="strategy-name">AI Neural Network</div>
+                                <div class="strategy-stats">Win Rate: 68% | Sharpe: 2.1</div>
+                            </div>
+                            <div class="strategy-item">
+                                <div class="strategy-name">Quantum Momentum</div>
+                                <div class="strategy-stats">Win Rate: 71% | Sharpe: 2.4</div>
+                            </div>
+                            <div class="strategy-item">
+                                <div class="strategy-name">Custom Strategy #1</div>
+                                <div class="strategy-stats">Win Rate: 52% | Sharpe: 0.8</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Asset Selection</label>
+                        <select class="form-control" id="assetSelect">
+                            <option selected>SPX (S&P 500 Index)</option>
+                            <option>NDX (NASDAQ 100)</option>
+                            <option>BTC/USD (Bitcoin)</option>
+                            <option>ETH/USD (Ethereum)</option>
+                            <option>Gold Futures</option>
+                            <option>Oil Futures</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="startDate" value="2024-01-01">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="endDate" value="2026-01-20">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Initial Capital ($)</label>
+                        <input type="number" class="form-control" id="initialCapital" value="100000" step="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Commission per Trade ($)</label>
+                        <input type="number" class="form-control" id="commission" value="5.95" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Slippage (%)</label>
+                        <input type="number" class="form-control" id="slippage" value="0.1" step="0.01" min="0" max="1">
+                    </div>
+
+                    <div class="progress-container" id="progressContainer" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">Initializing backtest...</div>
+                    </div>
+
+                    <div class="tool-actions">
+                        <button class="btn btn-primary" id="startBacktestBtn">
+                            <i class="fas fa-play"></i> Start Backtest
+                        </button>
+                        <button class="btn btn-outline" id="optimizeBtn">
+                            <i class="fas fa-cog"></i> Optimize Parameters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="results-panel">
+                    <!-- Performance Chart -->
+                    <div class="chart-container">
+                        <div class="chart-placeholder" id="chartPlaceholder">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Backtest Performance</h3>
+                            <p>Run a backtest to see performance visualization</p>
+                            <div style="margin-top: 1rem;">
+                                <button class="btn btn-sm btn-primary" id="loadSampleBtn">
+                                    <i class="fas fa-chart-bar"></i> Load Sample Results
+                                </button>
+                            </div>
+                        </div>
+                        <div id="chartResults" style="display: none; height: 100%;">
+                            <!-- Chart would be implemented with Chart.js in production -->
+                            <div style="height: 100%; display: flex; flex-direction: column;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                    <h4>Equity Curve: Moving Average Crossover</h4>
+                                    <div style="color: var(--success-color); font-weight: 600;">+24.8% Total Return</div>
+                                </div>
+                                <div style="flex: 1; background: linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 100%); position: relative;">
+                                    <!-- Simulated equity curve -->
+                                    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 80%; background: linear-gradient(90deg, rgba(0,201,167,0.1) 0%, rgba(0,201,167,0.2) 100%); border-radius: 4px;"></div>
+                                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60%; background: linear-gradient(90deg, rgba(59,130,246,0.1) 0%, rgba(59,130,246,0.2) 100%); border-radius: 4px;"></div>
+                                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 40%; background: linear-gradient(90deg, rgba(147,51,234,0.1) 0%, rgba(147,51,234,0.2) 100%); border-radius: 4px;"></div>
+
+                                    <!-- Timeline markers -->
+                                    <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 1px; background-color: var(--border-color);"></div>
+                                    <div style="position: absolute; bottom: 0; left: 0%; transform: translateX(-50%);">Jan 2024</div>
+                                    <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);">Jan 2025</div>
+                                    <div style="position: absolute; bottom: 0; left: 100%; transform: translateX(-50%);">Jan 2026</div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-light);">
+                                    <span>Strategy</span>
+                                    <span>Buy & Hold</span>
+                                    <span>Benchmark</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Metrics -->
+                    <div class="metrics-container">
+                        <h3 style="margin-bottom: 1rem;">Performance Metrics</h3>
+                        <div class="metrics-grid" id="metricsGrid">
+                            <div class="metric-card">
+                                <div class="metric-label">Total Return</div>
+                                <div class="metric-value" id="metricReturn" style="color: var(--success-color);">+24.8%</div>
+                                <div class="metric-label">Strategy Performance</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Sharpe Ratio</div>
+                                <div class="metric-value" id="metricSharpe">1.42</div>
+                                <div class="metric-label">Risk-Adjusted Return</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Max Drawdown</div>
+                                <div class="metric-value" id="metricDrawdown" style="color: var(--danger-color);">-12.4%</div>
+                                <div class="metric-label">Worst Loss</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Win Rate</div>
+                                <div class="metric-value" id="metricWinRate">58.2%</div>
+                                <div class="metric-label">Profitable Trades</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Profit Factor</div>
+                                <div class="metric-value" id="metricProfitFactor">1.65</div>
+                                <div class="metric-label">Gross Profit/Loss</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Total Trades</div>
+                                <div class="metric-value" id="metricTotalTrades">142</div>
+                                <div class="metric-label">Executed Trades</div>
+                            </div>
+                        </div>
+
+                        <div class="comparison-container" style="margin-top: 1.5rem;">
+                            <div class="comparison-item">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem;">Strategy vs Buy & Hold</div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                    <span>Strategy Return:</span>
+                                    <strong style="color: var(--success-color);">+24.8%</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                    <span>Buy & Hold:</span>
+                                    <strong style="color: var(--warning-color);">+18.2%</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Outperformance:</span>
+                                    <strong style="color: var(--success-color);">+6.6%</strong>
+                                </div>
+                            </div>
+                            <div class="comparison-item">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem;">AI Analysis</div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                    <span>AI Confidence:</span>
+                                    <strong style="color: var(--success-color);">85%</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                                    <span>Recommended Action:</span>
+                                    <strong style="color: var(--success-color);">DEPLOY</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span>Optimization Score:</span>
+                                    <strong style="color: var(--success-color);">7.8/10</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trade Log -->
+                    <div class="trade-log">
+                        <div class="log-header">Recent Trades</div>
+                        <div id="tradeLogContent">
+                            <div class="log-item">
+                                <span style="color: var(--text-light);">2026-01-15 14:30</span> |
+                                <strong>BUY</strong> SPX @ 4,250.50 |
+                                <span class="log-profit">Exit: 4,280.25 (+0.70%)</span>
+                            </div>
+                            <div class="log-item">
+                                <span style="color: var(--text-light);">2026-01-12 11:15</span> |
+                                <strong>SELL</strong> SPX @ 4,230.75 |
+                                <span class="log-loss">Exit: 4,225.50 (-0.12%)</span>
+                            </div>
+                            <div class="log-item">
+                                <span style="color: var(--text-light);">2026-01-10 09:45</span> |
+                                <strong>BUY</strong> SPX @ 4,210.25 |
+                                <span class="log-profit">Exit: 4,245.80 (+0.84%)</span>
+                            </div>
+                            <div class="log-item">
+                                <span style="color: var(--text-light);">2026-01-08 16:20</span> |
+                                <strong>SELL</strong> SPX @ 4,195.50 |
+                                <span class="log-profit">Exit: 4,180.25 (+0.36%)</span>
+                            </div>
+                            <div class="log-item">
+                                <span style="color: var(--text-light);">2026-01-05 13:10</span> |
+                                <strong>BUY</strong> SPX @ 4,180.75 |
+                                <span class="log-profit">Exit: 4,210.50 (+0.71%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Backtest Features -->
+            <div class="metrics-container fade-in" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Advanced Backtest Features</h3>
+                <div class="comparison-container">
+                    <div class="comparison-item">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="background-color: rgba(147, 51, 234, 0.1); color: #9333ea; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-atom"></i>
+                            </div>
+                            <div>
+                                <strong>Quantum Backtesting</strong>
+                                <div style="font-size: 0.85rem; color: var(--text-light);">Test across multiple timelines</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" style="width: 100%;">Enable Quantum Mode</button>
+                    </div>
+
+                    <div class="comparison-item">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div>
+                                <strong>AI Parameter Optimization</strong>
+                                <div style="font-size: 0.85rem; color: var(--text-light);">Find optimal strategy parameters</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" style="width: 100%;">Run AI Optimization</button>
+                    </div>
+
+                    <div class="comparison-item">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="background-color: rgba(16, 185, 129, 0.1); color: var(--success-color); width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-chart-network"></i>
+                            </div>
+                            <div>
+                                <strong>Monte Carlo Simulation</strong>
+                                <div style="font-size: 0.85rem; color: var(--text-light);">10,000+ random walk tests</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" style="width: 100%;">Run Simulation</button>
+                    </div>
+
+                    <div class="comparison-item">
+                        <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                            <div style="background-color: rgba(245, 158, 11, 0.1); color: var(--warning-color); width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <strong>Walk-Forward Analysis</strong>
+                                <div style="font-size: 0.85rem; color: var(--text-light);">Test strategy robustness</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" style="width: 100%;">Analyze</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+
+            if (document.body.classList.contains('dark-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+
+        // Strategy selection
+        const strategyItems = document.querySelectorAll('.strategy-item');
+        strategyItems.forEach(item => {
+            item.addEventListener('click', function() {
+                strategyItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Backtest simulation
+        const startBacktestBtn = document.getElementById('startBacktestBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const chartPlaceholder = document.getElementById('chartPlaceholder');
+        const chartResults = document.getElementById('chartResults');
+        const loadSampleBtn = document.getElementById('loadSampleBtn');
+
+        let isBacktesting = false;
+
+        function simulateBacktest() {
+            if (isBacktesting) return;
+
+            isBacktesting = true;
+            progressContainer.style.display = 'block';
+            startBacktestBtn.disabled = true;
+            startBacktestBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Running...';
+
+            // Get configuration values
+            const strategy = document.querySelector('.strategy-item.active .strategy-name').textContent;
+            const asset = document.getElementById('assetSelect').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const capital = document.getElementById('initialCapital').value;
+
+            // Simulate progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 100) progress = 100;
+
+                progressFill.style.width = progress + '%';
+
+                if (progress < 30) {
+                    progressText.textContent = 'Loading historical data...';
+                } else if (progress < 60) {
+                    progressText.textContent = 'Executing trades...';
+                } else if (progress < 90) {
+                    progressText.textContent = 'Calculating metrics...';
+                } else {
+                    progressText.textContent = 'Generating report...';
+                }
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+
+                    // Show results
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        chartPlaceholder.style.display = 'none';
+                        chartResults.style.display = 'block';
+
+                        // Update metrics based on strategy
+                        updateBacktestResults(strategy, asset);
+
+                        // Reset button
+                        startBacktestBtn.disabled = false;
+                        startBacktestBtn.innerHTML = '<i class="fas fa-play"></i> Start Backtest';
+                        isBacktesting = false;
+                    }, 500);
+                }
+            }, 100);
+        }
+
+        function updateBacktestResults(strategy, asset) {
+            // Generate results based on strategy and asset
+            let metrics;
+
+            if (strategy.includes('AI Neural') || strategy.includes('Quantum')) {
+                metrics = {
+                    return: (Math.random() * 30 + 15).toFixed(1),
+                    sharpe: (Math.random() * 1.5 + 1.5).toFixed(2),
+                    drawdown: (Math.random() * 10 + 8).toFixed(1),
+                    winRate: (Math.random() * 15 + 60).toFixed(1),
+                    profitFactor: (Math.random() * 1 + 1.5).toFixed(2),
+                    totalTrades: Math.floor(Math.random() * 100 + 100)
+                };
+            } else if (strategy.includes('RSI')) {
+                metrics = {
+                    return: (Math.random() * 20 + 10).toFixed(1),
+                    sharpe: (Math.random() * 1 + 1.2).toFixed(2),
+                    drawdown: (Math.random() * 8 + 6).toFixed(1),
+                    winRate: (Math.random() * 10 + 55).toFixed(1),
+                    profitFactor: (Math.random() * 0.8 + 1.2).toFixed(2),
+                    totalTrades: Math.floor(Math.random() * 80 + 80)
+                };
+            } else {
+                metrics = {
+                    return: (Math.random() * 15 + 5).toFixed(1),
+                    sharpe: (Math.random() * 0.8 + 0.8).toFixed(2),
+                    drawdown: (Math.random() * 12 + 10).toFixed(1),
+                    winRate: (Math.random() * 15 + 45).toFixed(1),
+                    profitFactor: (Math.random() * 0.6 + 1).toFixed(2),
+                    totalTrades: Math.floor(Math.random() * 60 + 60)
+                };
+            }
+
+            // Update metric displays
+            document.getElementById('metricReturn').textContent = `+${metrics.return}%`;
+            document.getElementById('metricReturn').style.color = 'var(--success-color)';
+            document.getElementById('metricSharpe').textContent = metrics.sharpe;
+            document.getElementById('metricDrawdown').textContent = `-${metrics.drawdown}%`;
+            document.getElementById('metricWinRate').textContent = `${metrics.winRate}%`;
+            document.getElementById('metricProfitFactor').textContent = metrics.profitFactor;
+            document.getElementById('metricTotalTrades').textContent = metrics.totalTrades;
+
+            // Update comparison
+            const buyHoldReturn = (parseFloat(metrics.return) - (Math.random() * 10)).toFixed(1);
+            document.querySelector('.comparison-item:first-child strong:nth-child(2)').textContent = `+${buyHoldReturn}%`;
+
+            const outperformance = (parseFloat(metrics.return) - parseFloat(buyHoldReturn)).toFixed(1);
+            document.querySelector('.comparison-item:first-child strong:last-child').textContent = `+${outperformance}%`;
+
+            // Update AI confidence
+            const aiConfidence = Math.min(95, Math.max(70, parseFloat(metrics.winRate) + 10)).toFixed(0);
+            document.querySelectorAll('.comparison-item')[1].querySelectorAll('strong')[0].textContent = `${aiConfidence}%`;
+
+            // Generate trade log
+            const tradeLog = document.getElementById('tradeLogContent');
+            tradeLog.innerHTML = '';
+
+            const today = new Date();
+            for (let i = 0; i < 5; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() - i * 2);
+
+                const isBuy = Math.random() > 0.5;
+                const price = (Math.random() * 200 + 4200).toFixed(2);
+                const exitPrice = isBuy ? (parseFloat(price) * (1 + Math.random() * 0.02)).toFixed(2) :
+                                         (parseFloat(price) * (1 - Math.random() * 0.01)).toFixed(2);
+                const profit = ((exitPrice / price - 1) * 100 * (isBuy ? 1 : -1)).toFixed(2);
+                const isProfit = parseFloat(profit) > 0;
+
+                const logItem = document.createElement('div');
+                logItem.className = 'log-item';
+                logItem.innerHTML = `
+                    <span style="color: var(--text-light);">${date.toISOString().split('T')[0]} ${Math.floor(Math.random() * 8 + 9)}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}</span> |
+                    <strong>${isBuy ? 'BUY' : 'SELL'}</strong> ${asset.split(' ')[0]} @ ${price} |
+                    <span class="${isProfit ? 'log-profit' : 'log-loss'}">Exit: ${exitPrice} (${profit > 0 ? '+' : ''}${profit}%)</span>
+                `;
+
+                tradeLog.appendChild(logItem);
+            }
+        }
+
+        // Event listeners
+        startBacktestBtn.addEventListener('click', simulateBacktest);
+
+        loadSampleBtn.addEventListener('click', function() {
+            chartPlaceholder.style.display = 'none';
+            chartResults.style.display = 'block';
+            updateBacktestResults('Moving Average Crossover', 'SPX (S&P 500 Index)');
+        });
+
+        // Quick backtest button
+        document.getElementById('quickBacktest').addEventListener('click', function() {
+            // Set quick configuration
+            document.querySelectorAll('.strategy-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.strategy-item')[3].classList.add('active'); // AI Neural Network
+            document.getElementById('startDate').value = '2025-01-01';
+
+            // Run backtest
+            simulateBacktest();
+        });
+
+        // Load template button
+        document.getElementById('loadTemplate').addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Loading...';
+
+            setTimeout(() => {
+                // Load a template configuration
+                document.querySelectorAll('.strategy-item').forEach(item => item.classList.remove('active'));
+                document.querySelectorAll('.strategy-item')[4].classList.add('active'); // Quantum Momentum
+                document.getElementById('assetSelect').selectedIndex = 2; // BTC/USD
+                document.getElementById('startDate').value = '2024-06-01';
+                document.getElementById('initialCapital').value = '50000';
+
+                this.innerHTML = '<i class="fas fa-check"></i> Loaded!';
+
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                }, 1500);
+            }, 1000);
+        });
+
+        // Optimize parameters button
+        document.getElementById('optimizeBtn').addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Optimizing...';
+
+            setTimeout(() => {
+                // Simulate AI optimization
+                const strategyName = document.querySelector('.strategy-item.active .strategy-name').textContent;
+
+                // Show AI suggestions
+                const aiSuggestion = document.createElement('div');
+                aiSuggestion.className = 'comparison-item';
+                aiSuggestion.style.marginTop = '1rem';
+                aiSuggestion.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+                aiSuggestion.style.borderColor = 'var(--success-color)';
+                aiSuggestion.innerHTML = `
+                    <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--success-color);">
+                        <i class="fas fa-lightbulb"></i> AI Optimization Complete
+                    </div>
+                    <div style="font-size: 0.9rem; margin-bottom: 0.5rem;">
+                        AI suggests adjusting parameters for <strong>${strategyName}</strong>:
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.85rem;">
+                        <div>Fast MA: <strong>12 → 8</strong></div>
+                        <div>Slow MA: <strong>26 → 21</strong></div>
+                        <div>Stop Loss: <strong>2% → 1.5%</strong></div>
+                        <div>Take Profit: <strong>4% → 5%</strong></div>
+                    </div>
+                    <div style="margin-top: 0.75rem;">
+                        <button class="btn btn-sm btn-primary" style="width: 100%;">
+                            <i class="fas fa-check"></i> Apply AI Recommendations
+                        </button>
+                    </div>
+                `;
+
+                // Add to configuration panel
+                const configPanel = document.querySelector('.configuration-panel');
+                configPanel.appendChild(aiSuggestion);
+
+                this.innerHTML = '<i class="fas fa-check"></i> Optimized!';
+
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                }, 2000);
+            }, 2000);
+        });
+
+        // Initialize date inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            const oneYearAgo = new Date(today);
+            oneYearAgo.setFullYear(today.getFullYear() - 1);
+            const twoYearsAgo = new Date(today);
+            twoYearsAgo.setFullYear(today.getFullYear() - 2);
+
+            document.getElementById('startDate').value = twoYearsAgo.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+
+            // Set min/max dates
+            document.getElementById('startDate').max = today.toISOString().split('T')[0];
+            document.getElementById('endDate').max = today.toISOString().split('T')[0];
+            document.getElementById('endDate').min = document.getElementById('startDate').value;
+
+            // Update end date when start date changes
+            document.getElementById('startDate').addEventListener('change', function() {
+                document.getElementById('endDate').min = this.value;
+                if (document.getElementById('endDate').value < this.value) {
+                    document.getElementById('endDate').value = this.value;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

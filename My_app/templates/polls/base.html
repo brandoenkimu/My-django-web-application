@@ -1,0 +1,1327 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoldTrader - Professional Trading Platform | Bentley-Brand-Dev</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --gradient-primary: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            --gradient-accent: linear-gradient(135deg, #2ecc71 0%, #1abc9c 100%);
+            --gradient-warning: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Header & Navigation */
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.8rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .brand-slogan {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .navbar {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 10px 0;
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-link {
+            font-weight: 600;
+            margin: 0 8px;
+            color: #2c3e50 !important;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #3498db !important;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 100px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        /* Market Ticker */
+        .market-ticker {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ticker-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: ticker 40s linear infinite;
+        }
+
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .ticker-item {
+            display: inline-block;
+            margin: 0 40px;
+            font-weight: 600;
+        }
+
+        .ticker-up {
+            color: #2ecc71;
+        }
+
+        .ticker-down {
+            color: #e74c3c;
+        }
+
+        /* Trading Cards */
+        .trading-card {
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            height: 100%;
+        }
+
+        .trading-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        /* Carousel Section */
+        .carousel-item {
+            height: 500px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .carousel-caption {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 15px;
+            bottom: 20%;
+            left: 10%;
+            right: 10%;
+        }
+
+        /* Advertisements */
+        .ad-card {
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            height: 100%;
+        }
+
+        .ad-card:hover {
+            transform: scale(1.03);
+        }
+
+        .ad-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Mobile App Preview */
+        .mobile-app-section {
+            background: #f8f9fa;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-mockup {
+            position: relative;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .mobile-screen {
+            position: absolute;
+            top: 12%;
+            left: 7%;
+            width: 86%;
+            height: 76%;
+            border-radius: 25px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .screen-slide {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Trading Tools */
+        .tool-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+            border: 1px solid #e9ecef;
+        }
+
+        .tool-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.15);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--primary-color);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-links a {
+            color: #bdc3c7;
+            text-decoration: none;
+            transition: color 0.3s;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .social-icons a {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            margin-right: 10px;
+            transition: all 0.3s;
+        }
+
+        .social-icons a:hover {
+            background: #3498db;
+            transform: translateY(-3px);
+        }
+
+        /* Stats Counter */
+        .stat-card {
+            text-align: center;
+            padding: 30px 20px;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .counter {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .carousel-item {
+                height: 400px;
+            }
+
+            .carousel-caption {
+                bottom: 10%;
+                padding: 20px;
+            }
+
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Custom Animations */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        /* Chart Preview */
+        .chart-container {
+            height: 300px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 20px;
+            width: 90%;
+            height: 2px;
+            background: #3498db;
+        }
+
+        .chart-point {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #3498db;
+            border-radius: 50%;
+            bottom: 15px;
+        }
+
+        /* Trading Pair */
+        .trading-pair {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            border: 1px solid #e9ecef;
+        }
+
+        .trading-pair:hover {
+            border-color: #3498db;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.1);
+        }
+
+        /* Smooth transitions */
+        body {
+            transition: background-color .4s ease, color .4s ease;
+        }
+
+        /* ============================================
+           SAFE DARK MODE – DOES NOT CHANGE NAV COLORS
+           Only affects page background & text
+        ============================================= */
+        body.dark-mode {
+            background-color: #121212 !important;
+            color: #f5f5f5 !important;
+        }
+
+        /* Text color only — does NOT touch buttons/navbars */
+        body.dark-mode p,
+        body.dark-mode span,
+        body.dark-mode h1,
+        body.dark-mode h2,
+        body.dark-mode h3,
+        body.dark-mode h4,
+        body.dark-mode h5,
+        body.dark-mode a:not(.nav-link) {
+            color: #e6e6e6 !important;
+        }
+
+        /* Dark mode dropdown – readable */
+        body.dark-mode .dropdown-menu {
+            background: #222 !important;
+            color: white !important;
+        }
+
+        /* ============================================
+           NAVBAR — GLASS EFFECT (NOT AFFECTED BY DARK)
+        ============================================= */
+        .glass-nav {
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            background-color: rgba(255, 255, 255, 0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        /* Optional slight tint on dark mode */
+        body.dark-mode .glass-nav {
+            background-color: rgba(0, 0, 0, 0.45) !important;
+        }
+
+        /* ============================================
+           NAVBAR LINKS – ANIMATED GOLD UNDERLINE
+        ============================================= */
+        .nav-link {
+            position: relative;
+            overflow: hidden;
+            color: #7f8c8d !important;
+        }
+
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: #ffd700;  /* gold */
+            transition: width .3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* ============================================
+           MEGA MENU STYLES
+        ============================================= */
+        .dropdown-mega {
+            width: 480px;
+        }
+
+        .dropdown-mega .col {
+            padding: 15px;
+        }
+
+        .dropdown-mega a:hover {
+            color: #0d6efd !important;
+        }
+
+        /* ============================================
+           THEME TOGGLE ICON
+        ============================================= */
+        .theme-toggle {
+            cursor: pointer;
+            font-size: 22px;
+            margin-right: 15px;
+            color: white !important;
+        }
+
+        /* ============================================
+           USER BADGE (Django initials)
+        ============================================= */
+        .user-badge {
+            width: 40px;
+            height: 40px;
+            background: #0a8dea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        /* Glassmorphism effect */
+        .glass-nav {
+            backdrop-filter: blur(12px) saturate(160%);
+            -webkit-backdrop-filter: blur(12px) saturate(160%);
+            background-color: rgba(255, 255, 255, 0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        /* Animated underline */
+        .nav-link {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: #ffd700;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Mega menu */
+        .dropdown-mega {
+            width: 500px;
+        }
+
+        .dropdown-mega .col {
+            padding: 15px;
+        }
+
+        .dropdown-mega a:hover {
+            color: #0d6efd !important;
+        }
+
+        /* Light/Dark Mode Toggle */
+        .theme-toggle {
+            cursor: pointer;
+            font-size: 22px;
+            margin-right: 15px;
+            color: white;
+        }
+
+        body.dark-mode {
+            background-color: #fff;
+            color: white;
+        }
+
+        body.dark-mode .navbar {
+            background-color: rgba(0, 0, 0, 0.45) !important;
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        /* User initials circle */
+        .user-badge {
+            width: 50px;
+            height: 50px;
+            background: #ffd700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 60px;
+        }
+        footer.dark-mode {
+            background-color: #1a1a1a;
+            color: #f1f1f1;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line me-2"></i>
+                BoldTrader
+                <div class="brand-slogan">by Bentley-Brand-Dev</div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+
+                     <!-- NORMAL LINKS (Home / About / Contact) -->
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+
+                    <!-- MEGA MENU: BUILD -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" data-bs-toggle="dropdown">Markets</a>
+
+                        <div class="dropdown-menu dropdown-mega p-4 shadow-lg rounded-3">
+                            <div class="row">
+                                <div class="col">
+                                    <h6 class="fw-bold">Algo-trading platform</h6>
+                                    <a class="dropdown-item" href="/strategy-lab/">Strategy Lab</a>
+                                    <a class="dropdown-item" href="/trade-builder/">Trade Builder</a>
+                                    <a class="dropdown-item" href="/market-blueprint/">Market Blueprint</a>
+
+
+                                </div>
+
+                                <div class="col">
+                                    <h6 class="fw-bold">Advanced Trading Tools</h6>
+                                    <a class="dropdown-item" href="/charting-suite/">Charting Suite</a>
+                                    <a class="dropdown-item" href="/indicator-workshop/">Indicator Workshop</a>
+                                    <a class="dropdown-item" href="/trading-toolkit/">Trading Toolkit</a>
+                                    <a class="dropdown-item" href="/backtest-center/">Backtest Center</a>
+                                    <a class="dropdown-item" href="/trade-development/">Trade Development </a>
+                                    <a class="dropdown-item" href="/market-research/">Market Research</a>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- MEGA MENU: RUN -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" data-bs-toggle="dropdown">Live Trading</a>
+
+                        <div class="dropdown-menu dropdown-mega p-4 shadow-lg rounded-3">
+                            <div class="row">
+                                <div class="col">
+                                    <h6 class="fw-bold">Monitoring</h6>
+                                    <a class="dropdown-item" href="/execution-hub/">Execution Hub</a>
+                                    <a class="dropdown-item" href="/live-trading/">Live Trading</a>
+                                    <a class="dropdown-item" href="/trade-operations/">Trade Operations</a>
+                                    <a class="dropdown-item" href="/market-monitor/">Market Monitor</a>
+                                    <a class="dropdown-item" href="/sentiment-watch/">Sentiment Watch</a>
+                                </div>
+
+                                <div class="col">
+                                    <h6 class="fw-bold">Automation</h6>
+                                    <a class="dropdown-item" href="/automation-center/">Automation Center</a>
+                                    <a class="dropdown-item" href="/risk-console/">Risk Console</a>
+                                    <a class="dropdown-item" href="/performance-tracker/">Performance Tracker</a>
+                                     <a class="dropdown-item" href="/signal-runner/">Signal Runner</a>
+                                     <a class="dropdown-item" href="/trade-manager/">Trade Manager</a>
+                                     <a class="dropdown-item" href="/position-control/">Position Control</a>
+
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="#education">Education</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#mobile">Mobile App</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/contact1/">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/contact1/">About</a></li>
+
+
+
+
+
+                </ul>
+
+                <div class="d-flex ms-lg-3 mt-3 mt-lg-0">
+                     <!-- LIGHT/DARK TOGGLE -->
+                    <div class="theme-toggle text-white" onclick="toggleTheme()">
+                         <span id="theme-icon">🌙</span>
+                    </div>
+                    <button class="btn btn-outline-primary me-2">Login</button>
+                    <button class="btn btn-success pulse">Start Trading</button>
+
+                    <!-- USER INITIALS DROPDOWN (from Django user) -->
+                   <!-- User Menu -->
+                    <div class="dropdown">
+                        <div class="user-badge dropdown-toggle" data-bs-toggle="dropdown" title="Account Menu">
+                            {{ request.user.username|slice:":1"|upper }}
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 p-3">
+                            <li><a class="dropdown-item active" href="{% url 'user' %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'profile' %}">
+                                <i class="fas fa-user me-2"></i>My Profile
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'messages' %}">
+                                <i class="fas fa-envelope me-2"></i>Messages
+                                <span class="badge bg-danger ms-2">3</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'search' %}">
+                                <i class="fas fa-users me-2"></i>Community
+                                <span class="badge bg-primary ms-2">New</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'notifications' %}">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                                <span class="badge bg-warning ms-2">5</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'settings' %}">
+                                <i class="fas fa-cog me-2"></i>Settings
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger"
+                                        style="background: none; border: none; width: 100%; text-align: left;"
+                                        onclick="return confirm('Are you sure you want to logout?');">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="home" data-aos="fade-in">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="hero-title">Trade Smarter with <span class="text-warning">BoldTrader</span></h1>
+                    <p class="hero-subtitle">Professional trading platform powered by advanced analytics, real-time data, and AI-driven insights. Join thousands of successful traders today.</p>
+
+                    <div class="mt-4">
+                        <button class="btn btn-light btn-lg me-3">
+                            <i class="fas fa-play-circle me-2"></i> Watch Demo
+                        </button>
+                        <button class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-download me-2"></i> Download App
+                        </button>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="row mt-5">
+                        <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                            <div class="stat-card">
+                                <div class="counter" data-count="25000">0</div>
+                                <p>Active Traders</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                            <div class="stat-card">
+                                <div class="counter" data-count="98.7">0</div>
+                                <p>Success Rate</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                            <div class="stat-card">
+                                <div class="counter" data-count="24">0</div>
+                                <p>24/7 Support</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mt-5 mt-lg-0">
+                    <div class="chart-container" data-aos="zoom-in">
+                        <h5 class="mb-3">BTC/USD Live Chart</h5>
+                        <div class="chart-line"></div>
+                        <div class="chart-point" style="left: 10%;"></div>
+                        <div class="chart-point" style="left: 30%; bottom: 50px;"></div>
+                        <div class="chart-point" style="left: 50%; bottom: 30px;"></div>
+                        <div class="chart-point" style="left: 70%; bottom: 80px;"></div>
+                        <div class="chart-point" style="left: 90%; bottom: 40px;"></div>
+
+                        <div class="mt-4">
+                            <div class="trading-pair">
+                                <div>
+                                    <strong>BTC/USD</strong>
+                                    <div class="text-muted">Bitcoin / US Dollar</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fs-4">$42,567.89</div>
+                                    <div class="text-success"><i class="fas fa-arrow-up"></i> +2.34%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Market Ticker -->
+    <div class="market-ticker">
+        <div class="ticker-content">
+            <span class="ticker-item"><strong>BTC:</strong> <span class="ticker-up">$90960.89 (+1.3%)</span></span>
+            <span class="ticker-item"><strong>ETH:</strong> <span class="ticker-up">$3113.67 (+1.8%)</span></span>
+            <span class="ticker-item"><strong>SPX:</strong> <span class="ticker-up">6910.89 (-0.16%)</span></span>
+            <span class="ticker-item"><strong>GOLD:</strong> <span class="ticker-down">$4,445.65 (-0.24%)</span></span>
+            <span class="ticker-item"><strong>EUR/USD:</strong> <span class="ticker-up">1.1646 (+0.1%)</span></span>
+            <span class="ticker-item"><strong>TSLA:</strong> <span class="ticker-down">$433.67 (+0.55%)</span></span>
+            <span class="ticker-item"><strong>OIL:</strong> <span class="ticker-up">$78.45 (+0.8%)</span></span>
+        </div>
+    </div>
+
+    <!-- Trading Features -->
+    <section class="py-5" id="markets">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold">Advanced Trading Features</h2>
+                <p class="text-muted">Everything you need for successful trading in one platform</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="trading-card">
+                        <div class="card-body p-4">
+                            <div class="card-icon text-primary">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h4 class="card-title">Lightning Fast Execution</h4>
+                            <p class="card-text">Execute trades in milliseconds with our low-latency infrastructure. Never miss a market opportunity.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> <10ms execution</li>
+                                <li><i class="fas fa-check text-success me-2"></i> 99.9% uptime</li>
+                                <li><i class="fas fa-check text-success me-2"></i> No requotes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="trading-card">
+                        <div class="card-body p-4">
+                            <div class="card-icon text-success">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h4 class="card-title">AI-Powered Analytics</h4>
+                            <p class="card-text">Advanced machine learning algorithms analyze market patterns and provide actionable insights.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> Predictive analytics</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Risk assessment</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Automated signals</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="trading-card">
+                        <div class="card-body p-4">
+                            <div class="card-icon text-warning">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <h4 class="card-title">Bank-Level Security</h4>
+                            <p class="card-text">Your funds and data are protected with military-grade encryption and multi-factor authentication.</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> 256-bit encryption</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Cold storage wallets</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Insurance coverage</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Market Carousel -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold">Live Market Overview</h2>
+                <p class="text-muted">Real-time market movements and trends</p>
+            </div>
+
+            <div id="marketCarousel" class="carousel slide" data-bs-ride="carousel" data-aos="zoom-in">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#marketCarousel" data-bs-slide-to="0" class="active"></button>
+                    <button type="button" data-bs-target="#marketCarousel" data-bs-slide-to="1"></button>
+                    <button type="button" data-bs-target="#marketCarousel" data-bs-slide-to="2"></button>
+                </div>
+
+                <div class="carousel-inner rounded-4">
+                    <div class="carousel-item active" style="background-image: url('https://images.unsplash.com/photo-1642790553124-4c56d74c5a65?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
+                        <div class="carousel-caption">
+                            <h3>Cryptocurrency Markets</h3>
+                            <p>Real-time crypto trading with 150+ pairs. Advanced charting and analysis tools.</p>
+                            <button class="btn btn-primary">Explore Crypto</button>
+                        </div>
+                    </div>
+
+                    <div class="carousel-item" style="background-image: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
+                        <div class="carousel-caption">
+                            <h3>Forex Trading</h3>
+                            <p>Trade 50+ currency pairs with tight spreads and leverage up to 1:500.</p>
+                            <button class="btn btn-primary">Trade Forex</button>
+                        </div>
+                    </div>
+
+                    <div class="carousel-item" style="background-image: url('https://images.unsplash.com/photo-1613243555988-441166d4a6fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');">
+                        <div class="carousel-caption">
+                            <h3>Stock & Indices</h3>
+                            <p>Access global stock markets and major indices with real-time data.</p>
+                            <button class="btn btn-primary">View Stocks</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#marketCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#marketCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advertisements Section -->
+    <section class="py-5" id="tools">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold">Premium Trading Tools</h2>
+                <p class="text-muted">Enhance your trading with our professional tools</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="ad-card position-relative">
+                        <span class="ad-badge">LIMITED OFFER</span>
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" class="card-img-top" alt="Trading Signals">
+                        <div class="card-body p-4">
+                            <h5 class="card-title">AI Trading Signals Pro</h5>
+                            <p class="card-text">Get accurate buy/sell signals powered by artificial intelligence. 85% accuracy rate.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h4 text-primary mb-0">$49/month</span>
+                                <button class="btn btn-outline-primary">Subscribe Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="ad-card position-relative">
+                        <span class="ad-badge" style="background: #2ecc71;">NEW</span>
+                        <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" class="card-img-top" alt="Trading Education">
+                        <div class="card-body p-4">
+                            <h5 class="card-title">Master Trader Course</h5>
+                            <p class="card-text">Complete trading education from beginners to advanced strategies. 40+ hours of content.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h4 text-primary mb-0">$299</span>
+                                <button class="btn btn-outline-primary">Enroll Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="ad-card position-relative">
+                        <span class="ad-badge" style="background: #f39c12;">POPULAR</span>
+                        <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" class="card-img-top" alt="Trading Community">
+                        <div class="card-body p-4">
+                            <h5 class="card-title">Trader's Community</h5>
+                            <p class="card-text">Join our exclusive community of successful traders. Share strategies and insights.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h4 text-primary mb-0">$99/year</span>
+                                <button class="btn btn-outline-primary">Join Community</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mobile App Section -->
+    <section class="mobile-app-section py-5" id="mobile">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h2 class="display-5 fw-bold mb-4">Trade Anywhere with Our Mobile App</h2>
+                    <p class="lead mb-4">Access full trading functionality on your mobile device. Available for iOS and Android.</p>
+
+                    <div class="mb-4">
+                        <h5><i class="fas fa-check-circle text-success me-2"></i> Real-time charts</h5>
+                        <h5><i class="fas fa-check-circle text-success me-2"></i> Instant execution</h5>
+                        <h5><i class="fas fa-check-circle text-success me-2"></i> Push notifications</h5>
+                        <h5><i class="fas fa-check-circle text-success me-2"></i> Biometric login</h5>
+                        <h5><i class="fas fa-check-circle text-success me-2"></i> Portfolio management</h5>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-3">
+                        <button class="btn btn-dark btn-lg">
+                            <i class="fab fa-apple me-2"></i> App Store
+                        </button>
+                        <button class="btn btn-light btn-lg border">
+                            <i class="fab fa-google-play me-2"></i> Google Play
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left">
+                    <div class="mobile-mockup">
+                        <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80" class="img-fluid" alt="Mobile App">
+                        <div class="mobile-screen">
+                            <div id="mobileScreenCarousel" class="carousel slide h-100" data-bs-ride="carousel">
+                                <div class="carousel-inner h-100">
+                                    <div class="carousel-item active h-100" style="background-image: url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');"></div>
+                                    <div class="carousel-item h-100" style="background-image: url('https://images.unsplash.com/photo-1613243555988-441166d4a6fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');"></div>
+                                    <div class="carousel-item h-100" style="background-image: url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trading Tools -->
+    <section class="py-5" id="education">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h2 class="display-5 fw-bold">Educational Resources</h2>
+                <p class="text-muted">Learn trading with our comprehensive educational materials</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
+                    <div class="tool-card">
+                        <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
+                        <h5>Webinars</h5>
+                        <p>Live trading sessions with market experts</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
+                    <div class="tool-card">
+                        <i class="fas fa-book fa-3x text-success mb-3"></i>
+                        <h5>E-Books</h5>
+                        <p>Comprehensive guides on trading strategies</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="300">
+                    <div class="tool-card">
+                        <i class="fas fa-video fa-3x text-warning mb-3"></i>
+                        <h5>Video Tutorials</h5>
+                        <p>Step-by-step video lessons for all levels</p>
+                    </div>
+                </div>
+
+                <div class="col-md-3" data-aos="fade-up" data-aos-delay="400">
+                    <div class="tool-card">
+                        <i class="fas fa-chart-bar fa-3x text-danger mb-3"></i>
+                        <h5>Market Analysis</h5>
+                        <p>Daily market reviews and forecasts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="about">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h3 class="mb-3">
+                        <i class="fas fa-chart-line me-2"></i>
+                        BoldTrader
+                    </h3>
+                    <p class="text-light">Professional trading platform by Bentley-Brand-Dev. Empowering traders with advanced tools and insights.</p>
+                    <div class="social-icons mt-4">
+                        <a href="https://x.com/messages/compose?recipient_screen_name=n_bentely&text=Hello%20Bentely%20Brand" target="_self"><i class="fab fa-twitter"></i></a>
+                        <a href=https://facebook.com/61568374984253?text=Hello%20Bentely%20Brand" target="_self"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/brandonlavie/" target="_self"><i class="fab fa-instagram"></i></a>
+                        <a href="#" target="_self"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="https://t.me/Boldtraderbrandon?text=Hello%20Bentely%20Brand" target="_self" aria-label="Chat on Telegram"><i class="fab fa-telegram"></i></a>
+                        <a href="https://www.tiktok.com/@bentelyboldtrader" target="_blank" aria-label="Message on TikTok"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://www.youtube.com/@BentelyBrand%C5%93n" target="_self"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
+                    <h5 class="mb-3">Trading</h5>
+                    <div class="footer-links">
+                        <a href="#">Forex</a>
+                        <a href="#">Cryptocurrency</a>
+                        <a href="#">Stocks</a>
+                        <a href="#">Indices</a>
+                        <a href="#">Commodities</a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
+                    <h5 class="mb-3">Platform</h5>
+                    <div class="footer-links">
+                        <a href="/market-research/">Web Terminal</a>
+                        <a href="#">Mobile App</a>
+                        <a href="#">Desktop App</a>
+                        <a href="#">API Access</a>
+                        <a href="#">Tools & Calculators</a>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-12">
+                    <h5 class="mb-3">Newsletter</h5>
+                    <p class="text-light">Subscribe for market insights and trading tips</p>
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control" placeholder="Your email">
+                        <button class="btn btn-primary" type="button">Subscribe</button>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-light"><i class="fas fa-envelope me-2"></i> support@boldtrader.com</p>
+                        <p class="text-light"><i class="fas fa-phone me-2"></i> +(254) 45870406</p>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5" style="border-color: rgba(255,255,255,0.1);">
+
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">© 2026 BoldTrader by Bentley-Brand-Dev. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="{% url 'privacy_policy' %}" class="text-light me-3">Privacy Policy</a>
+                    <a href="{% url 'terms_of_service' %}" class="text-light me-3">Terms of Service</a>
+                    <a href="{% url 'risk_disclosure' %}" class="text-light">Risk Disclosure</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap & JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Custom JavaScript -->
+    <script>
+        // Initialize AOS animations
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+
+        // Navbar scroll effect
+        $(window).scroll(function() {
+            if ($(window).scrollTop() > 50) {
+                $('.navbar').addClass('scrolled');
+            } else {
+                $('.navbar').removeClass('scrolled');
+            }
+        });
+
+        // Counter animation
+        $(document).ready(function() {
+            $('.counter').each(function() {
+                var $this = $(this);
+                var countTo = $this.attr('data-count');
+
+                $({ countNum: 0 }).animate({
+                    countNum: countTo
+                }, {
+                    duration: 2000,
+                    easing: 'swing',
+                    step: function() {
+                        $this.text(Math.floor(this.countNum));
+                    },
+                    complete: function() {
+                        $this.text(this.countNum);
+                    }
+                });
+            });
+
+            // Market ticker animation
+            function resetTicker() {
+                $('.ticker-content').css('animation', 'none');
+                setTimeout(function() {
+                    $('.ticker-content').css('animation', 'ticker 40s linear infinite');
+                }, 10);
+            }
+
+            // Reset ticker on hover
+            $('.market-ticker').hover(function() {
+                $('.ticker-content').css('animation-play-state', 'paused');
+            }, function() {
+                $('.ticker-content').css('animation-play-state', 'running');
+            });
+
+            // Auto update market data (simulated)
+            function updateMarketData() {
+                $('.ticker-item').each(function() {
+                    var change = (Math.random() - 0.5) * 4;
+                    var direction = change >= 0 ? 'up' : 'down';
+                    var colorClass = direction === 'up' ? 'ticker-up' : 'ticker-down';
+                    var sign = change >= 0 ? '+' : '';
+
+                    $(this).find('span').removeClass('ticker-up ticker-down').addClass(colorClass)
+                        .html('$' + (Math.random() * 100000).toFixed(2) + ' (' + sign + change.toFixed(2) + '%)');
+                });
+            }
+
+            // Update market data every 10 seconds
+            setInterval(updateMarketData, 10000);
+
+            // Mobile screen carousel auto-slide
+            $('#mobileScreenCarousel').carousel({
+                interval: 3000,
+                ride: 'carousel'
+            });
+
+            // Smooth scrolling for navigation links
+            $('a[href^="#"]').on('click', function(e) {
+                e.preventDefault();
+
+                var target = this.hash;
+                var $target = $(target);
+
+                $('html, body').animate({
+                    'scrollTop': $target.offset().top - 70
+                }, 800, 'swing');
+            });
+
+            // Trading pair hover effect
+            $('.trading-pair').hover(
+                function() {
+                    $(this).css('transform', 'translateY(-5px)');
+                },
+                function() {
+                    $(this).css('transform', 'translateY(0)');
+                }
+            );
+
+            // Pulse animation for CTA button
+            setInterval(function() {
+                $('.pulse').toggleClass('pulse');
+                setTimeout(function() {
+                    $('.btn-success').addClass('pulse');
+                }, 100);
+            }, 4000);
+
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Add scroll progress indicator
+            $(window).scroll(function() {
+                var wintop = $(window).scrollTop();
+                var docheight = $(document).height();
+                var winheight = $(window).height();
+                var scrolled = (wintop/(docheight-winheight))*100;
+
+                // Update scroll progress (if you add a progress bar)
+                // $('.scroll-progress').css('width', scrolled + '%');
+            });
+        });
+
+    function toggleTheme() {
+        const body = document.body;
+        const navbar = document.querySelector(".navbar");
+        const footer = document.querySelector("footer");
+        const icon = document.getElementById("theme-icon");
+
+        // Toggle dark-mode on body, navbar, and footer
+        const darkModeEnabled = body.classList.toggle("dark-mode");
+
+        if (navbar) {
+            navbar.classList.toggle("dark-mode", darkModeEnabled);
+        }
+
+        if (footer) {
+            footer.classList.toggle("dark-mode", darkModeEnabled);
+        }
+
+        // Update icon
+        icon.textContent = darkModeEnabled ? "☀️" : "🌙";
+
+        // Save preference
+        localStorage.setItem("darkMode", darkModeEnabled ? "enabled" : "disabled");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const saved = localStorage.getItem("darkMode");
+        const body = document.body;
+        const navbar = document.querySelector(".navbar");
+        const footer = document.querySelector("footer");
+        const icon = document.getElementById("theme-icon");
+
+        if (saved === "enabled") {
+            body.classList.add("dark-mode");
+            if (navbar) navbar.classList.add("dark-mode");
+            if (footer) footer.classList.add("dark-mode");
+            icon.textContent = "☀️";
+        }
+    });
+    </script>
+</body>
+</html>

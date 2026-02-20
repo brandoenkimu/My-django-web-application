@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Successful - Bold Trading Academy</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .success-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .success-icon {
+            font-size: 80px;
+            color: #2ecc71;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite alternate;
+        }
+
+        h1 {
+            color: #27ae60;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .success-details {
+            background: #f8fff9;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #2ecc71;
+            text-align: left;
+        }
+
+        .success-details p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+
+        .action-buttons {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(149, 165, 166, 0.3);
+        }
+
+        .spinner {
+            margin: 20px 0;
+            color: #3498db;
+        }
+
+        .countdown {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-top: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">
+            ✅
+        </div>
+
+        <h1>🎉 Registration Successful!</h1>
+
+        <div class="success-details">
+            <p><strong>👤 Username:</strong> {{ username }}</p>
+            <p><strong>📧 Email:</strong> {{ email }}</p>
+            <p><strong>🆔 Account ID:</strong> {{ account_id }}</p>
+            <p><strong>📅 Registered:</strong> {% now "F j, Y \a\t g:i A" %}</p>
+        </div>
+
+        <p style="color: #7f8c8d; margin: 20px 0;">
+            Welcome to <strong>Bold Trading Academy</strong>! Your account has been created successfully.
+            You can now access premium trading features and start your journey.
+        </p>
+
+        <div class="spinner">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+        </div>
+
+        <div class="countdown" id="countdown">
+            Redirecting to login page in <span id="seconds">10</span> seconds...
+        </div>
+
+        <div class="action-buttons">
+            <a href="{{ login_url }}" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Login Now
+            </a>
+            <a href="/" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Go Home
+            </a>
+            <a href="/signup/" class="btn btn-secondary">
+                <i class="fas fa-user-plus"></i> Create Another Account
+            </a>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #95a5a6; font-size: 14px;">
+            <p><i class="fas fa-lightbulb"></i> <strong>Tip:</strong> Check your email for account confirmation.</p>
+            <p><i class="fas fa-shield-alt"></i> <strong>Security:</strong> Keep your login credentials safe.</p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-redirect to login page after 10 seconds
+        let seconds = 10;
+        const countdownElement = document.getElementById('seconds');
+
+        function updateCountdown() {
+            countdownElement.textContent = seconds;
+            seconds--;
+
+            if (seconds < 0) {
+                window.location.href = "{{ login_url }}";
+            } else {
+                setTimeout(updateCountdown, 1000);
+            }
+        }
+
+        // Start countdown
+        setTimeout(updateCountdown, 1000);
+
+        // Auto-redirect after 10 seconds
+        setTimeout(function() {
+            window.location.href = "{{ login_url }}";
+        }, 10000);
+    </script>
+</body>
+</html>

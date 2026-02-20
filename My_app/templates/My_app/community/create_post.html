@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post - TradingHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #7209b7;
+        }
+
+        body {
+            background: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .create-post-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .post-header {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .post-content {
+            padding: 1.5rem;
+        }
+
+        .post-textarea {
+            border: none;
+            width: 100%;
+            min-height: 150px;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .post-textarea::placeholder {
+            color: #999;
+        }
+
+        .trading-details {
+            background: #f8f9ff;
+            border: 1px solid #e0e7ff;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .media-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            margin-top: 1rem;
+        }
+
+        .media-upload:hover {
+            border-color: var(--primary);
+        }
+
+        .media-preview {
+            margin-top: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .media-preview img,
+        .media-preview video {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn-post {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .btn-post:hover {
+            opacity: 0.9;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{% url 'community_feed' %}">
+                <i class="fas fa-arrow-left me-2"></i>Back to Feed
+            </a>
+            <span class="navbar-text fw-bold text-primary">
+                Create New Post
+            </span>
+        </div>
+    </nav>
+
+    <!-- Create Post Form -->
+    <div class="container">
+        <div class="create-post-container">
+            <form method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data" id="postForm">
+                {% csrf_token %}
+
+                <div class="post-header">
+                    <div class="d-flex align-items-center">
+                        <img src="{{ user.profile.get_avatar_url }}"
+                             class="rounded-circle me-3" width="40" height="40">
+                        <div>
+                            <div class="fw-bold">{{ user.username }}</div>
+                            <small class="text-muted">{{ user.profile.plan }} User</small>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-post">
+                        <i class="fas fa-paper-plane me-2"></i>Post
+                    </button>
+                </div>
+
+                <div class="post-content">
+                    <!-- Content -->
+                    <textarea class="post-textarea" name="content"
+                              placeholder="Share your trading analysis, market insights, or trade ideas..."
+                              required></textarea>
+
+                    <!-- Post Type -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Post Type</label>
+                        <select class="form-select" name="post_type">
+                            <option value="analysis">Market Analysis</option>
+                            <option value="trade_idea">Trade Idea</option>
+                            <option value="news">Market News</option>
+                            <option value="question">Question</option>
+                            <option value="discussion">Discussion</option>
+                            <option value="education">Educational</option>
+                        </select>
+                    </div>
+
+                    <!-- Visibility -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Visibility</label>
+                        <select class="form-select" name="visibility">
+                            <option value="public">Public (Everyone)</option>
+                            <option value="followers">Followers Only</option>
+                            <option value="private">Private</option>
+                        </select>
+                    </div>
+
+                    <!-- Trading Details -->
+                    <div class="trading-details">
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-chart-line me-2"></i>Trading Details (Optional)
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" name="trading_symbol"
+                                       placeholder="Trading Symbol (BTC/USD, AAPL, etc)">
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select" name="trade_direction">
+                                    <option value="">Trade Direction</option>
+                                    <option value="long">Long (Bullish)</option>
+                                    <option value="short">Short (Bearish)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" step="0.000001" class="form-control" name="entry_price"
+                                       placeholder="Entry Price">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" step="0.000001" class="form-control" name="target_price"
+                                       placeholder="Target Price">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" step="0.000001" class="form-control" name="stop_loss"
+                                       placeholder="Stop Loss">
+                            </div>
+                            <div class="col-md-6">
+                                <select class="form-select" name="timeframe">
+                                    <option value="">Timeframe</option>
+                                    <option value="1m">1 Minute</option>
+                                    <option value="5m">5 Minutes</option>
+                                    <option value="15m">15 Minutes</option>
+                                    <option value="1h">1 Hour</option>
+                                    <option value="4h">4 Hours</option>
+                                    <option value="1d">1 Day</option>
+                                    <option value="1w">1 Week</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="number" step="0.01" class="form-control" name="risk_reward_ratio"
+                                       placeholder="Risk/Reward Ratio">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Media Upload -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Add Media</label>
+                        <div class="media-upload" onclick="document.getElementById('mediaInput').click()">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                            <h5>Drag & drop photos or videos</h5>
+                            <p class="text-muted">or click to select files</p>
+                            <small class="text-muted">Supports: JPG, PNG, GIF, MP4, MOV</small>
+                        </div>
+                        <input type="file" class="d-none" id="mediaInput" name="image" accept="image/*,video/*"
+                               onchange="previewMedia(event)">
+                        <input type="file" class="d-none" id="videoInput" name="video" accept="video/*">
+
+                        <div class="media-preview d-none" id="mediaPreview"></div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tags (Optional)</label>
+                        <input type="text" class="form-control" name="tags"
+                               placeholder="#Bitcoin #Trading #Analysis (comma separated)">
+                        <small class="text-muted">Add relevant hashtags to reach more traders</small>
+                    </div>
+                </div>
+
+                <div class="post-actions">
+                    <button type="button" class="btn btn-outline-secondary"
+                            onclick="document.getElementById('mediaInput').click()">
+                        <i class="fas fa-image me-2"></i>Photo/Video
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="addPoll()">
+                        <i class="fas fa-poll me-2"></i>Poll
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="addMention()">
+                        <i class="fas fa-at me-2"></i>Mention
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Media preview
+        function previewMedia(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('mediaPreview');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = '';
+
+                    if (file.type.startsWith('image/')) {
+                        preview.innerHTML = `<img src="${e.target.result}" class="img-fluid">`;
+                    } else if (file.type.startsWith('video/')) {
+                        preview.innerHTML = `
+                            <video src="${e.target.result}" controls class="img-fluid">
+                                Your browser does not support the video tag.
+                            </video>
+                        `;
+                    }
+
+                    preview.classList.remove('d-none');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Add poll function
+        function addPoll() {
+            const pollHTML = `
+                <div class="trading-details mt-3" id="pollSection">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-poll me-2"></i>Add Poll
+                    </h6>
+                    <div class="mb-2">
+                        <input type="text" class="form-control mb-2" placeholder="Poll question">
+                        <input type="text" class="form-control mb-2" placeholder="Option 1">
+                        <input type="text" class="form-control mb-2" placeholder="Option 2">
+                        <button class="btn btn-link btn-sm" onclick="addPollOption()">
+                            <i class="fas fa-plus me-1"></i>Add option
+                        </button>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="allowMultiple">
+                        <label class="form-check-label" for="allowMultiple">
+                            Allow multiple selections
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            const form = document.getElementById('postForm');
+            const tradingDetails = form.querySelector('.trading-details');
+            tradingDetails.insertAdjacentHTML('afterend', pollHTML);
+        }
+
+        // Add mention function
+        function addMention() {
+            const textarea = document.querySelector('.post-textarea');
+            const mention = '@';
+            const cursorPos = textarea.selectionStart;
+
+            textarea.value = textarea.value.substring(0, cursorPos) + mention +
+                           textarea.value.substring(cursorPos);
+            textarea.focus();
+            textarea.setSelectionRange(cursorPos + 1, cursorPos + 1);
+        }
+
+        // Form validation
+        document.getElementById('postForm').addEventListener('submit', function(e) {
+            const content = this.querySelector('textarea[name="content"]').value.trim();
+            if (!content) {
+                e.preventDefault();
+                alert('Please enter some content for your post.');
+                return false;
+            }
+
+            // Add loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Posting...';
+            submitBtn.disabled = true;
+        });
+
+        // Auto-resize textarea
+        const textarea = document.querySelector('.post-textarea');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    </script>
+</body>
+</html>

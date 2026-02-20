@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment Card - TradingHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #7209b7;
+        }
+
+        .comment-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #eee;
+            transition: all 0.3s;
+        }
+
+        .comment-card:hover {
+            border-color: #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .comment-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .comment-author-info {
+            flex: 1;
+        }
+
+        .comment-author-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .comment-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .comment-badge {
+            background: #f0f7ff;
+            color: var(--primary);
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .comment-content {
+            color: #333;
+            line-height: 1.5;
+            font-size: 14px;
+            margin-bottom: 0.75rem;
+            padding-left: 46px; /* Align with text below avatar */
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 1rem;
+            font-size: 12px;
+            color: #666;
+            padding-left: 46px;
+        }
+
+        .comment-action {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .comment-action:hover {
+            background: #f0f7ff;
+            color: var(--primary);
+        }
+
+        .comment-action.liked {
+            color: #ef4444;
+        }
+
+        .comment-replies {
+            margin-top: 1rem;
+            margin-left: 46px;
+            padding-left: 1rem;
+            border-left: 2px solid #f0f0f0;
+        }
+
+        .reply-form {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.75rem;
+            padding-left: 46px;
+        }
+
+        .reply-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 36px;
+        }
+
+        .reply-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .reply-submit {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .reply-submit:hover {
+            background: var(--primary-dark);
+        }
+
+        .comment-edit-form {
+            padding-left: 46px;
+            margin-top: 0.5rem;
+        }
+
+        .comment-edit-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--primary);
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+        }
+
+        .comment-edit-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .edit-btn, .delete-btn {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .edit-btn:hover {
+            color: var(--primary);
+            background: #f0f7ff;
+        }
+
+        .delete-btn:hover {
+            color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .expert-badge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .verified-badge {
+            background: #10b981;
+            color: white;
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .pinned-comment {
+            border-left: 3px solid var(--primary);
+            background: #f8f9ff;
+        }
+
+        .pinned-badge {
+            background: var(--primary);
+            color: white;
+            padding: 1px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Comment Card -->
+    <div class="comment-card {% if comment.is_pinned %}pinned-comment{% endif %}" id="comment-{{ comment.id }}">
+        <!-- Header -->
+        <div class="comment-header">
+            <img src="{{ comment.author.profile.get_avatar_url }}"
+                 class="comment-avatar"
+                 alt="{{ comment.author.username }}"
+                 onclick="window.location.href='{% url 'profile' comment.author.username %}'">
+
+            <div class="comment-author-info">
+                <div class="d-flex align-items-center">
+                    <h5 class="comment-author-name"
+                        onclick="window.location.href='{% url 'profile' comment.author.username %}'">
+                        {{ comment.author.username }}
+                    </h5>
+
+                    {% if comment.author.profile.is_expert %}
+                    <span class="expert-badge ms-2">
+                        <i class="fas fa-star"></i> Expert
+                    </span>
+                    {% endif %}
+
+                    {% if comment.author.profile.kyc_verified %}
+                    <span class="verified-badge ms-2">
+                        <i class="fas fa-check-circle"></i> Verified
+                    </span>
+                    {% endif %}
+
+                    {% if comment.is_pinned %}
+                    <span class="pinned-badge ms-2">
+                        <i class="fas fa-thumbtack"></i> Pinned
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="comment-meta">
+                    <span>{{ comment.created_at|timesince }} ago</span>
+                    {% if comment.is_edited %}
+                    <span class="text-muted">• Edited</span>
+                    {% endif %}
+                    {% if comment.author == post.author %}
+                    <span class="comment-badge">Author</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Action Menu -->
+            <div class="dropdown">
+                <button class="btn btn-sm btn-link text-muted"
+                        type="button"
+                        data-bs-toggle="dropdown">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    {% if comment.author == user %}
+                    <li>
+                        <button class="dropdown-item edit-comment-btn" data-comment-id="{{ comment.id }}">
+                            <i class="fas fa-edit me-2"></i>Edit
+                        </button>
+                    </li>
+                    <li>
+                        <button class="dropdown-item text-danger delete-comment-btn" data-comment-id="{{ comment.id }}">
+                            <i class="fas fa-trash me-2"></i>Delete
+                        </button>
+                    </li>
+                    {% else %}
+                    <li>
+                        <button class="dropdown-item" onclick="reportComment({{ comment.id }})">
+                            <i class="fas fa-flag me-2"></i>Report
+                        </button>
+                    </li>
+                    {% endif %}
+
+                    {% if user == post.author or user.is_superuser %}
+                    <li>
+                        <button class="dropdown-item pin-comment-btn" data-comment-id="{{ comment.id }}">
+                            <i class="fas fa-thumbtack me-2"></i>
+                            {% if comment.is_pinned %}Unpin{% else %}Pin{% endif %}
+                        </button>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="comment-content">
+            {{ comment.content|linebreaks }}
+        </div>
+
+        <!-- Actions -->
+        <div class="comment-actions">
+            <button class="comment-action {% if user in comment.likes.all %}liked{% endif %}"
+                    data-comment-id="{{ comment.id }}"
+                    data-action="like">
+                <i class="fas fa-heart"></i>
+                <span class="like-count">{{ comment.likes_count }}</span>
+            </button>
+
+            <button class="comment-action reply-btn" data-comment-id="{{ comment.id }}">
+                <i class="fas fa-reply"></i> Reply
+            </button>
+
+            <button class="comment-action share-btn" data-comment-id="{{ comment.id }}">
+                <i class="fas fa-share"></i> Share
+            </button>
+        </div>
+
+        <!-- Replies -->
+        {% if comment.replies.all %}
+        <div class="comment-replies">
+            {% for reply in comment.replies.all %}
+                {% include 'comment_card.html' with comment=reply %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Edit Form (hidden by default) -->
+        <div class="comment-edit-form d-none" id="edit-form-{{ comment.id }}">
+            <textarea class="comment-edit-input" rows="3">{{ comment.content }}</textarea>
+            <div class="comment-edit-actions">
+                <button class="btn btn-sm btn-outline-secondary cancel-edit" data-comment-id="{{ comment.id }}">
+                    Cancel
+                </button>
+                <button class="btn btn-sm btn-primary save-edit" data-comment-id="{{ comment.id }}">
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Like comment
+        $('.comment-action[data-action="like"]').click(function() {
+            const $btn = $(this);
+            const commentId = $btn.data('comment-id');
+
+            $.ajax({
+                url: '{% url "api_like_comment" %}',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify({
+                    'comment_id': commentId
+                }),
+                success: function(response) {
+                    if (response.status === 'liked') {
+                        $btn.addClass('liked');
+                        $btn.find('i').removeClass('far').addClass('fas');
+                    } else {
+                        $btn.removeClass('liked');
+                        $btn.find('i').removeClass('fas').addClass('far');
+                    }
+                    $btn.find('.like-count').text(response.likes_count);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Like error:', error);
+                }
+            });
+        });
+
+        // Reply to comment
+        $('.reply-btn').click(function() {
+            const commentId = $(this).data('comment-id');
+            const $commentCard = $(`#comment-${commentId}`);
+            const $repliesSection = $commentCard.find('.comment-replies');
+
+            // Remove any existing reply form
+            $commentCard.find('.reply-form').remove();
+
+            // Create reply form
+            const replyForm = `
+                <form class="reply-form" method="POST" action="{% url 'add_reply' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_id" value="${commentId}">
+                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                    <textarea class="reply-input"
+                              name="content"
+                              placeholder="Write a reply..."
+                              required></textarea>
+                    <button type="submit" class="reply-submit">Reply</button>
+                </form>
+            `;
+
+            // If no replies section exists, create one
+            if ($repliesSection.length === 0) {
+                $commentCard.append(`<div class="comment-replies"></div>`);
+                $repliesSection = $commentCard.find('.comment-replies');
+            }
+
+            $repliesSection.prepend(replyForm);
+            $repliesSection.find('.reply-input').focus();
+        });
+
+        // Edit comment
+        $('.edit-comment-btn').click(function() {
+            const commentId = $(this).data('comment-id');
+            const $commentCard = $(`#comment-${commentId}`);
+            const $editForm = $(`#edit-form-${commentId}`);
+            const $content = $commentCard.find('.comment-content');
+
+            // Hide content, show edit form
+            $content.addClass('d-none');
+            $editForm.removeClass('d-none');
+        });
+
+        // Cancel edit
+        $('.cancel-edit').click(function() {
+            const commentId = $(this).data('comment-id');
+            const $commentCard = $(`#comment-${commentId}`);
+            const $editForm = $(`#edit-form-${commentId}`);
+            const $content = $commentCard.find('.comment-content');
+
+            $content.removeClass('d-none');
+            $editForm.addClass('d-none');
+        });
+
+        // Save edit
+        $('.save-edit').click(function() {
+            const commentId = $(this).data('comment-id');
+            const $commentCard = $(`#comment-${commentId}`);
+            const $editForm = $(`#edit-form-${commentId}`);
+            const $content = $commentCard.find('.comment-content');
+            const newContent = $editForm.find('textarea').val().trim();
+
+            if (newContent) {
+                $.ajax({
+                    url: `{% url "api_edit_comment" 0 %}`.replace('0', commentId),
+                    method: 'PUT',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify({
+                        'content': newContent
+                    }),
+                    success: function(response) {
+                        if (response.success) {
+                            $content.html(response.content.replace(/\n/g, '<br>'));
+                            $content.removeClass('d-none');
+                            $editForm.addClass('d-none');
+
+                            // Update meta to show edited
+                            $commentCard.find('.comment-meta').append(
+                                '<span class="text-muted">• Edited</span>'
+                            );
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Edit error:', error);
+                        alert('Failed to update comment');
+                    }
+                });
+            }
+        });
+
+        // Delete comment
+        $('.delete-comment-btn').click(function() {
+            const commentId = $(this).data('comment-id');
+
+            if (confirm('Are you sure you want to delete this comment?')) {
+                $.ajax({
+                    url: `{% url "api_delete_comment" 0 %}`.replace('0', commentId),
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            $(`#comment-${commentId}`).remove();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Delete error:', error);
+                    }
+                });
+            }
+        });
+
+        // Pin/Unpin comment
+        $('.pin-comment-btn').click(function() {
+            const commentId = $(this).data('comment-id');
+            const $btn = $(this);
+
+            $.ajax({
+                url: `{% url "api_pin_comment" 0 %}`.replace('0', commentId),
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                success: function(response) {
+                    if (response.pinned) {
+                        $btn.html('<i class="fas fa-thumbtack me-2"></i>Unpin');
+                        $(`#comment-${commentId}`).addClass('pinned-comment');
+                    } else {
+                        $btn.html('<i class="fas fa-thumbtack me-2"></i>Pin');
+                        $(`#comment-${commentId}`).removeClass('pinned-comment');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Pin error:', error);
+                }
+            });
+        });
+
+        // Share comment
+        $('.share-btn').click(function() {
+            const commentId = $(this).data('comment-id');
+            const shareUrl = `${window.location.origin}/post/{{ post.id }}/#comment-${commentId}`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Comment by {{ comment.author.username }}',
+                    text: 'Check out this comment on TradingHub',
+                    url: shareUrl
+                });
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('Comment link copied to clipboard!');
+                });
+            }
+        });
+
+        // Report comment
+        function reportComment(commentId) {
+            const reason = prompt('Please enter the reason for reporting this comment:');
+            if (reason) {
+                $.ajax({
+                    url: '{% url "api_report_comment" %}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json'
+                    },
+                    data: JSON.stringify({
+                        'comment_id': commentId,
+                        'reason': reason
+                    }),
+                    success: function(response) {
+                        alert('Comment reported successfully. Thank you for keeping TradingHub safe.');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Report error:', error);
+                        alert('Failed to report comment');
+                    }
+                });
+            }
+        }
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

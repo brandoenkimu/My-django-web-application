@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Watch | Bentley BoldTrader 2026</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --bentley-black: #0A0A0A;
+            --bentley-dark: #121212;
+            --bentley-gray: #1A1A1A;
+            --bentley-light-gray: #2D2D2D;
+            --bentley-gold: #C9A86A;
+            --bentley-gold-dark: #9C8242;
+            --bentley-gold-light: #E8D9B5;
+            --success: #00C853;
+            --warning: #FF9800;
+            --danger: #FF5252;
+            --info: #2196F3;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --card-bg: #1A1A1A;
+            --border-color: #333333;
+            --quantum-blue: #00D4FF;
+            --neuro-purple: #9C27B0;
+            --space-orange: #FF6B35;
+            --climate-green: #4CAF50;
+        }
+
+        body {
+            background-color: var(--bentley-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bentley-black) 0%, #151515 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bentley-gold);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            color: var(--bentley-gold);
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, var(--bentley-gold), var(--bentley-gold-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text span {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Sentiment Overview */
+        .sentiment-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--bentley-gold);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(201, 168, 106, 0.1), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--bentley-gold);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Sentiment Gauge */
+        .sentiment-gauge {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 2rem;
+        }
+
+        .gauge-circle {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .gauge-background {
+            fill: none;
+            stroke: var(--bentley-light-gray);
+            stroke-width: 10;
+        }
+
+        .gauge-foreground {
+            fill: none;
+            stroke: var(--bentley-gold);
+            stroke-width: 10;
+            stroke-linecap: round;
+            transition: stroke-dasharray 1s ease;
+        }
+
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+        }
+
+        .gauge-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Sentiment Indicators */
+        .sentiment-indicators {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .indicator-card {
+            background: linear-gradient(135deg, var(--bentley-gray), var(--bentley-light-gray));
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .indicator-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--bentley-gold);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .indicator-name {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .indicator-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-family: 'Source Code Pro', monospace;
+        }
+
+        .indicator-change {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .change-positive {
+            background-color: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+        }
+
+        .change-negative {
+            background-color: rgba(255, 82, 82, 0.1);
+            color: var(--danger);
+        }
+
+        .change-quantum {
+            background-color: rgba(0, 212, 255, 0.1);
+            color: var(--quantum-blue);
+        }
+
+        .change-neuro {
+            background-color: rgba(156, 39, 176, 0.1);
+            color: var(--neuro-purple);
+        }
+
+        /* Sentiment Chart */
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        /* Social Sentiment */
+        .social-sentiment {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* News Feed */
+        .news-feed {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+
+        .news-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .news-item:hover {
+            background-color: rgba(201, 168, 106, 0.05);
+        }
+
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .news-source {
+            color: var(--bentley-gold);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .news-time {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .news-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .news-sentiment {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .sentiment-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        /* Sentiment Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--border-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 1rem 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 1.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--bentley-gold);
+        }
+
+        .timeline-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-event {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: rgba(201, 168, 106, 0.05);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            color: var(--bentley-gold);
+            border-bottom: 2px solid var(--bentley-gold);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            background-color: var(--bentley-gold);
+            color: var(--bentley-black);
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn:hover {
+            background-color: var(--bentley-gold-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--bentley-gold);
+            border: 1px solid var(--bentley-gold);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(201, 168, 106, 0.1);
+        }
+
+        /* Live Indicator */
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            color: var(--success);
+        }
+
+        .live-pulse {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sentiment-overview {
+                grid-template-columns: 1fr;
+            }
+
+            .social-sentiment {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .sentiment-indicators {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sentiment-indicators {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="logo-text">BENTLEY<span>BOLDTRADER 2026</span></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(201, 168, 106, 0.1); border-radius: 20px; border: 1px solid var(--bentley-gold);">
+                <div class="live-pulse"></div>
+                <span>LIVE SENTIMENT: QUANTUM BULLISH</span>
+            </div>
+            <div style="color: var(--text-secondary);">
+                AI Confidence: <span style="color: var(--quantum-blue); font-weight: 600;">92%</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Sentiment Watch 2026</h1>
+                <p class="page-subtitle">Real-time quantum AI sentiment analysis with 2026 market trends prediction</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn" onclick="refreshSentiment()">
+                    <i class="fas fa-sync-alt"></i> Quantum Refresh
+                </button>
+                <button class="btn-secondary" onclick="exportSentimentData()">
+                    <i class="fas fa-download"></i> Export 2026 Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Sentiment Overview -->
+        <div class="sentiment-overview fade-in">
+            <!-- Overall Sentiment Gauge -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-tachometer-alt"></i> Quantum Market Sentiment</h3>
+                    <div class="live-indicator">
+                        <div class="live-pulse"></div>
+                        <span>LIVE</span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="sentiment-gauge">
+                        <div class="gauge-container">
+                            <svg class="gauge-circle" viewBox="0 0 100 100">
+                                <circle class="gauge-background" cx="50" cy="50" r="45"></circle>
+                                <circle class="gauge-foreground" cx="50" cy="50" r="45"
+                                        stroke-dasharray="283"
+                                        stroke-dashoffset="113.2"></circle>
+                            </svg>
+                            <div class="gauge-value" id="quantumSentiment">74%</div>
+                        </div>
+                        <div class="gauge-label">Quantum Bullish Score</div>
+                        <div style="margin-top: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span style="color: var(--danger);">Classic</span>
+                                <span style="color: var(--warning);">Hybrid</span>
+                                <span style="color: var(--quantum-blue);">Quantum</span>
+                            </div>
+                            <div style="height: 6px; background: linear-gradient(to right, var(--danger), var(--warning), var(--quantum-blue)); border-radius: 3px;"></div>
+                        </div>
+                        <div style="margin-top: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                            <i class="fas fa-robot" style="color: var(--quantum-blue);"></i>
+                            AI Prediction: <span style="color: var(--success); font-weight: 600;">+3.2% next 24h</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sentiment Indicators -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-bar"></i> 2026 Sentiment Indicators</h3>
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchIndicators('quantum')">Quantum</div>
+                        <div class="tab" onclick="switchIndicators('emerging')">Emerging</div>
+                        <div class="tab" onclick="switchIndicators('traditional')">Traditional</div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="sentiment-indicators" id="quantumIndicators">
+                        <div class="indicator-card">
+                            <div class="indicator-name">AI Regulation</div>
+                            <div class="indicator-value">78</div>
+                            <div class="indicator-change change-positive">+5</div>
+                        </div>
+
+                        <div class="indicator-card">
+                            <div class="indicator-name">Quantum Finance</div>
+                            <div class="indicator-value">82</div>
+                            <div class="indicator-change change-quantum">+8</div>
+                        </div>
+
+                        <div class="indicator-card">
+                            <div class="indicator-name">Neuro-Tech</div>
+                            <div class="indicator-value">71</div>
+                            <div class="indicator-change change-neuro">+4</div>
+                        </div>
+
+                        <div class="indicator-card">
+                            <div class="indicator-name">Space Economy</div>
+                            <div class="indicator-value">69</div>
+                            <div class="indicator-change change-positive">+6</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="sentimentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Sentiment -->
+        <div class="social-sentiment fade-in">
+            <!-- Quantum AI Sentiment -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-atom"></i> Quantum AI Sentiment</h3>
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Multi-Modal Analysis</span>
+                </div>
+                <div class="card-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--quantum-blue);">78%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Quantum Positive</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--warning);">15%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Hybrid Neutral</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--danger);">7%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Classic Negative</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">Emerging Markets</h4>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Sector</th>
+                                        <th>Q-Score</th>
+                                        <th>Sentiment</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Quantum Computing</strong></td>
+                                        <td>85</td>
+                                        <td><span style="color: var(--quantum-blue);">Very Bullish</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Neuro-Tech</strong></td>
+                                        <td>71</td>
+                                        <td><span style="color: var(--neuro-purple);">Bullish</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Space Mining</strong></td>
+                                        <td>68</td>
+                                        <td><span style="color: var(--space-orange);">Moderate</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Climate Tech</strong></td>
+                                        <td>92</td>
+                                        <td><span style="color: var(--climate-green);">Very Bullish</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <button class="btn-secondary" style="width: 100%;" onclick="viewQuantumDetails()">
+                        <i class="fas fa-microchip"></i> View Quantum Analysis
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tokenized Economy -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-coins"></i> Tokenized Economy</h3>
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">RWA Sentiment</span>
+                </div>
+                <div class="card-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--success);">74%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">RWA Bullish</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--warning);">19%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Stable</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 2rem; font-weight: bold; color: var(--danger);">7%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Bearish</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">Real-World Assets</h4>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-time">1 hour ago</div>
+                                <div class="timeline-event">Commercial real estate tokenization up 42%</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-time">3 hours ago</div>
+                                <div class="timeline-event">Art NFTs show institutional adoption growth</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-time">5 hours ago</div>
+                                <div class="timeline-event">Carbon credit tokens surge on regulation</div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-time">7 hours ago</div>
+                                <div class="timeline-event">Fractional space assets gaining traction</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-secondary" style="width: 100%;" onclick="viewTokenizedDetails()">
+                        <i class="fas fa-chart-network"></i> Explore Tokenized Economy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- News Sentiment -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-newspaper"></i> 2026 News Sentiment Analysis</h3>
+                <div class="tabs">
+                    <div class="tab active" onclick="switchNewsSource('quantum')">Quantum</div>
+                    <div class="tab" onclick="switchNewsSource('emerging')">Emerging</div>
+                    <div class="tab" onclick="switchNewsSource('regulation')">Regulation</div>
+                    <div class="tab" onclick="switchNewsSource('all')">All</div>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="news-feed" id="newsFeed">
+                    <!-- News items will be populated by JavaScript -->
+                </div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn-secondary" onclick="loadMoreNews()">
+                        <i class="fas fa-plus"></i> Load More 2026 News
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sector Sentiment -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-industry"></i> 2026 Sector Sentiment Analysis</h3>
+                <div class="live-indicator">
+                    <div class="live-pulse"></div>
+                    <span>AI-PREDICTIVE</span>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sector</th>
+                                <th>Q-Score</th>
+                                <th>24h Change</th>
+                                <th>Key 2026 Drivers</th>
+                                <th>AI Outlook</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sectorSentimentTable">
+                            <!-- Sector sentiment will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="chart-container" style="height: 250px; margin-top: 1.5rem;">
+                    <canvas id="sectorSentimentChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 2026 Real-time Sentiment Data
+        const REAL_TIME_SENTIMENT_2026 = {
+            quantumSentiment: 74.2,
+            lastUpdate: new Date().toISOString(),
+            confidence: 92.4,
+            predictions: {
+                next24h: '+3.2%',
+                volatility: 'moderate',
+                keyEvents: [
+                    'Quantum AI Summit Geneva',
+                    'Neuro-Tech Regulation Review',
+                    'SpaceX Mars Demo Mission',
+                    'AI Governance Treaty Signing'
+                ]
+            },
+            emergingMarkets: {
+                quantumFinance: { score: 82, trend: 'very bullish', volume: 'high' },
+                neuroTech: { score: 71, trend: 'bullish', volume: 'growing' },
+                spaceEconomy: { score: 69, trend: 'moderate', volume: 'medium' },
+                climateTech: { score: 92, trend: 'very bullish', volume: 'high' },
+                tokenizedRWA: { score: 74, trend: 'bullish', volume: 'high' },
+                decentralizedAI: { score: 68, trend: 'neutral', volume: 'growing' }
+            }
+        };
+
+        // 2026 WebSocket Simulation
+        class QuantumSentimentStream {
+            constructor() {
+                this.connected = true;
+                this.updateInterval = null;
+                this.startStream();
+            }
+
+            startStream() {
+                this.updateInterval = setInterval(() => {
+                    this.updateSentimentData();
+                }, 3000); // Update every 3 seconds
+            }
+
+            updateSentimentData() {
+                // Simulate real-time quantum sentiment fluctuations
+                const baseSentiment = 74;
+                const fluctuation = (Math.random() - 0.5) * 2; // -1 to +1
+                REAL_TIME_SENTIMENT_2026.quantumSentiment = Math.max(0, Math.min(100, baseSentiment + fluctuation));
+
+                // Update emerging markets
+                Object.keys(REAL_TIME_SENTIMENT_2026.emergingMarkets).forEach(sector => {
+                    const market = REAL_TIME_SENTIMENT_2026.emergingMarkets[sector];
+                    const change = (Math.random() - 0.5) * 1.5;
+                    market.score = Math.max(0, Math.min(100, market.score + change));
+
+                    // Update trend based on score
+                    if (market.score >= 80) market.trend = 'very bullish';
+                    else if (market.score >= 70) market.trend = 'bullish';
+                    else if (market.score >= 50) market.trend = 'moderate';
+                    else if (market.score >= 30) market.trend = 'bearish';
+                    else market.trend = 'very bearish';
+                });
+
+                updateDashboard();
+            }
+
+            disconnect() {
+                clearInterval(this.updateInterval);
+                this.connected = false;
+            }
+        }
+
+        // Initialize 2026 Dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSentimentWatch2026();
+            initializeCharts2026();
+            generateNewsFeed2026();
+            generateSectorSentiment2026();
+
+            // Start quantum stream
+            window.quantumStream = new QuantumSentimentStream();
+        });
+
+        function initializeSentimentWatch2026() {
+            updateSentimentGauge2026();
+            startLiveUpdates2026();
+        }
+
+        function updateSentimentGauge2026(value = REAL_TIME_SENTIMENT_2026.quantumSentiment) {
+            const gauge = document.querySelector('.gauge-foreground');
+            const offset = 283 - (283 * value / 100);
+            gauge.style.strokeDashoffset = offset;
+
+            const valueElement = document.getElementById('quantumSentiment');
+            valueElement.textContent = value.toFixed(1) + '%';
+
+            // Color based on sentiment
+            if (value >= 70) {
+                gauge.style.stroke = 'var(--quantum-blue)';
+                valueElement.style.color = 'var(--quantum-blue)';
+            } else if (value >= 50) {
+                gauge.style.stroke = 'var(--warning)';
+                valueElement.style.color = 'var(--warning)';
+            } else {
+                gauge.style.stroke = 'var(--danger)';
+                valueElement.style.color = 'var(--danger)';
+            }
+        }
+
+        function initializeCharts2026() {
+            // Sentiment Trend Chart for 2026
+            const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+            window.sentimentChart = new Chart(sentimentCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Q4-2025', 'Q1-2026', 'Q2-2026', 'Q3-2026', 'Now'],
+                    datasets: [{
+                        label: 'Quantum Sentiment',
+                        data: [68, 72, 70, 73, 74],
+                        borderColor: '#00D4FF',
+                        backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Neuro-Tech Sentiment',
+                        data: [62, 65, 68, 69, 71],
+                        borderColor: '#9C27B0',
+                        backgroundColor: 'rgba(156, 39, 176, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Space Economy',
+                        data: [58, 62, 65, 67, 69],
+                        borderColor: '#FF6B35',
+                        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#B0B0B0',
+                                font: {
+                                    family: "'Source Code Pro', monospace"
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Sector Sentiment Chart for 2026
+            const sectorCtx = document.getElementById('sectorSentimentChart').getContext('2d');
+            window.sectorChart = new Chart(sectorCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Quantum', 'Neuro-Tech', 'Space', 'Climate', 'RWA', 'AI DAOs'],
+                    datasets: [{
+                        label: '2026 Sentiment Score',
+                        data: [82, 71, 69, 92, 74, 68],
+                        backgroundColor: [
+                            '#00D4FF',
+                            '#9C27B0',
+                            '#FF6B35',
+                            '#4CAF50',
+                            '#C9A86A',
+                            '#2196F3'
+                        ],
+                        borderColor: [
+                            '#00D4FF',
+                            '#9C27B0',
+                            '#FF6B35',
+                            '#4CAF50',
+                            '#C9A86A',
+                            '#2196F3'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Q-Score: ${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function generateNewsFeed2026() {
+            const news2026 = [
+                {
+                    source: 'Quantum Finance Today',
+                    time: 'Just now',
+                    title: 'Post-Quantum Cryptography Adoption Reaches 47% of Major Banks',
+                    sentiment: 'quantum',
+                    impact: 'high',
+                    category: 'quantum'
+                },
+                {
+                    source: 'Neuro-Tech Review',
+                    time: '5 min ago',
+                    title: 'FDA Approves First Consumer-Grade Neural Interface Device',
+                    sentiment: 'positive',
+                    impact: 'high',
+                    category: 'emerging'
+                },
+                {
+                    source: 'Space Economy Digest',
+                    time: '12 min ago',
+                    title: 'Lunar Mining Consortium Announces $4.2B Infrastructure Plan',
+                    sentiment: 'positive',
+                    impact: 'medium',
+                    category: 'emerging'
+                },
+                {
+                    source: 'AI Governance Watch',
+                    time: '25 min ago',
+                    title: 'Global AI Regulation Treaty Signed by 42 Nations',
+                    sentiment: 'positive',
+                    impact: 'high',
+                    category: 'regulation'
+                },
+                {
+                    source: 'Climate Tech Monitor',
+                    time: '38 min ago',
+                    title: 'Carbon Capture Tokenization Market Surges 320% YoY',
+                    sentiment: 'very positive',
+                    impact: 'high',
+                    category: 'emerging'
+                },
+                {
+                    source: 'Quantum Computing Weekly',
+                    time: '52 min ago',
+                    title: '1000-Qubit Quantum Processor Achieves Financial Modeling Breakthrough',
+                    sentiment: 'quantum',
+                    impact: 'very high',
+                    category: 'quantum'
+                },
+                {
+                    source: 'Digital Assets 2026',
+                    time: '1h ago',
+                    title: 'Real Estate Tokenization Volume Hits $850B, Up 65% from 2025',
+                    sentiment: 'positive',
+                    impact: 'medium',
+                    category: 'emerging'
+                },
+                {
+                    source: 'AI Ethics Board',
+                    time: '1.5h ago',
+                    title: 'New Regulations Limit AI Training Data Sources, Sentiment Turns Cautious',
+                    sentiment: 'neutral',
+                    impact: 'medium',
+                    category: 'regulation'
+                }
+            ];
+
+            const newsContainer = document.getElementById('newsFeed');
+            renderNewsFeed(newsContainer, news2026, 'all');
+        }
+
+        function renderNewsFeed(container, news, filter = 'all') {
+            container.innerHTML = '';
+
+            const filteredNews = filter === 'all'
+                ? news
+                : news.filter(item => item.category === filter);
+
+            filteredNews.forEach(item => {
+                let sentimentColor, sentimentText;
+
+                switch(item.sentiment) {
+                    case 'quantum':
+                        sentimentColor = 'var(--quantum-blue)';
+                        sentimentText = 'QUANTUM BULLISH';
+                        break;
+                    case 'very positive':
+                        sentimentColor = 'var(--success)';
+                        sentimentText = 'VERY POSITIVE';
+                        break;
+                    case 'positive':
+                        sentimentColor = 'var(--success)';
+                        sentimentText = 'POSITIVE';
+                        break;
+                    case 'neutral':
+                        sentimentColor = 'var(--warning)';
+                        sentimentText = 'NEUTRAL';
+                        break;
+                    default:
+                        sentimentColor = 'var(--danger)';
+                        sentimentText = 'NEGATIVE';
+                }
+
+                const impactIcon = item.impact === 'very high' ? 'fa-bolt' :
+                                   item.impact === 'high' ? 'fa-chart-line-up' :
+                                   item.impact === 'medium' ? 'fa-chart-line' :
+                                   'fa-info-circle';
+
+                const newsItem = document.createElement('div');
+                newsItem.className = 'news-item';
+                newsItem.onclick = () => showNewsDetail2026(item.title);
+
+                newsItem.innerHTML = `
+                    <div class="news-header">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="news-source">${item.source}</span>
+                            <i class="fas ${impactIcon}" style="color: ${sentimentColor}; font-size: 0.8rem;"></i>
+                        </div>
+                        <span class="news-time">${item.time}</span>
+                    </div>
+                    <div class="news-title">${item.title}</div>
+                    <div class="news-sentiment">
+                        <div class="sentiment-dot" style="background-color: ${sentimentColor};"></div>
+                        <span style="color: ${sentimentColor};">${sentimentText}</span>
+                        <span style="color: var(--text-secondary); font-size: 0.8rem; margin-left: auto;">${item.category.toUpperCase()}</span>
+                    </div>
+                `;
+
+                container.appendChild(newsItem);
+            });
+        }
+
+        function generateSectorSentiment2026() {
+            const sectors2026 = [
+                {
+                    name: 'Quantum Computing',
+                    score: 82,
+                    change: '+8',
+                    drivers: 'Post-quantum crypto, financial modeling',
+                    outlook: 'Quantum Bullish',
+                    color: 'var(--quantum-blue)'
+                },
+                {
+                    name: 'Neuro-Tech',
+                    score: 71,
+                    change: '+4',
+                    drivers: 'FDA approvals, consumer adoption',
+                    outlook: 'Bullish',
+                    color: 'var(--neuro-purple)'
+                },
+                {
+                    name: 'Space Economy',
+                    score: 69,
+                    change: '+6',
+                    drivers: 'Lunar mining, orbital infrastructure',
+                    outlook: 'Moderate Bullish',
+                    color: 'var(--space-orange)'
+                },
+                {
+                    name: 'Climate Tech',
+                    score: 92,
+                    change: '+12',
+                    drivers: 'Carbon capture, green energy tokens',
+                    outlook: 'Very Bullish',
+                    color: 'var(--climate-green)'
+                },
+                {
+                    name: 'Tokenized RWA',
+                    score: 74,
+                    change: '+5',
+                    drivers: 'Real estate, art fractionalization',
+                    outlook: 'Bullish',
+                    color: 'var(--success)'
+                },
+                {
+                    name: 'Decentralized AI',
+                    score: 68,
+                    change: '+3',
+                    drivers: 'DAO governance, open models',
+                    outlook: 'Moderate',
+                    color: 'var(--info)'
+                }
+            ];
+
+            const tableBody = document.getElementById('sectorSentimentTable');
+            tableBody.innerHTML = '';
+
+            sectors2026.forEach(sector => {
+                const row = document.createElement('tr');
+
+                const changeColor = sector.change.startsWith('+') ? 'var(--success)' :
+                                   sector.change.startsWith('-') ? 'var(--danger)' :
+                                   'var(--text-secondary)';
+
+                row.innerHTML = `
+                    <td><strong style="color: ${sector.color};">${sector.name}</strong></td>
+                    <td style="color: ${sector.color}; font-weight: 700; font-family: 'Source Code Pro', monospace;">${sector.score}</td>
+                    <td style="color: ${changeColor}; font-weight: 700; font-family: 'Source Code Pro', monospace;">${sector.change}</td>
+                    <td style="color: var(--text-secondary); font-size: 0.9rem;">${sector.drivers}</td>
+                    <td><span style="padding: 0.3rem 0.8rem; background-color: ${sector.color}20; color: ${sector.color}; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">${sector.outlook}</span></td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function startLiveUpdates2026() {
+            // Update indicators with real-time quantum data
+            setInterval(() => {
+                updateIndicators2026();
+            }, 5000);
+        }
+
+        function updateIndicators2026() {
+            // Update quantum indicators
+            const indicators = document.querySelectorAll('#quantumIndicators .indicator-value');
+            indicators.forEach((indicator, index) => {
+                const baseValues = [78, 82, 71, 69];
+                const fluctuation = (Math.random() - 0.5) * 3;
+                const newValue = Math.max(0, Math.min(100, baseValues[index] + fluctuation));
+                indicator.textContent = Math.round(newValue);
+
+                // Update change indicators
+                const changeElement = indicator.nextElementSibling;
+                if (changeElement && changeElement.classList.contains('indicator-change')) {
+                    const change = fluctuation;
+                    const changeText = change >= 0 ? `+${Math.round(change)}` : `${Math.round(change)}`;
+                    changeElement.textContent = changeText;
+
+                    // Update change class based on sector
+                    const sectorClasses = ['change-positive', 'change-quantum', 'change-neuro', 'change-positive'];
+                    changeElement.className = `indicator-change ${sectorClasses[index]}`;
+                }
+            });
+        }
+
+        function updateDashboard() {
+            // Update gauge with real-time data
+            updateSentimentGauge2026(REAL_TIME_SENTIMENT_2026.quantumSentiment);
+
+            // Update header sentiment
+            const headerSentiment = document.querySelector('.header span');
+            if (headerSentiment) {
+                headerSentiment.textContent = `LIVE SENTIMENT: ${REAL_TIME_SENTIMENT_2026.quantumSentiment >= 70 ? 'QUANTUM BULLISH' : 'HYBRID NEUTRAL'}`;
+            }
+
+            // Update charts with new data
+            if (window.sentimentChart) {
+                const newData = window.sentimentChart.data.datasets[0].data;
+                newData[4] = REAL_TIME_SENTIMENT_2026.quantumSentiment;
+                window.sentimentChart.update('none');
+            }
+
+            if (window.sectorChart) {
+                const newData = [
+                    REAL_TIME_SENTIMENT_2026.emergingMarkets.quantumFinance.score,
+                    REAL_TIME_SENTIMENT_2026.emergingMarkets.neuroTech.score,
+                    REAL_TIME_SENTIMENT_2026.emergingMarkets.spaceEconomy.score,
+                    REAL_TIME_SENTIMENT_2026.emergingMarkets.climateTech.score,
+                    REAL_TIME_SENTIMENT_2026.emergingMarkets.tokenizedRWA.score,
+                    REAL_TIME_SENTIMENT_2026.emergingMarkets.decentralizedAI.score
+                ];
+                window.sectorChart.data.datasets[0].data = newData;
+                window.sectorChart.update('none');
+            }
+        }
+
+        function refreshSentiment() {
+            showNotification2026('Quantum refresh initiated...', 'quantum');
+
+            // Simulate quantum computation
+            setTimeout(() => {
+                updateDashboard();
+                showNotification2026('Quantum sentiment refreshed with AI prediction', 'success');
+            }, 1500);
+        }
+
+        function exportSentimentData() {
+            showNotification2026('Exporting 2026 quantum sentiment dataset...', 'info');
+
+            // Create export data
+            const exportData = {
+                ...REAL_TIME_SENTIMENT_2026,
+                exportTime: new Date().toISOString(),
+                format: 'QUANTUM_SENTIMENT_2026_v1.0'
+            };
+
+            // Simulate export
+            setTimeout(() => {
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const exportFileDefaultName = `quantum-sentiment-${new Date().getTime()}.json`;
+
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+
+                showNotification2026('2026 quantum data exported successfully', 'success');
+            }, 1000);
+        }
+
+        function switchIndicators(type) {
+            const tabs = document.querySelectorAll('.card:nth-child(2) .tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const activeTab = Array.from(tabs).find(tab => tab.textContent.toLowerCase() === type);
+            if (activeTab) {
+                activeTab.classList.add('active');
+
+                // Update indicators based on type
+                const indicators = {
+                    quantum: ['AI Regulation', 'Quantum Finance', 'Neuro-Tech', 'Space Economy'],
+                    emerging: ['Climate Tech', 'Tokenized RWA', 'Decentralized AI', 'Biotech'],
+                    traditional: ['S&P 500', 'NASDAQ', 'VIX', 'Put/Call']
+                };
+
+                const indicatorNames = document.querySelectorAll('.indicator-name');
+                indicatorNames.forEach((name, index) => {
+                    name.textContent = indicators[type][index] || indicators.quantum[index];
+                });
+            }
+
+            showNotification2026(`Showing ${type} indicators`, 'info');
+        }
+
+        function switchNewsSource(source) {
+            const tabs = document.querySelectorAll('.card:nth-child(3) .tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const activeTab = Array.from(tabs).find(tab => tab.textContent.toLowerCase() === source);
+            if (activeTab) {
+                activeTab.classList.add('active');
+
+                // Re-render news feed with filter
+                const newsContainer = document.getElementById('newsFeed');
+                generateNewsFeed2026(); // Regenerate and filter
+
+                // Filter news
+                const allNews = Array.from(newsContainer.querySelectorAll('.news-item'));
+                allNews.forEach(item => {
+                    const category = item.querySelector('span:last-child')?.textContent?.toLowerCase();
+                    if (source === 'all' || category?.includes(source)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+
+            showNotification2026(`Filtering ${source} news`, 'info');
+        }
+
+        function viewQuantumDetails() {
+            showNotification2026('Opening quantum AI sentiment analysis...', 'quantum');
+            // In a real app, this would navigate to detailed quantum analysis
+            alert('Quantum AI Sentiment Analysis:\n\n' +
+                  `Current Quantum Score: ${REAL_TIME_SENTIMENT_2026.quantumSentiment.toFixed(1)}%\n` +
+                  `AI Confidence: ${REAL_TIME_SENTIMENT_2026.confidence}%\n` +
+                  `24h Prediction: ${REAL_TIME_SENTIMENT_2026.predictions.next24h}\n` +
+                  `Next Key Event: ${REAL_TIME_SENTIMENT_2026.predictions.keyEvents[0]}`);
+        }
+
+        function viewTokenizedDetails() {
+            showNotification2026('Opening tokenized economy dashboard...', 'info');
+            // In a real app, this would navigate to tokenized assets dashboard
+            alert('Tokenized Economy Overview:\n\n' +
+                  'Real-World Asset (RWA) tokenization is revolutionizing traditional finance.\n\n' +
+                  'Current Trends:\n' +
+                  '• Commercial real estate: $850B tokenized\n' +
+                  '• Art & collectibles: 320% YoY growth\n' +
+                  '• Carbon credits: Fully tokenized market\n' +
+                  '• Space assets: Emerging fractional ownership');
+        }
+
+        function loadMoreNews() {
+            showNotification2026('Loading additional 2026 quantum news...', 'info');
+
+            // Simulate loading more news
+            setTimeout(() => {
+                const newsContainer = document.getElementById('newsFeed');
+                const newItem = document.createElement('div');
+                newItem.className = 'news-item';
+                newItem.innerHTML = `
+                    <div class="news-header">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span class="news-source">Quantum Update</span>
+                            <i class="fas fa-bolt" style="color: var(--quantum-blue); font-size: 0.8rem;"></i>
+                        </div>
+                        <span class="news-time">Just added</span>
+                    </div>
+                    <div class="news-title">Quantum-Resistant Blockchain Adoption Crosses 60% of Fortune 500</div>
+                    <div class="news-sentiment">
+                        <div class="sentiment-dot" style="background-color: var(--quantum-blue);"></div>
+                        <span style="color: var(--quantum-blue);">QUANTUM BULLISH</span>
+                    </div>
+                `;
+                newsContainer.appendChild(newItem);
+                showNotification2026('Additional quantum news loaded', 'success');
+            }, 1000);
+        }
+
+        function showNewsDetail2026(title) {
+            showNotification2026(`Opening quantum analysis: ${title}`, 'info');
+            // In a real application, this would open the full article with quantum analysis
+        }
+
+        function showNotification2026(message, type) {
+            const notification = document.createElement('div');
+            const icon = type === 'quantum' ? 'fas fa-atom' :
+                         type === 'success' ? 'fas fa-check-circle' :
+                         type === 'warning' ? 'fas fa-exclamation-triangle' :
+                         'fas fa-info-circle';
+
+            const bgColor = type === 'quantum' ? 'rgba(0, 212, 255, 0.9)' :
+                            type === 'success' ? 'rgba(0, 200, 83, 0.9)' :
+                            type === 'warning' ? 'rgba(255, 152, 0, 0.9)' :
+                            'rgba(33, 150, 243, 0.9)';
+
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background-color: ${bgColor};
+                color: white;
+                border-radius: 6px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-width: 300px;
+            `;
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            notification.innerHTML = `
+                <i class="${icon}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => {
+                    notification.remove();
+                    style.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // 2026 AI Prediction Simulation
+        function getAIPrediction() {
+            const predictions = [
+                "Quantum computing will boost financial modeling accuracy by 47% in Q2",
+                "Neuro-tech adoption to reach 15% of consumer electronics by EOY",
+                "Space mining regulations expected to be finalized by Q3 2026",
+                "AI-driven climate tech investment to surpass $2T by 2027",
+                "Tokenized real estate to account for 8% of global RE market"
+            ];
+
+            return predictions[Math.floor(Math.random() * predictions.length)];
+        }
+
+        // Simulate quantum entanglement for real-time updates
+        setInterval(() => {
+            // Randomly show AI predictions
+            if (Math.random() > 0.7) {
+                const prediction = getAIPrediction();
+                showNotification2026(`AI Prediction: ${prediction}`, 'quantum');
+            }
+        }, 30000); // Every 30 seconds
+    </script>
+</body>
+</html>

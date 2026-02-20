@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Backtest Center | Bentley-Brand-dev</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* All CSS remains exactly the same */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2d6bc9;
+            --accent-color: #00c9a7;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dark-mode {
+            --light-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-dark: #f1f5f9;
+            --text-light: #94a3b8;
+            --border-color: #334155;
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-text span {
+            color: var(--accent-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-icon {
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar-section h3 {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+
+        .module-list {
+            list-style: none;
+        }
+
+        .module-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .module-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .module-link:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+            color: var(--accent-color);
+        }
+
+        .module-link.active {
+            background-color: rgba(0, 201, 167, 0.15);
+            color: var(--accent-color);
+            font-weight: 600;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .module-icon {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        /* Backtest Center specific styles */
+        .backtest-container {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .backtest-config {
+            width: 350px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .backtest-results {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .chart-container {
+            height: 400px;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric-box {
+            text-align: center;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .metric-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .positive-metric {
+            color: var(--success-color);
+        }
+
+        .negative-metric {
+            color: var(--danger-color);
+        }
+
+        .backtest-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #00b397;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #265cbb;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        .results-table th {
+            text-align: left;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            color: var(--text-light);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .results-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .backtest-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-top: 1.5rem;
+        }
+
+        .backtest-tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+        }
+
+        .backtest-tab.active {
+            border-bottom-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .tab-content {
+            margin-top: 1.5rem;
+        }
+
+        .optimization-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .optimization-param {
+            flex: 1;
+            padding: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+        }
+
+        .param-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .param-range {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .walkforward-steps {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .wf-step {
+            text-align: center;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+            flex: 1;
+            margin: 0 0.5rem;
+        }
+
+        .wf-step.active {
+            background-color: rgba(0, 201, 167, 0.1);
+            border: 1px solid var(--accent-color);
+        }
+
+        .wf-step-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .wf-step-value {
+            font-weight: 600;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .backtest-container {
+                flex-direction: column;
+            }
+
+            .backtest-config {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="logo-text">Bentley-<span>Brand-dev</span></div>
+        </div>
+
+        <div class="nav-links">
+            <a href="{% url 'base' %}" class="nav-link"><i class="fas fa-home nav-icon"></i>Dashboard</a>
+            <a href="{% url 'notifications' %}" class="nav-link"><i class="fas fa-bell nav-icon"></i>Alerts</a>
+            <a href="{% url 'algo_trading_platform' %}" class="nav-link"><i class="fas fa-chart-bar nav-icon"></i>Analytics</a>
+            <a href="{% url 'settings' %}" class="nav-link"><i class="fas fa-cog nav-icon"></i>Settings</a>
+        </div>
+
+        <div class="user-menu">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-avatar">
+                {{ user.username|first|upper }}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>Trading Modules</h3>
+                <ul class="module-list">
+                    <li class="module-item">
+                        <a href="{% url 'strategy_lab' %}" class="module-link">
+                            <i class="fas fa-flask module-icon"></i> Strategy Lab
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trade_builder' %}" class="module-link">
+                            <i class="fas fa-tools module-icon"></i> Trade Builder
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'market_blueprint' %}" class="module-link">
+                            <i class="fas fa-map module-icon"></i> Market Blueprint
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'advanced_trading_tools' %}" class="module-link">
+                            <i class="fas fa-chart-bar module-icon"></i> Advanced Trading Tools
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Development Tools</h3>
+                <ul class="module-list">
+                    <li class="module-item">
+                        <a href="{% url 'indicator_workshop' %}" class="module-link">
+                            <i class="fas fa-ruler-combined module-icon"></i> Indicator Workshop
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trading_toolkit' %}" class="module-link">
+                            <i class="fas fa-toolbox module-icon"></i> Trading Toolkit
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'backtest_center' %}" class="module-link active">
+                            <i class="fas fa-history module-icon"></i> Quantum Backtest
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trade_development' %}" class="module-link">
+                            <i class="fas fa-code-branch module-icon"></i> Trade Development
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>AI Backtest Stats</h3>
+                <div class="card">
+                    <div class="card-content">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span><i class="fas fa-atom"></i> Quantum Tests</span>
+                            <strong>142</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span><i class="fas fa-brain"></i> AI Optimized</span>
+                            <strong>118/142</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span><i class="fas fa-chart-line"></i> Avg. Win Rate</span>
+                            <strong style="color: var(--success-color);">76.4%</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span><i class="fas fa-bolt"></i> Best Strategy</span>
+                            <strong>Quantum AI Momentum</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Quantum Backtest Center</h1>
+                    <p class="page-subtitle">AI-powered strategy testing with quantum historical data and predictive analytics | March 18, 2026</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary"><i class="fas fa-plus"></i> New Quantum Test</button>
+                    <button class="btn btn-outline"><i class="fas fa-robot"></i> AI Compare</button>
+                </div>
+            </div>
+
+            <div class="backtest-tabs">
+                <div class="backtest-tab active" onclick="switchTab('simple')">Quantum Backtest</div>
+                <div class="backtest-tab" onclick="switchTab('optimization')">AI Optimization</div>
+                <div class="backtest-tab" onclick="switchTab('walkforward')">Quantum WF Analysis</div>
+                <div class="backtest-tab" onclick="switchTab('montecarlo')">Quantum Monte Carlo</div>
+                <div class="backtest-tab" onclick="switchTab('predictive')">AI Predictive Testing</div>
+            </div>
+
+            <div class="tab-content">
+                <div id="simple-tab" class="fade-in">
+                    <div class="backtest-container">
+                        <div class="backtest-config">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                <h3>Quantum Backtest Configuration</h3>
+                                <span class="status-indicator status-active">
+                                    <i class="fas fa-bolt"></i> AI Powered
+                                </span>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-brain"></i> Quantum Strategy</label>
+                                <select class="form-control">
+                                    <option selected>Quantum AI Momentum v3.1</option>
+                                    <option>Neural Arbitrage Bot v4</option>
+                                    <option>Sentiment Analysis Pro</option>
+                                    <option>Crypto Quantum Hedge</option>
+                                    <option>AI Options Predictor</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-chart-line"></i> Symbol</label>
+                                <input type="text" class="form-control" value="QNTM" placeholder="Quantum asset symbol">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" value="2025-01-01">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">End Date</label>
+                                    <input type="date" class="form-control" value="2026-03-18">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-clock"></i> Quantum Timeframe</label>
+                                <select class="form-control">
+                                    <option>1 Second</option>
+                                    <option>1 Minute</option>
+                                    <option selected>15 Minutes</option>
+                                    <option>1 Hour</option>
+                                    <option>Quantum Bars</option>
+                                    <option>AI Clustered</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-wallet"></i> Quantum Capital</label>
+                                <input type="number" class="form-control" value="250000" step="1000">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-percentage"></i> AI Commission</label>
+                                <input type="number" class="form-control" value="4.95" step="0.01">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-wave-square"></i> Quantum Slippage</label>
+                                <input type="number" class="form-control" value="0.005" step="0.001" placeholder="in %">
+                            </div>
+
+                            <div class="backtest-actions">
+                                <button class="btn btn-primary" style="flex: 1;"><i class="fas fa-play fa-spin"></i> Run Quantum Test</button>
+                                <button class="btn btn-outline"><i class="fas fa-atom"></i> Save</button>
+                            </div>
+                        </div>
+
+                        <div class="backtest-results">
+                            <div class="chart-container">
+                                <div style="text-align: center;">
+                                    <i class="fas fa-atom" style="font-size: 3rem; margin-bottom: 1rem; color: var(--accent-color);"></i>
+                                    <p>Quantum Equity Curve</p>
+                                    <p style="font-size: 0.9rem; opacity: 0.7;">AI-optimized strategy performance visualization</p>
+                                    <div style="margin-top: 1rem;">
+                                        <span class="status-indicator status-active">Processing 2.4M data points</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 style="margin-bottom: 1rem;">Quantum Performance Metrics</h3>
+                                <div class="performance-metrics">
+                                    <div class="metric-box">
+                                        <div class="metric-label">Quantum Return</div>
+                                        <div class="metric-value positive-metric">+42.8%</div>
+                                        <div class="metric-label">$107,000</div>
+                                    </div>
+                                    <div class="metric-box">
+                                        <div class="metric-label">AI Win Rate</div>
+                                        <div class="metric-value">78.4%</div>
+                                        <div class="metric-label">142/181 trades</div>
+                                    </div>
+                                    <div class="metric-box">
+                                        <div class="metric-label">Profit Factor</div>
+                                        <div class="metric-value">3.15</div>
+                                        <div class="metric-label">Quantum Ratio</div>
+                                    </div>
+                                    <div class="metric-box">
+                                        <div class="metric-label">Max Drawdown</div>
+                                        <div class="metric-value negative-metric">-5.7%</div>
+                                        <div class="metric-label">AI Controlled</div>
+                                    </div>
+                                    <div class="metric-box">
+                                        <div class="metric-label">Quantum Sharpe</div>
+                                        <div class="metric-value positive-metric">2.42</div>
+                                        <div class="metric-label">Risk-Adjusted</div>
+                                    </div>
+                                    <div class="metric-box">
+                                        <div class="metric-label">AI Win/Loss</div>
+                                        <div class="metric-value">2.85</div>
+                                        <div class="metric-label">Ratio</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card fade-in" style="margin-top: 2rem;">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-list"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">Quantum Trade Log</h3>
+                                <p>AI-analyzed trades with quantum execution metrics</p>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>AI Signal</th>
+                                        <th>Entry</th>
+                                        <th>Exit</th>
+                                        <th>Size</th>
+                                        <th>P&L</th>
+                                        <th>AI Confidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>Jan 15, 2025</td>
+                                        <td style="color: var(--success-color);"><i class="fas fa-brain"></i> STRONG BUY</td>
+                                        <td>$1,085.50</td>
+                                        <td>$1,142.25</td>
+                                        <td>250</td>
+                                        <td style="color: var(--success-color);">+$14,187.50</td>
+                                        <td>92%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>Feb 2, 2025</td>
+                                        <td style="color: var(--danger-color);"><i class="fas fa-brain"></i> WEAK SELL</td>
+                                        <td>$1,152.75</td>
+                                        <td>$1,125.50</td>
+                                        <td>200</td>
+                                        <td style="color: var(--success-color);">+$5,450.00</td>
+                                        <td>68%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>Feb 28, 2025</td>
+                                        <td style="color: var(--success-color);"><i class="fas fa-bolt"></i> QUANTUM BUY</td>
+                                        <td>$1,098.25</td>
+                                        <td>$1,165.80</td>
+                                        <td>300</td>
+                                        <td style="color: var(--success-color);">+$20,265.00</td>
+                                        <td>96%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>Mar 25, 2025</td>
+                                        <td style="color: var(--success-color);"><i class="fas fa-brain"></i> AI BUY</td>
+                                        <td>$1,175.40</td>
+                                        <td>$1,248.50</td>
+                                        <td>250</td>
+                                        <td style="color: var(--success-color);">+$18,275.00</td>
+                                        <td>94%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td>Apr 18, 2025</td>
+                                        <td style="color: var(--danger-color);"><i class="fas fa-brain"></i> AI SELL</td>
+                                        <td>$1,245.75</td>
+                                        <td>$1,195.25</td>
+                                        <td>200</td>
+                                        <td style="color: var(--danger-color);">-$10,100.00</td>
+                                        <td>72%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="optimization-tab" class="fade-in" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">Quantum AI Optimization</h3>
+                                <p>Neural network optimization with quantum parameter search</p>
+                            </div>
+                            <div style="margin-left: auto;">
+                                <span class="status-indicator status-active">
+                                    <i class="fas fa-robot"></i> AI Learning
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Quantum Optimization Parameters</h4>
+                            <div class="optimization-controls">
+                                <div class="optimization-param">
+                                    <div class="param-name"><i class="fas fa-brain"></i> AI Confidence</div>
+                                    <div class="param-range">Range: 65% - 95%</div>
+                                    <input type="range" class="form-control" min="65" max="95" value="85" style="margin-top: 0.5rem;">
+                                    <div style="text-align: center; margin-top: 0.5rem; font-weight: 600;">85%</div>
+                                </div>
+                                <div class="optimization-param">
+                                    <div class="param-name"><i class="fas fa-atom"></i> Quantum Lookback</div>
+                                    <div class="param-range">Range: 5 - 50</div>
+                                    <input type="range" class="form-control" min="5" max="50" value="28" style="margin-top: 0.5rem;">
+                                    <div style="text-align: center; margin-top: 0.5rem; font-weight: 600;">28</div>
+                                </div>
+                                <div class="optimization-param">
+                                    <div class="param-name"><i class="fas fa-shield-alt"></i> AI Stop Loss %</div>
+                                    <div class="param-range">Range: 0.5% - 3%</div>
+                                    <input type="range" class="form-control" min="0.5" max="3" step="0.1" value="1.5" style="margin-top: 0.5rem;">
+                                    <div style="text-align: center; margin-top: 0.5rem; font-weight: 600;">1.5%</div>
+                                </div>
+                            </div>
+
+                            <div class="chart-container" style="height: 300px; margin-top: 1.5rem;">
+                                <div style="text-align: center;">
+                                    <i class="fas fa-atom" style="font-size: 3rem; margin-bottom: 1rem; color: #9333ea;"></i>
+                                    <p>Quantum Optimization Surface</p>
+                                    <p style="font-size: 0.9rem; opacity: 0.7;">AI-generated parameter performance landscape</p>
+                                    <div style="margin-top: 1rem;">
+                                        <span class="status-indicator status-active">Evaluating 2,500 combinations</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="backtest-actions" style="margin-top: 1.5rem;">
+                                <button class="btn btn-primary"><i class="fas fa-play fa-spin"></i> Run Quantum Optimization</button>
+                                <button class="btn btn-secondary"><i class="fas fa-brain"></i> AI Suggest</button>
+                                <button class="btn btn-outline"><i class="fas fa-download"></i> Export Quantum</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="walkforward-tab" class="fade-in" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-forward"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">Quantum Walk-Forward Analysis</h3>
+                                <p>AI-powered out-of-sample validation with quantum time folding</p>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h4>Quantum WF Configuration</h4>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-chart-line"></i> Quantum Optimization</label>
+                                    <select class="form-control">
+                                        <option selected>6 Months</option>
+                                        <option>Quantum 3M</option>
+                                        <option>AI 1 Year</option>
+                                        <option>Extended 2 Years</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-check-circle"></i> AI Validation</label>
+                                    <select class="form-control">
+                                        <option selected>Quantum 3 Months</option>
+                                        <option>AI 1 Month</option>
+                                        <option>6 Months</option>
+                                        <option>Extended Validation</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <h4 style="margin-top: 1.5rem;">Quantum Walk-Forward Steps</h4>
+                            <div class="walkforward-steps">
+                                <div class="wf-step active">
+                                    <div class="wf-step-label">Q-Phase 1</div>
+                                    <div class="wf-step-value"><i class="fas fa-brain"></i> Optimize</div>
+                                    <div style="font-size: 0.85rem; margin-top: 0.5rem;">Jan - Jun 2025</div>
+                                    <div style="font-size: 0.75rem; color: var(--success-color);">Win: 82%</div>
+                                </div>
+                                <div class="wf-step">
+                                    <div class="wf-step-label">Q-Phase 1</div>
+                                    <div class="wf-step-value"><i class="fas fa-check"></i> Validate</div>
+                                    <div style="font-size: 0.85rem; margin-top: 0.5rem;">Jul - Sep 2025</div>
+                                    <div style="font-size: 0.75rem; color: var(--success-color);">Win: 78%</div>
+                                </div>
+                                <div class="wf-step">
+                                    <div class="wf-step-label">Q-Phase 2</div>
+                                    <div class="wf-step-value"><i class="fas fa-brain"></i> Optimize</div>
+                                    <div style="font-size: 0.85rem; margin-top: 0.5rem;">Apr - Sep 2025</div>
+                                    <div style="font-size: 0.75rem; color: var(--success-color);">Win: 84%</div>
+                                </div>
+                                <div class="wf-step">
+                                    <div class="wf-step-label">Q-Phase 2</div>
+                                    <div class="wf-step-value"><i class="fas fa-check"></i> Validate</div>
+                                    <div style="font-size: 0.85rem; margin-top: 0.5rem;">Oct - Dec 2025</div>
+                                    <div style="font-size: 0.75rem; color: var(--success-color);">Win: 81%</div>
+                                </div>
+                                <div class="wf-step">
+                                    <div class="wf-step-label">Q-Phase 3</div>
+                                    <div class="wf-step-value"><i class="fas fa-brain"></i> Optimize</div>
+                                    <div style="font-size: 0.85rem; margin-top: 0.5rem;">Jul - Dec 2025</div>
+                                    <div style="font-size: 0.75rem; color: var(--success-color);">Win: 87%</div>
+                                </div>
+                                <div class="wf-step">
+                                    <div class="wf-step-label">Q-Phase 3</div>
+                                    <div class="wf-step-value"><i class="fas fa-check"></i> Validate</div>
+                                    <div style="font-size: 0.85rem; margin-top: 0.5rem;">Jan - Mar 2026</div>
+                                    <div style="font-size: 0.75rem; color: var(--success-color);">Win: 85%</div>
+                                </div>
+                            </div>
+
+                            <div class="chart-container" style="height: 300px; margin-top: 1.5rem;">
+                                <div style="text-align: center;">
+                                    <i class="fas fa-project-diagram" style="font-size: 3rem; margin-bottom: 1rem; color: var(--accent-color);"></i>
+                                    <p>Quantum WF Analysis</p>
+                                    <p style="font-size: 0.9rem; opacity: 0.7;">In-sample vs quantum out-of-sample performance</p>
+                                </div>
+                            </div>
+
+                            <div class="backtest-actions" style="margin-top: 1.5rem;">
+                                <button class="btn btn-primary"><i class="fas fa-play fa-spin"></i> Run Quantum WF</button>
+                                <button class="btn btn-outline"><i class="fas fa-chart-bar"></i> AI Metrics</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="montecarlo-tab" class="fade-in" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-dice"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">Quantum Monte Carlo</h3>
+                                <p>Quantum probability simulations with AI risk assessment</p>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-atom"></i> Quantum Simulations</label>
+                                    <input type="number" class="form-control" value="5000" min="100" max="100000">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-shield-alt"></i> AI Confidence</label>
+                                    <select class="form-control">
+                                        <option>90%</option>
+                                        <option selected>95%</option>
+                                        <option>99%</option>
+                                        <option>Quantum 99.9%</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="chart-container" style="height: 300px; margin-top: 1rem;">
+                                <div style="text-align: center;">
+                                    <i class="fas fa-atom" style="font-size: 3rem; margin-bottom: 1rem; color: #9333ea;"></i>
+                                    <p>Quantum Probability Distribution</p>
+                                    <p style="font-size: 0.9rem; opacity: 0.7;">AI-generated outcome probabilities with quantum sampling</p>
+                                </div>
+                            </div>
+
+                            <div class="performance-metrics" style="margin-top: 1.5rem;">
+                                <div class="metric-box">
+                                    <div class="metric-label">Quantum Expected</div>
+                                    <div class="metric-value positive-metric">+38.4%</div>
+                                    <div class="metric-label">AI Mean</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Best Case (95%)</div>
+                                    <div class="metric-value positive-metric">+68.8%</div>
+                                    <div class="metric-label">Quantum Upper</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Worst Case (95%)</div>
+                                    <div class="metric-value negative-metric">-2.2%</div>
+                                    <div class="metric-label">AI Protected</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">AI Profit Probability</div>
+                                    <div class="metric-value">94.5%</div>
+                                    <div class="metric-label">Quantum Success</div>
+                                </div>
+                            </div>
+
+                            <div class="backtest-actions" style="margin-top: 1.5rem;">
+                                <button class="btn btn-primary"><i class="fas fa-play fa-spin"></i> Run Quantum Simulation</button>
+                                <button class="btn btn-outline"><i class="fas fa-chart-pie"></i> View Quantum Dist</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="predictive-tab" class="fade-in" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <i class="fas fa-crystal-ball"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title">AI Predictive Testing</h3>
+                                <p>Neural network forecasting of future strategy performance</p>
+                            </div>
+                            <div style="margin-left: auto;">
+                                <span class="status-indicator status-active">
+                                    <i class="fas fa-robot"></i> Predictive AI
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-calendar"></i> Forecast Period</label>
+                                    <select class="form-control">
+                                        <option>Next 30 Days</option>
+                                        <option selected>Next 90 Days</option>
+                                        <option>Next 180 Days</option>
+                                        <option>Quantum 1 Year</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label"><i class="fas fa-brain"></i> AI Model</label>
+                                    <select class="form-control">
+                                        <option>Transformer v4</option>
+                                        <option selected>Quantum LSTM</option>
+                                        <option>GAN Predictor</option>
+                                        <option>Neural ODE</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="chart-container" style="height: 300px; margin-top: 1rem;">
+                                <div style="text-align: center;">
+                                    <i class="fas fa-crystal-ball" style="font-size: 3rem; margin-bottom: 1rem; color: #9333ea;"></i>
+                                    <p>AI Performance Forecast</p>
+                                    <p style="font-size: 0.9rem; opacity: 0.7;">Neural network prediction of future returns</p>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1.5rem;">
+                                <h4>AI Predictions (Next 90 Days)</h4>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                                    <div style="padding: 1rem; background-color: rgba(16, 185, 129, 0.1); border-radius: 8px;">
+                                        <div style="font-weight: 600; color: var(--success-color);"><i class="fas fa-arrow-up"></i> Bullish Scenario</div>
+                                        <div style="margin-top: 0.5rem; font-size: 1.25rem;">+28.5% Expected</div>
+                                        <div style="font-size: 0.85rem; color: var(--text-light);">Probability: 72% | AI Confidence: 88%</div>
+                                    </div>
+                                    <div style="padding: 1rem; background-color: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                                        <div style="font-weight: 600; color: var(--danger-color);"><i class="fas fa-arrow-down"></i> Bearish Scenario</div>
+                                        <div style="margin-top: 0.5rem; font-size: 1.25rem;">-6.8% Expected</div>
+                                        <div style="font-size: 0.85rem; color: var(--text-light);">Probability: 28% | AI Confidence: 82%</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="backtest-actions" style="margin-top: 1.5rem;">
+                                <button class="btn btn-primary"><i class="fas fa-play fa-spin"></i> Run AI Forecast</button>
+                                <button class="btn btn-outline"><i class="fas fa-chart-line"></i> View AI Projections</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card fade-in" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <h3 class="card-title">Quantum Backtest History</h3>
+                        <p>AI-analyzed historical backtests with quantum metrics | Updated: 15:05</p>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <span class="status-indicator status-active">
+                            <i class="fas fa-sync-alt fa-spin"></i> Live Updates
+                        </span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>Backtest Name</th>
+                                <th>Quantum Strategy</th>
+                                <th>Date</th>
+                                <th>Duration</th>
+                                <th>Trades</th>
+                                <th>AI Win Rate</th>
+                                <th>Quantum Return</th>
+                                <th>AI Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Quantum AI Momentum v3.1</strong></td>
+                                <td>Quantum Momentum</td>
+                                <td>Mar 16, 2026</td>
+                                <td>14 Months</td>
+                                <td>181</td>
+                                <td><strong style="color: var(--success-color);">78.4%</strong></td>
+                                <td style="color: var(--success-color);"><strong>+42.8%</strong></td>
+                                <td>94/100</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Analyze</button>
+                                    <button class="btn btn-primary btn-sm">AI Clone</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Neural Arbitrage v4</td>
+                                <td>AI Arbitrage</td>
+                                <td>Mar 14, 2026</td>
+                                <td>6 Months</td>
+                                <td>342</td>
+                                <td><strong style="color: var(--success-color);">82.1%</strong></td>
+                                <td style="color: var(--success-color);">+38.5%</td>
+                                <td>92/100</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Analyze</button>
+                                    <button class="btn btn-primary btn-sm">AI Clone</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Sentiment Analysis Pro</td>
+                                <td>AI Sentiment</td>
+                                <td>Mar 10, 2026</td>
+                                <td>2 Years</td>
+                                <td>145</td>
+                                <td><strong style="color: var(--success-color);">71.3%</strong></td>
+                                <td style="color: var(--success-color);">+52.4%</td>
+                                <td>88/100</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Analyze</button>
+                                    <button class="btn btn-primary btn-sm">AI Clone</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Crypto Quantum Hedge</td>
+                                <td>Quantum Crypto</td>
+                                <td>Mar 5, 2026</td>
+                                <td>3 Months</td>
+                                <td>412</td>
+                                <td><strong style="color: var(--success-color);">65.8%</strong></td>
+                                <td style="color: var(--success-color);">+28.8%</td>
+                                <td>85/100</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Analyze</button>
+                                    <button class="btn btn-primary btn-sm">AI Clone</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>AI Options Predictor</td>
+                                <td>Options AI</td>
+                                <td>Feb 28, 2026</td>
+                                <td>8 Months</td>
+                                <td>198</td>
+                                <td><strong style="color: var(--success-color);">74.2%</strong></td>
+                                <td style="color: var(--success-color);">+68.5%</td>
+                                <td>96/100</td>
+                                <td>
+                                    <button class="btn btn-outline btn-sm">Analyze</button>
+                                    <button class="btn btn-primary btn-sm">AI Clone</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <div style="color: var(--text-light); font-size: 0.9em;">
+                        <i class="fas fa-robot"></i> AI analyzed 142 quantum backtests | Average AI Score: <strong style="color: var(--success-color);">91/100</strong>
+                    </div>
+                    <button class="btn btn-outline">View All Quantum Tests</button>
+                </div>
+            </div>
+
+            <!-- Quantum Analytics Section -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon" style="background-color: rgba(147, 51, 234, 0.1); color: #9333ea;">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div>
+                            <h3 class="card-title">AI Strategy Ranker</h3>
+                            <p>Quantum performance comparison</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>1. Quantum AI Momentum</span>
+                                <strong style="color: var(--success-color);">94/100</strong>
+                            </div>
+                            <div style="height: 4px; background-color: rgba(0, 0, 0, 0.1); border-radius: 2px; margin-top: 0.25rem;">
+                                <div style="height: 100%; width: 94%; background-color: var(--success-color); border-radius: 2px;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>2. AI Options Predictor</span>
+                                <strong style="color: var(--success-color);">92/100</strong>
+                            </div>
+                            <div style="height: 4px; background-color: rgba(0, 0, 0, 0.1); border-radius: 2px; margin-top: 0.25rem;">
+                                <div style="height: 100%; width: 92%; background-color: var(--success-color); border-radius: 2px;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>3. Neural Arbitrage</span>
+                                <strong style="color: var(--success-color);">88/100</strong>
+                            </div>
+                            <div style="height: 4px; background-color: rgba(0, 0, 0, 0.1); border-radius: 2px; margin-top: 0.25rem;">
+                                <div style="height: 100%; width: 88%; background-color: var(--success-color); border-radius: 2px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h3 class="card-title">Quantum Speed Metrics</h3>
+                            <p>Backtest performance data</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Avg. Test Time:</span>
+                            <strong>4.2s</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Data Processed:</span>
+                            <strong>1.8B points</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Quantum Speedup:</span>
+                            <strong style="color: var(--success-color);">142x</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>AI Accuracy:</span>
+                            <strong style="color: var(--success-color);">87.5%</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success-color);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <h3 class="card-title">Performance Trends</h3>
+                            <p>Strategy evolution over time</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Monthly Improvement:</span>
+                            <strong style="color: var(--success-color);">+3.2%</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>AI Learning Rate:</span>
+                            <strong style="color: var(--success-color);">85%</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Best Month:</span>
+                            <strong style="color: var(--success-color);">Feb 2026 (+14.8%)</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+
+            if (document.body.classList.contains('dark-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        });
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content > div').forEach(tab => {
+                tab.style.display = 'none';
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.backtest-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab and add active class
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            event.target.classList.add('active');
+        }
+
+        // Update range slider values
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            const valueDisplay = slider.parentElement.querySelector('div[style*="text-align: center"]');
+
+            // Set initial value
+            if (slider.getAttribute('name') && slider.getAttribute('name').includes('%')) {
+                valueDisplay.textContent = slider.value + '%';
+            } else {
+                valueDisplay.textContent = slider.value;
+            }
+
+            // Update on change
+            slider.addEventListener('input', function() {
+                if (this.getAttribute('name') && this.getAttribute('name').includes('%')) {
+                    valueDisplay.textContent = this.value + '%';
+                } else {
+                    valueDisplay.textContent = this.value;
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop();
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const linkHref = link.getAttribute('href');
+                if (linkHref === currentPage ||
+                   (currentPage === '' && linkHref === 'index.html') ||
+                   (currentPage === 'index.html' && linkHref === 'index.html')) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            const moduleLinks = document.querySelectorAll('.module-link');
+            moduleLinks.forEach(link => {
+                const linkHref = link.getAttribute('href');
+                if (linkHref === currentPage) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Update real-time data
+            function updateRealTimeData() {
+                const date = new Date();
+                const options = { month: 'long', day: 'numeric', year: 'numeric' };
+                const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                // Update the subtitle with real-time info
+                const subtitle = document.querySelector('.page-subtitle');
+                if (subtitle) {
+                    subtitle.textContent = `AI-powered strategy testing with quantum historical data and predictive analytics | ${date.toLocaleDateString('en-US', options)} ${timeString}`;
+                }
+
+                // Update backtest history time
+                const historySubtitle = document.querySelector('.card-title + p');
+                if (historySubtitle && historySubtitle.textContent.includes('Updated:')) {
+                    historySubtitle.textContent = `AI-analyzed historical backtests with quantum metrics | Updated: ${timeString}`;
+                }
+            }
+
+            // Update every minute
+            updateRealTimeData();
+            setInterval(updateRealTimeData, 60000);
+        });
+    </script>
+</body>
+</html>

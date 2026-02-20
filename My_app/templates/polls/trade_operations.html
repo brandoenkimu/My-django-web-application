@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade Operations | Bentley BoldTrader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --bentley-black: #0A0A0A;
+            --bentley-dark: #121212;
+            --bentley-gray: #1A1A1A;
+            --bentley-light-gray: #2D2D2D;
+            --bentley-gold: #C9A86A;
+            --bentley-gold-dark: #9C8242;
+            --bentley-gold-light: #E8D9B5;
+            --success: #00C853;
+            --warning: #FF9800;
+            --danger: #FF5252;
+            --info: #2196F3;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --card-bg: #1A1A1A;
+            --border-color: #333333;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            background-color: var(--bentley-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bentley-black) 0%, #151515 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bentley-gold);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .logo-icon {
+            color: var(--bentley-gold);
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, var(--bentley-gold), var(--bentley-gold-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text span {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--bentley-gold);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Operations Grid */
+        .operations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--bentley-gold), var(--bentley-gold-light));
+            transform: scaleX(0);
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--bentley-gold);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(201, 168, 106, 0.1), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--bentley-gold);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            transition: background-color var(--transition-speed) ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(201, 168, 106, 0.05);
+            color: var(--text-primary);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .status-badge:hover {
+            transform: scale(1.05);
+        }
+
+        .status-active {
+            background-color: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-pending {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .status-closed {
+            background-color: rgba(158, 158, 158, 0.1);
+            color: var(--text-secondary);
+            border: 1px solid var(--text-secondary);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        .btn-primary {
+            background-color: var(--bentley-gold);
+            color: var(--bentley-black);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--bentley-gold-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 106, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border-color: var(--bentley-gold);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #00B248;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #FF3838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 82, 82, 0.3);
+        }
+
+        .btn-small {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+        }
+
+        /* Bulk Actions */
+        .bulk-actions {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .bulk-actions:hover {
+            border-color: var(--bentley-gold);
+        }
+
+        .bulk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .bulk-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            padding: 0.8rem 1rem;
+            background-color: var(--bentley-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--bentley-gold);
+            box-shadow: 0 0 0 2px rgba(201, 168, 106, 0.1);
+        }
+
+        select.form-control {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23C9A86A' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 16px;
+            padding-right: 2.5rem;
+        }
+
+        /* Statistics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent, rgba(201, 168, 106, 0.05));
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--bentley-gold);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+            margin: 0.5rem 0;
+            font-family: 'Source Code Pro', monospace;
+            position: relative;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .stat-change {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            transition: transform var(--transition-speed) ease;
+            position: relative;
+        }
+
+        .stat-change:hover {
+            transform: scale(1.05);
+        }
+
+        .change-positive {
+            background-color: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .change-negative {
+            background-color: rgba(255, 82, 82, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        /* Checkbox Styling */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--bentley-gold);
+            cursor: pointer;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .checkbox-group input[type="checkbox"]:hover {
+            transform: scale(1.1);
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            transition: color var(--transition-speed) ease;
+        }
+
+        .checkbox-group:hover label {
+            color: var(--text-primary);
+        }
+
+        /* Hover Effects */
+        .hover-effect {
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+        }
+
+        .hover-effect:hover {
+            color: var(--bentley-gold);
+            transform: translateX(5px);
+        }
+
+        /* Code styling for order IDs */
+        code {
+            background: rgba(201, 168, 106, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 0.9rem;
+            color: var(--bentley-gold);
+            border: 1px solid rgba(201, 168, 106, 0.2);
+            transition: all var(--transition-speed) ease;
+        }
+
+        code:hover {
+            background: rgba(201, 168, 106, 0.2);
+            border-color: var(--bentley-gold);
+            transform: scale(1.05);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 1;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 200, 83, 0.1);
+            border-radius: 20px;
+            border: 1px solid var(--success);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .status-indicator:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 200, 83, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        /* User Avatar */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--bentley-gold), var(--bentley-gold-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--bentley-black);
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            border: 2px solid transparent;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1);
+            border-color: var(--bentley-gold);
+            box-shadow: 0 4px 12px rgba(201, 168, 106, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .operations-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .operations-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bulk-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .bulk-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo" onclick="window.location.href='/'">
+            <div class="logo-icon">
+                <i class="fas fa-cogs"></i>
+            </div>
+            <div class="logo-text">BENTLEY<span>BOLDTRADER</span></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>OPERATIONAL</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="color: var(--text-secondary);">Trader: <strong style="color: var(--bentley-gold);">{{ user.first_name|default:user.username|title }}</strong></span>
+                <div class="user-avatar" onclick="showUserMenu()">
+                    {{ user.username|first|upper }}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Trade Operations</h1>
+                <p class="page-subtitle">Manage and monitor all trading activities, orders, and executions</p>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-primary" onclick="exportOperations()">
+                    <i class="fas fa-file-export"></i> Export Report
+                </button>
+                <button class="btn btn-secondary" onclick="openSettings()">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card fade-in">
+                <div class="stat-label">Today's Trades</div>
+                <div class="stat-value">28</div>
+                <div class="stat-change change-positive">+12%</div>
+            </div>
+
+            <div class="stat-card fade-in">
+                <div class="stat-label">Active Positions</div>
+                <div class="stat-value">17</div>
+                <div class="stat-change change-negative">-2</div>
+            </div>
+
+            <div class="stat-card fade-in">
+                <div class="stat-label">Executions Today</div>
+                <div class="stat-value">42</div>
+                <div class="stat-change change-positive">+8%</div>
+            </div>
+
+            <div class="stat-card fade-in">
+                <div class="stat-label">Success Rate</div>
+                <div class="stat-value">87.4%</div>
+                <div class="stat-change change-positive">+2.3%</div>
+            </div>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bulk-actions fade-in">
+            <div class="bulk-header">
+                <h2 style="font-size: 1.2rem; color: var(--bentley-gold-light);">Bulk Trade Management</h2>
+                <button class="btn btn-primary" onclick="applyBulkActions()">
+                    <i class="fas fa-play"></i> Apply Actions
+                </button>
+            </div>
+
+            <div class="bulk-controls">
+                <div class="form-group">
+                    <label class="form-label">Select Action</label>
+                    <select class="form-control" id="bulkAction">
+                        <option value="">Choose action...</option>
+                        <option value="close">Close Selected Positions</option>
+                        <option value="stop-loss">Set Stop Loss (5%)</option>
+                        <option value="take-profit">Set Take Profit (10%)</option>
+                        <option value="trailing-stop">Enable Trailing Stop (3%)</option>
+                        <option value="move-stop">Move Stop to Break Even</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Apply To</label>
+                    <select class="form-control" id="bulkFilter">
+                        <option value="all">All Positions</option>
+                        <option value="profitable">Profitable Positions Only</option>
+                        <option value="losing">Losing Positions Only</option>
+                        <option value="tech">Technology Sector</option>
+                        <option value="selected">Selected Below</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Confirmation</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="confirmBulk" checked>
+                        <label for="confirmBulk">Require confirmation for each trade</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Operations Grid -->
+        <div class="operations-grid">
+            <!-- Active Positions Card -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-line"></i> Active Positions</h3>
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Total: 17 positions</span>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;"></th>
+                                    <th>Symbol</th>
+                                    <th>Position</th>
+                                    <th>Entry</th>
+                                    <th>Current</th>
+                                    <th>P&L</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><input type="checkbox" class="position-select" data-symbol="AAPL"></td>
+                                    <td><strong>AAPL</strong></td>
+                                    <td><span class="status-active">LONG</span></td>
+                                    <td>$172.45</td>
+                                    <td>$175.20</td>
+                                    <td style="color: var(--success); font-weight: 600;">+$2,750</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-danger btn-small" onclick="closePosition('AAPL')">
+                                                <i class="fas fa-times"></i> Close
+                                            </button>
+                                            <button class="btn btn-secondary btn-small" onclick="managePosition('AAPL')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="position-select" data-symbol="TSLA"></td>
+                                    <td><strong>TSLA</strong></td>
+                                    <td><span class="status-active">SHORT</span></td>
+                                    <td>$245.30</td>
+                                    <td>$242.10</td>
+                                    <td style="color: var(--success); font-weight: 600;">+$1,280</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-danger btn-small" onclick="closePosition('TSLA')">
+                                                <i class="fas fa-times"></i> Close
+                                            </button>
+                                            <button class="btn btn-secondary btn-small" onclick="managePosition('TSLA')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="position-select" data-symbol="MSFT"></td>
+                                    <td><strong>MSFT</strong></td>
+                                    <td><span class="status-active">LONG</span></td>
+                                    <td>$328.90</td>
+                                    <td>$330.15</td>
+                                    <td style="color: var(--success); font-weight: 600;">+$625</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-danger btn-small" onclick="closePosition('MSFT')">
+                                                <i class="fas fa-times"></i> Close
+                                            </button>
+                                            <button class="btn btn-secondary btn-small" onclick="managePosition('MSFT')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="position-select" data-symbol="NVDA"></td>
+                                    <td><strong>NVDA</strong></td>
+                                    <td><span class="status-active">LONG</span></td>
+                                    <td>$450.20</td>
+                                    <td>$485.20</td>
+                                    <td style="color: var(--success); font-weight: 600;">+$8,750</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-danger btn-small" onclick="closePosition('NVDA')">
+                                                <i class="fas fa-times"></i> Close
+                                            </button>
+                                            <button class="btn btn-secondary btn-small" onclick="managePosition('NVDA')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><input type="checkbox" class="position-select" data-symbol="GOOGL"></td>
+                                    <td><strong>GOOGL</strong></td>
+                                    <td><span class="status-active">LONG</span></td>
+                                    <td>$136.20</td>
+                                    <td>$134.80</td>
+                                    <td style="color: var(--danger); font-weight: 600;">-$560</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-danger btn-small" onclick="closePosition('GOOGL')">
+                                                <i class="fas fa-times"></i> Close
+                                            </button>
+                                            <button class="btn btn-secondary btn-small" onclick="managePosition('GOOGL')">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 1rem;">
+                        <button class="btn btn-secondary btn-small" onclick="selectAllPositions()">
+                            <i class="fas fa-check-square"></i> Select All
+                        </button>
+                        <button class="btn btn-secondary btn-small" onclick="deselectAllPositions()">
+                            <i class="far fa-square"></i> Deselect All
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Management Card -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-tasks"></i> Order Management</h3>
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Pending: 3 orders</span>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Symbol</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>#ORD-7821</code></td>
+                                    <td><strong>AAPL</strong></td>
+                                    <td>Limit Buy @ $174.50</td>
+                                    <td><span class="status-pending">Pending</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-success btn-small" onclick="executeOrder('ORD-7821')">
+                                                <i class="fas fa-play"></i> Execute
+                                            </button>
+                                            <button class="btn btn-danger btn-small" onclick="cancelOrder('ORD-7821')">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>#ORD-7820</code></td>
+                                    <td><strong>TSLA</strong></td>
+                                    <td>Stop Loss @ $235.50</td>
+                                    <td><span class="status-active">Active</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary btn-small" onclick="editOrder('ORD-7820')">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                            <button class="btn btn-danger btn-small" onclick="cancelOrder('ORD-7820')">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>#ORD-7819</code></td>
+                                    <td><strong>MSFT</strong></td>
+                                    <td>Take Profit @ $335.00</td>
+                                    <td><span class="status-active">Active</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary btn-small" onclick="editOrder('ORD-7819')">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                            <button class="btn btn-danger btn-small" onclick="cancelOrder('ORD-7819')">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>#ORD-7818</code></td>
+                                    <td><strong>GOOGL</strong></td>
+                                    <td>Market Buy</td>
+                                    <td><span class="status-closed">Filled</span></td>
+                                    <td>
+                                        <button class="btn btn-secondary btn-small" disabled>
+                                            <i class="fas fa-check"></i> Completed
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>#ORD-7817</code></td>
+                                    <td><strong>NVDA</strong></td>
+                                    <td>Trailing Stop @ 3%</td>
+                                    <td><span class="status-active">Active</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-secondary btn-small" onclick="editOrder('ORD-7817')">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                            <button class="btn btn-danger btn-small" onclick="cancelOrder('ORD-7817')">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="createNewOrder()">
+                            <i class="fas fa-plus"></i> New Order
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewAllOrders()">
+                            <i class="fas fa-list"></i> View All Orders
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trade History Card -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-history"></i> Recent Trade History</h3>
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Last 24 hours</span>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Symbol</th>
+                                    <th>Action</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>10:23:45</td>
+                                    <td><strong>AAPL</strong></td>
+                                    <td style="color: var(--success); font-weight: 600;">BUY</td>
+                                    <td>100</td>
+                                    <td>$175.20</td>
+                                    <td><span class="status-active">Open</span></td>
+                                </tr>
+                                <tr>
+                                    <td>10:18:12</td>
+                                    <td><strong>TSLA</strong></td>
+                                    <td style="color: var(--danger); font-weight: 600;">SELL</td>
+                                    <td>50</td>
+                                    <td>$242.10</td>
+                                    <td><span class="status-active">Open</span></td>
+                                </tr>
+                                <tr>
+                                    <td>10:15:33</td>
+                                    <td><strong>MSFT</strong></td>
+                                    <td style="color: var(--success); font-weight: 600;">BUY</td>
+                                    <td>75</td>
+                                    <td>$330.15</td>
+                                    <td><span class="status-active">Open</span></td>
+                                </tr>
+                                <tr>
+                                    <td>09:55:47</td>
+                                    <td><strong>AMZN</strong></td>
+                                    <td style="color: var(--danger); font-weight: 600;">SELL</td>
+                                    <td>60</td>
+                                    <td>$130.40</td>
+                                    <td><span class="status-closed" style="color: var(--success);">+$825</span></td>
+                                </tr>
+                                <tr>
+                                    <td>09:42:18</td>
+                                    <td><strong>NVDA</strong></td>
+                                    <td style="color: var(--success); font-weight: 600;">BUY</td>
+                                    <td>40</td>
+                                    <td>$480.20</td>
+                                    <td><span class="status-active">Open</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <button class="btn btn-secondary" onclick="loadMoreHistory()">
+                            <i class="fas fa-sync-alt"></i> Load More History
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risk Management Card -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-shield-alt"></i> Risk Controls</h3>
+                    <span class="status-badge status-active pulse">ACTIVE</span>
+                </div>
+                <div class="card-content">
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div>
+                            <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">Position Limits</h4>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border-color);">
+                                <span style="color: var(--text-secondary);">Max Position Size</span>
+                                <span style="color: var(--bentley-gold);">$50,000</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border-color);">
+                                <span style="color: var(--text-secondary);">Max Daily Loss</span>
+                                <span style="color: var(--danger);">-$10,000</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 0.3rem 0;">
+                                <span style="color: var(--text-secondary);">Max Drawdown</span>
+                                <span style="color: var(--warning);">8%</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">Auto-Close Rules</h4>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border-color);">
+                                <span style="color: var(--text-secondary);">Stop Loss Trigger</span>
+                                <span style="color: var(--success); font-weight: 600;">Enabled</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem; padding: 0.3rem 0; border-bottom: 1px solid var(--border-color);">
+                                <span style="color: var(--text-secondary);">Take Profit</span>
+                                <span style="color: var(--success); font-weight: 600;">Enabled</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 0.3rem 0;">
+                                <span style="color: var(--text-secondary);">Trailing Stop</span>
+                                <span style="color: var(--warning); font-weight: 600;">Partial</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">Current Status</h4>
+                            <div style="padding: 1rem; background-color: rgba(0, 200, 83, 0.1); border-radius: 6px; border-left: 4px solid var(--success);">
+                                <div style="font-weight: 600; color: var(--success); display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fas fa-check-circle"></i> All systems operational
+                                </div>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.3rem;">All risk parameters are within acceptable limits.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" onclick="configureRisk()">
+                            <i class="fas fa-cog"></i> Configure
+                        </button>
+                        <button class="btn btn-secondary" onclick="viewRiskReport()">
+                            <i class="fas fa-chart-bar"></i> Risk Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeOperations();
+            preloadAnimations();
+        });
+
+        function initializeOperations() {
+            // Add event listeners to checkboxes
+            document.querySelectorAll('.position-select').forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedCount);
+                checkbox.addEventListener('click', function(e) {
+                    createRippleEffect(e);
+                });
+            });
+
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + E to export
+                if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                    e.preventDefault();
+                    exportOperations();
+                }
+                // Ctrl/Cmd + A to select all
+                if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                    e.preventDefault();
+                    selectAllPositions();
+                }
+                // Ctrl/Cmd + D to deselect all
+                if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                    e.preventDefault();
+                    deselectAllPositions();
+                }
+            });
+
+            // Initialize tooltips
+            initializeTooltips();
+        }
+
+        function preloadAnimations() {
+            // Preload animation styles
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes floatUp {
+                    0% { transform: translateY(0); opacity: 1; }
+                    100% { transform: translateY(-20px); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        function createRippleEffect(event) {
+            const button = event.currentTarget;
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(201, 168, 106, 0.6);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+            `;
+
+            button.style.position = 'relative';
+            button.style.overflow = 'hidden';
+            button.appendChild(ripple);
+
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        function updateSelectedCount() {
+            const selected = document.querySelectorAll('.position-select:checked').length;
+            console.log(`${selected} positions selected`);
+            // Update UI to show selected count
+            const selectedBadge = document.querySelector('.selected-count');
+            if (selectedBadge) {
+                selectedBadge.textContent = `${selected} selected`;
+            }
+        }
+
+        function selectAllPositions() {
+            document.querySelectorAll('.position-select').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updateSelectedCount();
+            showNotification('All positions selected', 'info');
+        }
+
+        function deselectAllPositions() {
+            document.querySelectorAll('.position-select').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectedCount();
+            showNotification('All positions deselected', 'info');
+        }
+
+        function closePosition(symbol) {
+            const confirmed = confirm(`Are you sure you want to close the ${symbol} position?`);
+            if (confirmed) {
+                showNotification(`${symbol} position closed successfully`, 'success');
+
+                // Visual feedback
+                const checkbox = document.querySelector(`.position-select[data-symbol="${symbol}"]`);
+                if (checkbox) {
+                    const row = checkbox.closest('tr');
+                    row.style.transition = 'all 0.5s ease';
+                    row.style.opacity = '0.5';
+                    row.style.transform = 'translateX(100%)';
+
+                    setTimeout(() => {
+                        row.remove();
+                        showNotification('Position removed from list', 'info');
+                    }, 500);
+                }
+            }
+        }
+
+        function managePosition(symbol) {
+            showNotification(`Opening management interface for ${symbol}`, 'info');
+
+            // Create modal with enhanced styling
+            const modalContent = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; animation: fadeIn 0.3s ease;">
+                    <div style="background: var(--card-bg); padding: 2rem; border-radius: 10px; border: 2px solid var(--bentley-gold); max-width: 500px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.5); animation: slideInRight 0.3s ease;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2 style="color: var(--bentley-gold); margin: 0;">Manage ${symbol} Position</h2>
+                            <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.5rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--bentley-gold)'" onmouseout="this.style.color='var(--text-secondary)'">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div>
+                                <label style="color: var(--bentley-gold-light); display: block; margin-bottom: 0.5rem; font-weight: 500;">Adjust Stop Loss</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="text" class="form-control" value="5%" style="flex: 1;">
+                                    <button class="btn btn-secondary btn-small" onclick="setStopLossValue('5')">5%</button>
+                                    <button class="btn btn-secondary btn-small" onclick="setStopLossValue('10')">10%</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="color: var(--bentley-gold-light); display: block; margin-bottom: 0.5rem; font-weight: 500;">Adjust Take Profit</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="text" class="form-control" value="10%" style="flex: 1;">
+                                    <button class="btn btn-secondary btn-small" onclick="setTakeProfitValue('10')">10%</button>
+                                    <button class="btn btn-secondary btn-small" onclick="setTakeProfitValue('15')">15%</button>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="color: var(--bentley-gold-light); display: block; margin-bottom: 0.5rem; font-weight: 500;">Add to Position</label>
+                                <input type="number" class="form-control" placeholder="Additional shares" min="0" step="1">
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="trailingStop">
+                                <label for="trailingStop">Enable Trailing Stop</label>
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                            <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" class="btn btn-secondary">Cancel</button>
+                            <button onclick="savePositionChanges('${symbol}')" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modal = document.createElement('div');
+            modal.innerHTML = modalContent;
+            document.body.appendChild(modal);
+        }
+
+        function setStopLossValue(value) {
+            const input = document.querySelector('input[value="5%"]');
+            if (input) input.value = value + '%';
+        }
+
+        function setTakeProfitValue(value) {
+            const input = document.querySelector('input[value="10%"]');
+            if (input) input.value = value + '%';
+        }
+
+        function savePositionChanges(symbol) {
+            showNotification(`Changes saved for ${symbol} position`, 'success');
+
+            // Close modal with animation
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) {
+                modal.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => modal.remove(), 300);
+            }
+        }
+
+        function executeOrder(orderId) {
+            const confirmed = confirm(`Execute order ${orderId} now?`);
+            if (confirmed) {
+                showNotification(`Order ${orderId} executed successfully`, 'success');
+
+                // Update status with animation
+                const orderRows = document.querySelectorAll('td code');
+                orderRows.forEach(cell => {
+                    if (cell.textContent === `#${orderId}`) {
+                        const row = cell.closest('tr');
+                        const statusCell = row.querySelectorAll('td')[3];
+                        const actionCell = row.querySelectorAll('td')[4];
+
+                        // Animate the update
+                        row.style.transition = 'all 0.5s ease';
+                        row.style.backgroundColor = 'rgba(0, 200, 83, 0.1)';
+
+                        setTimeout(() => {
+                            statusCell.innerHTML = '<span class="status-closed">Filled</span>';
+                            actionCell.innerHTML = '<button class="btn btn-secondary btn-small" disabled><i class="fas fa-check"></i> Completed</button>';
+                            row.style.backgroundColor = '';
+                        }, 300);
+                    }
+                });
+            }
+        }
+
+        function cancelOrder(orderId) {
+            const confirmed = confirm(`Cancel order ${orderId}?`);
+            if (confirmed) {
+                showNotification(`Order ${orderId} cancelled`, 'warning');
+
+                // Animate removal
+                const orderRows = document.querySelectorAll('td code');
+                orderRows.forEach(cell => {
+                    if (cell.textContent === `#${orderId}`) {
+                        const row = cell.closest('tr');
+                        row.style.transition = 'all 0.5s ease';
+                        row.style.opacity = '0';
+                        row.style.transform = 'translateX(-100%)';
+
+                        setTimeout(() => {
+                            row.remove();
+                        }, 500);
+                    }
+                });
+            }
+        }
+
+        function editOrder(orderId) {
+            showNotification(`Editing order ${orderId}`, 'info');
+            // In a real application, this would open an edit form with modal
+        }
+
+        function createNewOrder() {
+            showNotification('Opening new order form', 'info');
+            // In a real application, this would open a form or navigate to order creation
+        }
+
+        function viewAllOrders() {
+            showNotification('Loading all orders...', 'info');
+            // In a real application, this would load more data or navigate
+        }
+
+        function loadMoreHistory() {
+            showNotification('Loading more trade history...', 'info');
+            // Simulate loading with animation
+            const btn = event.target.closest('button');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                showNotification('Additional history loaded', 'success');
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }, 1500);
+        }
+
+        function configureRisk() {
+            showNotification('Opening risk configuration', 'info');
+            // In a real application, this would open a configuration panel
+        }
+
+        function viewRiskReport() {
+            showNotification('Generating risk report...', 'info');
+
+            // Simulate report generation
+            setTimeout(() => {
+                showNotification('Risk report generated successfully', 'success');
+                // In a real application, this would open a report modal or new page
+            }, 2000);
+        }
+
+        function exportOperations() {
+            showNotification('Exporting operations report...', 'info');
+
+            // Simulate download with progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 20;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        showNotification('Report exported successfully', 'success');
+                    }, 300);
+                }
+            }, 300);
+        }
+
+        function applyBulkActions() {
+            const action = document.getElementById('bulkAction').value;
+            const filter = document.getElementById('bulkFilter').value;
+
+            if (!action) {
+                showNotification('Please select an action', 'warning');
+                return;
+            }
+
+            const selectedCount = document.querySelectorAll('.position-select:checked').length;
+
+            if (filter === 'selected' && selectedCount === 0) {
+                showNotification('No positions selected', 'warning');
+                return;
+            }
+
+            const actionNames = {
+                'close': 'Close Positions',
+                'stop-loss': 'Set Stop Loss',
+                'take-profit': 'Set Take Profit',
+                'trailing-stop': 'Enable Trailing Stop',
+                'move-stop': 'Move Stop to Break Even'
+            };
+
+            const targetCount = filter === 'selected' ? selectedCount : 'all';
+            const confirmation = confirm(`Apply "${actionNames[action]}" to ${targetCount} positions?`);
+
+            if (confirmation) {
+                // Visual feedback
+                const btn = event.target.closest('button');
+                const originalContent = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Applying...';
+                btn.disabled = true;
+
+                setTimeout(() => {
+                    showNotification(`Bulk action "${actionNames[action]}" applied successfully`, 'success');
+                    btn.innerHTML = originalContent;
+                    btn.disabled = false;
+
+                    // Reset form
+                    document.getElementById('bulkAction').value = '';
+                    document.getElementById('bulkFilter').value = 'all';
+                }, 1500);
+            }
+        }
+
+        function openSettings() {
+            showNotification('Opening settings...', 'info');
+            // In a real application, this would open settings modal
+        }
+
+        function showUserMenu() {
+            showNotification('User menu opened', 'info');
+            // In a real application, this would show a dropdown menu
+        }
+
+        function initializeTooltips() {
+            // Add tooltips to buttons
+            document.querySelectorAll('.btn').forEach(btn => {
+                const title = btn.getAttribute('onclick');
+                if (title) {
+                    btn.setAttribute('title', title.replace(/onclick="(.*?)"/, '$1'));
+                }
+            });
+        }
+
+        function showNotification(message, type) {
+            // Remove existing notifications
+            document.querySelectorAll('.notification').forEach(n => n.remove());
+
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background-color: ${type === 'success' ? 'rgba(0, 200, 83, 0.9)' :
+                                  type === 'warning' ? 'rgba(255, 152, 0, 0.9)' :
+                                  type === 'danger' ? 'rgba(255, 82, 82, 0.9)' :
+                                  'rgba(33, 150, 243, 0.9)'};
+                color: white;
+                border-radius: 6px;
+                z-index: 1000;
+                animation: slideInRight 0.3s ease-out;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                max-width: 400px;
+                word-wrap: break-word;
+            `;
+
+            // Add icon based on type
+            const icon = type === 'success' ? 'check-circle' :
+                        type === 'warning' ? 'exclamation-triangle' :
+                        type === 'danger' ? 'exclamation-circle' : 'info-circle';
+
+            notification.innerHTML = `
+                <i class="fas fa-${icon}" style="font-size: 1.2rem;"></i>
+                <span>${message}</span>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+
+            // Click to dismiss
+            notification.addEventListener('click', () => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            });
+        }
+    </script>
+</body>
+</html>

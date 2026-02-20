@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicator Workshop | Bentley-Brand-dev</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base styles remain the same as template */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2d6bc9;
+            --accent-color: #00c9a7;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --indicator-blue: #3b82f6;
+            --indicator-purple: #8b5cf6;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dark-mode {
+            --light-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-dark: #f1f5f9;
+            --text-light: #94a3b8;
+            --border-color: #334155;
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-text span {
+            color: var(--accent-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-icon {
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar-section h3 {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+
+        .module-list {
+            list-style: none;
+        }
+
+        .module-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .module-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .module-link:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+            color: var(--accent-color);
+        }
+
+        .module-link.active {
+            background-color: rgba(0, 201, 167, 0.15);
+            color: var(--accent-color);
+            font-weight: 600;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .module-icon {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        /* Indicator Workshop specific styles */
+        .workshop-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .indicator-sidebar {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            height: fit-content;
+        }
+
+        .indicator-list {
+            max-height: 500px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .indicator-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .category-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-dark);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .indicator-item {
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .indicator-item:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+            border-color: rgba(0, 201, 167, 0.3);
+        }
+
+        .indicator-item.active {
+            background-color: rgba(0, 201, 167, 0.15);
+            border-color: var(--accent-color);
+        }
+
+        .indicator-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .indicator-desc {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .workshop-main {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .chart-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            height: 400px;
+            position: relative;
+        }
+
+        .chart-placeholder {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+        }
+
+        .chart-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .parameter-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .parameter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .preview-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            margin-top: 1.5rem;
+        }
+
+        .indicator-output {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .output-item {
+            text-align: center;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+        }
+
+        .output-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .output-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #00b397;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #265cbb;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .tool-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .code-editor {
+            background-color: var(--dark-bg);
+            color: #f1f5f9;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .ai-suggestions {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .suggestion-title {
+            color: var(--success-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .workshop-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="logo-text">Bentley-<span>Brand-dev</span></div>
+        </div>
+
+        <div class="nav-links">
+            <a href="{% url 'base' %}" class="nav-link"><i class="fas fa-home nav-icon"></i>Dashboard</a>
+            <a href="{% url 'notifications' %}" class="nav-link"><i class="fas fa-bell nav-icon"></i>Alerts</a>
+            <a href="{% url 'algo_trading_platform' %}" class="nav-link"><i class="fas fa-chart-bar nav-icon"></i>Analytics</a>
+            <a href="{% url 'settings' %}" class="nav-link"><i class="fas fa-cog nav-icon"></i>Settings</a>
+        </div>
+
+        <div class="user-menu">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-avatar">
+                {{ user.username|first|upper }}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>Trading Modules</h3>
+                <ul class="module-list">
+                    <li class="module-item">
+                        <a href="{% url 'strategy_lab' %}" class="module-link">
+                            <i class="fas fa-flask module-icon"></i> Strategy Lab
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trade_builder' %}" class="module-link">
+                            <i class="fas fa-tools module-icon"></i> Trade Builder
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'market_blueprint' %}" class="module-link">
+                            <i class="fas fa-map module-icon"></i> Market Blueprint
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'advanced_trading_tools' %}" class="module-link">
+                            <i class="fas fa-chart-bar module-icon"></i> Advanced Trading Tools
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Development Tools</h3>
+                <ul class="module-list">
+                    <li class="module-item">
+                        <a href="{% url 'indicator_workshop' %}" class="module-link active">
+                            <i class="fas fa-ruler-combined module-icon"></i> Indicator Workshop
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trading_toolkit' %}" class="module-link">
+                            <i class="fas fa-toolbox module-icon"></i> Trading Toolkit
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'backtest_center' %}" class="module-link">
+                            <i class="fas fa-history module-icon"></i> Backtest Center
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trade_development' %}" class="module-link">
+                            <i class="fas fa-code-branch module-icon"></i> Trade Development
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>AI Quick Access</h3>
+                <div class="card">
+                    <div class="card-content">
+                        <div style="margin-bottom: 1rem;">
+                            <button class="btn btn-primary btn-sm" style="width: 100%; margin-bottom: 0.5rem;" id="aiOptimizeBtn">
+                                <i class="fas fa-brain"></i> AI Optimize
+                            </button>
+                            <button class="btn btn-outline btn-sm" style="width: 100%;" id="aiGenerateBtn">
+                                <i class="fas fa-robot"></i> Generate Indicator
+                            </button>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                            <span><i class="fas fa-bolt"></i> AI Status:</span>
+                            <strong style="color: var(--success-color);">ACTIVE</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                            <span><i class="fas fa-robot"></i> AI Accuracy:</span>
+                            <strong style="color: var(--success-color);">91%</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Indicator Workshop</h1>
+                    <p class="page-subtitle">Build, test, and customize trading indicators with AI assistance | 2026 Edition</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary"><i class="fas fa-save"></i> Save Indicator</button>
+                    <button class="btn btn-outline"><i class="fas fa-share"></i> Export</button>
+                </div>
+            </div>
+
+            <div class="workshop-container fade-in">
+                <!-- Indicator Selection Sidebar -->
+                <div class="indicator-sidebar">
+                    <h3 style="margin-bottom: 1rem;">Indicator Library</h3>
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search indicators..." id="indicatorSearch">
+                    </div>
+
+                    <div class="indicator-list">
+                        <!-- Trend Indicators -->
+                        <div class="indicator-category">
+                            <div class="category-title">Trend Indicators</div>
+                            <div class="indicator-item active" data-indicator="sma">
+                                <div class="indicator-name">Simple Moving Average</div>
+                                <div class="indicator-desc">Basic trend following indicator</div>
+                            </div>
+                            <div class="indicator-item" data-indicator="ema">
+                                <div class="indicator-name">Exponential MA</div>
+                                <div class="indicator-desc">Weighted moving average</div>
+                            </div>
+                            <div class="indicator-item" data-indicator="macd">
+                                <div class="indicator-name">MACD</div>
+                                <div class="indicator-desc">Moving Average Convergence Divergence</div>
+                            </div>
+                            <div class="indicator-item" data-indicator="adx">
+                                <div class="indicator-name">ADX</div>
+                                <div class="indicator-desc">Average Directional Index</div>
+                            </div>
+                        </div>
+
+                        <!-- Momentum Indicators -->
+                        <div class="indicator-category">
+                            <div class="category-title">Momentum Indicators</div>
+                            <div class="indicator-item" data-indicator="rsi">
+                                <div class="indicator-name">RSI</div>
+                                <div class="indicator-desc">Relative Strength Index</div>
+                            </div>
+                            <div class="indicator-item" data-indicator="stochastic">
+                                <div class="indicator-name">Stochastic Oscillator</div>
+                                <div class="indicator-desc">Momentum indicator</div>
+                            </div>
+                            <div class="indicator-item" data-indicator="cci">
+                                <div class="indicator-name">CCI</div>
+                                <div class="indicator-desc">Commodity Channel Index</div>
+                            </div>
+                        </div>
+
+                        <!-- Volatility Indicators -->
+                        <div class="indicator-category">
+                            <div class="category-title">Volatility Indicators</div>
+                            <div class="indicator-item" data-indicator="bb">
+                                <div class="indicator-name">Bollinger Bands</div>
+                                <div class="indicator-desc">Volatility bands</div>
+                            </div>
+                            <div class="indicator-item" data-indicator="atr">
+                                <div class="indicator-name">ATR</div>
+                                <div class="indicator-desc">Average True Range</div>
+                            </div>
+                        </div>
+
+                        <!-- Volume Indicators -->
+                        <div class="indicator-category">
+                            <div class="category-title">Volume Indicators</div>
+                            <div class="indicator-item" data-indicator="obv">
+                                <div class="indicator-name">OBV</div>
+                                <div class="indicator-desc">On Balance Volume</div>
+                            </div>
+                            <div class="indicator-item" data-indicator="vwap">
+                                <div class="indicator-name">VWAP</div>
+                                <div class="indicator-desc">Volume Weighted Average Price</div>
+                            </div>
+                        </div>
+
+                        <!-- AI Indicators -->
+                        <div class="indicator-category">
+                            <div class="category-title">AI Indicators (2026)</div>
+                            <div class="indicator-item" data-indicator="neural-trend">
+                                <div class="indicator-name">Neural Trend Predictor</div>
+                                <div class="indicator-desc">AI-powered trend detection</div>
+                            </div>
+                            <div class="indicator-item" data-indicator="quantum-vol">
+                                <div class="indicator-name">Quantum Volatility</div>
+                                <div class="indicator-desc">Quantum computing enhanced</div>
+                            </div>
+                            <div class="indicator-item" data-indicator="sentiment-ai">
+                                <div class="indicator-name">Sentiment AI</div>
+                                <div class="indicator-desc">Real-time sentiment analysis</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Workshop Area -->
+                <div class="workshop-main">
+                    <!-- Chart Visualization -->
+                    <div class="chart-container">
+                        <div class="chart-placeholder">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Indicator Visualization</h3>
+                            <p>Select an indicator to visualize its behavior on the chart</p>
+                            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                                <button class="btn btn-sm btn-outline">Load Sample Data</button>
+                                <button class="btn btn-sm btn-primary">Live Market Data</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parameter Configuration -->
+                    <div class="parameter-container">
+                        <h3 style="margin-bottom: 1rem;">Indicator Parameters</h3>
+                        <div class="parameter-grid">
+                            <div class="form-group">
+                                <label class="form-label">Period</label>
+                                <input type="number" class="form-control" value="14" id="paramPeriod">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fast Period</label>
+                                <input type="number" class="form-control" value="12" id="paramFast">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Slow Period</label>
+                                <input type="number" class="form-control" value="26" id="paramSlow">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Signal Period</label>
+                                <input type="number" class="form-control" value="9" id="paramSignal">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Standard Deviations</label>
+                                <input type="number" class="form-control" value="2" step="0.1" id="paramStdDev">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Overbought Level</label>
+                                <input type="number" class="form-control" value="70" id="paramOverbought">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Oversold Level</label>
+                                <input type="number" class="form-control" value="30" id="paramOversold">
+                            </div>
+                        </div>
+
+                        <div class="tool-actions">
+                            <button class="btn btn-primary" id="applyParamsBtn">
+                                <i class="fas fa-play"></i> Apply Parameters
+                            </button>
+                            <button class="btn btn-outline" id="resetParamsBtn">
+                                <i class="fas fa-redo"></i> Reset to Default
+                            </button>
+                            <button class="btn btn-outline" id="aiOptimizeBtn2">
+                                <i class="fas fa-brain"></i> AI Optimize
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Code Editor -->
+                    <div class="parameter-container">
+                        <h3 style="margin-bottom: 1rem;">Custom Code Editor</h3>
+                        <div class="form-group">
+                            <label class="form-label">Indicator Logic (JavaScript)</label>
+                            <div class="code-editor" id="codeEditor">
+// Simple Moving Average Indicator
+function calculateSMA(data, period) {
+    const sma = [];
+    for (let i = period - 1; i < data.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < period; j++) {
+            sum += data[i - j].close;
+        }
+        sma.push({
+            value: sum / period,
+            date: data[i].date
+        });
+    }
+    return sma;
+}
+
+// AI-enhanced version with trend detection
+function calculateAI_SMA(data, period) {
+    const sma = calculateSMA(data, period);
+    const aiEnhanced = sma.map((point, index) => {
+        // AI trend prediction logic
+        const trend = index > 0 ?
+            point.value > sma[index - 1].value ? 'bullish' : 'bearish'
+            : 'neutral';
+
+        return {
+            ...point,
+            trend: trend,
+            confidence: calculateConfidence(data, index, period)
+        };
+    });
+    return aiEnhanced;
+}
+                            </div>
+                        </div>
+                        <div class="tool-actions">
+                            <button class="btn btn-primary">
+                                <i class="fas fa-play"></i> Test Code
+                            </button>
+                            <button class="btn btn-outline">
+                                <i class="fas fa-download"></i> Export as Library
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Indicator Output Preview -->
+                    <div class="preview-container">
+                        <h3 style="margin-bottom: 1rem;">Indicator Output</h3>
+                        <div class="indicator-output">
+                            <div class="output-item">
+                                <div class="output-label">Current Value</div>
+                                <div class="output-value" id="outputCurrent">62.4</div>
+                                <div class="output-label">RSI Level</div>
+                            </div>
+                            <div class="output-item">
+                                <div class="output-label">Signal</div>
+                                <div class="output-value" style="color: var(--warning-color);" id="outputSignal">Neutral</div>
+                                <div class="output-label">AI Confidence</div>
+                            </div>
+                            <div class="output-item">
+                                <div class="output-label">Previous Value</div>
+                                <div class="output-value" id="outputPrevious">58.2</div>
+                                <div class="output-label">Change</div>
+                            </div>
+                            <div class="output-item">
+                                <div class="output-label">Volatility</div>
+                                <div class="output-value" id="outputVolatility">18.2%</div>
+                                <div class="output-label">High</div>
+                            </div>
+                        </div>
+
+                        <div class="ai-suggestions">
+                            <div class="suggestion-title">
+                                <i class="fas fa-lightbulb"></i> AI Suggestion
+                            </div>
+                            <p>Based on current market conditions, AI suggests reducing the RSI period to 10 for more responsive signals. Combine with MACD (12,26,9) for confirmation.</p>
+                            <button class="btn btn-sm btn-primary" style="margin-top: 0.5rem;">
+                                <i class="fas fa-check"></i> Apply AI Suggestion
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Indicators Section -->
+            <div class="parameter-container fade-in" style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Recent & Popular Indicators (2026)</h3>
+                <div class="parameter-grid">
+                    <div class="form-group" style="background-color: rgba(0,0,0,0.02); padding: 1rem; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <div style="background-color: rgba(147, 51, 234, 0.1); color: #9333ea; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div>
+                                <strong>Quantum Momentum Index</strong>
+                                <div style="font-size: 0.85rem; color: var(--text-light);">AI-powered momentum detection</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" style="width: 100%; margin-top: 0.5rem;">Load</button>
+                    </div>
+
+                    <div class="form-group" style="background-color: rgba(0,0,0,0.02); padding: 1rem; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <div style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-chart-network"></i>
+                            </div>
+                            <div>
+                                <strong>Neural Correlation</strong>
+                                <div style="font-size: 0.85rem; color: var(--text-light);">Multi-asset correlation analysis</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" style="width: 100%; margin-top: 0.5rem;">Load</button>
+                    </div>
+
+                    <div class="form-group" style="background-color: rgba(0,0,0,0.02); padding: 1rem; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                            <div style="background-color: rgba(16, 185, 129, 0.1); color: var(--success-color); width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                <i class="fas fa-satellite"></i>
+                            </div>
+                            <div>
+                                <strong>Sentiment Wave</strong>
+                                <div style="font-size: 0.85rem; color: var(--text-light);">Real-time sentiment tracking</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline btn-sm" style="width: 100%; margin-top: 0.5rem;">Load</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+
+            if (document.body.classList.contains('dark-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+
+        // Indicator selection
+        const indicatorItems = document.querySelectorAll('.indicator-item');
+        let currentIndicator = 'sma';
+
+        indicatorItems.forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all items
+                indicatorItems.forEach(i => i.classList.remove('active'));
+
+                // Add active class to clicked item
+                this.classList.add('active');
+
+                // Update current indicator
+                currentIndicator = this.getAttribute('data-indicator');
+
+                // Update UI based on selected indicator
+                updateIndicatorParameters(currentIndicator);
+                updateIndicatorOutput(currentIndicator);
+            });
+        });
+
+        // Update parameters based on selected indicator
+        function updateIndicatorParameters(indicator) {
+            const paramPeriod = document.getElementById('paramPeriod');
+            const paramFast = document.getElementById('paramFast');
+            const paramSlow = document.getElementById('paramSlow');
+            const paramSignal = document.getElementById('paramSignal');
+            const paramStdDev = document.getElementById('paramStdDev');
+            const paramOverbought = document.getElementById('paramOverbought');
+            const paramOversold = document.getElementById('paramOversold');
+
+            // Reset all to default visibility
+            [paramPeriod, paramFast, paramSlow, paramSignal, paramStdDev, paramOverbought, paramOversold].forEach(input => {
+                input.parentElement.style.display = 'block';
+            });
+
+            // Set default values based on indicator
+            switch(indicator) {
+                case 'sma':
+                case 'ema':
+                    paramPeriod.value = 20;
+                    paramFast.parentElement.style.display = 'none';
+                    paramSlow.parentElement.style.display = 'none';
+                    paramSignal.parentElement.style.display = 'none';
+                    paramStdDev.parentElement.style.display = 'none';
+                    break;
+
+                case 'macd':
+                    paramFast.value = 12;
+                    paramSlow.value = 26;
+                    paramSignal.value = 9;
+                    paramPeriod.parentElement.style.display = 'none';
+                    paramStdDev.parentElement.style.display = 'none';
+                    break;
+
+                case 'rsi':
+                    paramPeriod.value = 14;
+                    paramOverbought.value = 70;
+                    paramOversold.value = 30;
+                    paramFast.parentElement.style.display = 'none';
+                    paramSlow.parentElement.style.display = 'none';
+                    paramSignal.parentElement.style.display = 'none';
+                    paramStdDev.parentElement.style.display = 'none';
+                    break;
+
+                case 'bb':
+                    paramPeriod.value = 20;
+                    paramStdDev.value = 2;
+                    paramFast.parentElement.style.display = 'none';
+                    paramSlow.parentElement.style.display = 'none';
+                    paramSignal.parentElement.style.display = 'none';
+                    break;
+
+                case 'neural-trend':
+                    paramPeriod.value = 14;
+                    paramFast.value = 8;
+                    paramSlow.value = 21;
+                    paramSignal.parentElement.style.display = 'none';
+                    paramStdDev.parentElement.style.display = 'none';
+                    break;
+            }
+        }
+
+        // Update indicator output display
+        function updateIndicatorOutput(indicator) {
+            const outputCurrent = document.getElementById('outputCurrent');
+            const outputSignal = document.getElementById('outputSignal');
+            const outputPrevious = document.getElementById('outputPrevious');
+            const outputVolatility = document.getElementById('outputVolatility');
+
+            // Simulate different outputs based on indicator
+            const indicators = {
+                'sma': { current: '4,250.50', signal: 'Bullish', previous: '4,230.25', volatility: '1.2%' },
+                'ema': { current: '4,245.80', signal: 'Bullish', previous: '4,225.60', volatility: '1.4%' },
+                'macd': { current: '+2.45', signal: 'Bullish', previous: '+1.85', volatility: '2.1%' },
+                'rsi': { current: '62.4', signal: 'Neutral', previous: '58.2', volatility: '18.2%' },
+                'bb': { current: 'Upper: 4,280', signal: 'Neutral', previous: '4,265', volatility: '2.8%' },
+                'neural-trend': { current: '78%', signal: 'Strong Bullish', previous: '72%', volatility: '12.5%' },
+                'quantum-vol': { current: '0.85', signal: 'Low Risk', previous: '0.92', volatility: '8.4%' }
+            };
+
+            const data = indicators[indicator] || {
+                current: 'N/A',
+                signal: 'Neutral',
+                previous: 'N/A',
+                volatility: 'N/A'
+            };
+
+            outputCurrent.textContent = data.current;
+            outputSignal.textContent = data.signal;
+            outputPrevious.textContent = data.previous;
+            outputVolatility.textContent = data.volatility;
+
+            // Color code the signal
+            if (data.signal.includes('Bullish')) {
+                outputSignal.style.color = 'var(--success-color)';
+            } else if (data.signal.includes('Bearish')) {
+                outputSignal.style.color = 'var(--danger-color)';
+            } else {
+                outputSignal.style.color = 'var(--warning-color)';
+            }
+        }
+
+        // Apply parameters button
+        document.getElementById('applyParamsBtn').addEventListener('click', function() {
+            // Simulate applying parameters
+            const indicatorName = document.querySelector('.indicator-item.active .indicator-name').textContent;
+
+            // Show success message
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check"></i> Applied!';
+            this.style.backgroundColor = 'var(--success-color)';
+
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.style.backgroundColor = '';
+            }, 1500);
+
+            // Update output with new parameters
+            updateIndicatorOutput(currentIndicator);
+        });
+
+        // Reset parameters button
+        document.getElementById('resetParamsBtn').addEventListener('click', function() {
+            updateIndicatorParameters(currentIndicator);
+
+            // Show reset message
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check"></i> Reset!';
+
+            setTimeout(() => {
+                this.innerHTML = originalText;
+            }, 1500);
+        });
+
+        // AI Optimize buttons
+        document.querySelectorAll('#aiOptimizeBtn, #aiOptimizeBtn2').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Simulate AI optimization
+                const originalText = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Optimizing...';
+
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-check"></i> Optimized!';
+
+                    // Update parameters with AI suggestions
+                    if (currentIndicator === 'rsi') {
+                        document.getElementById('paramPeriod').value = 10;
+                    } else if (currentIndicator === 'macd') {
+                        document.getElementById('paramFast').value = 8;
+                        document.getElementById('paramSlow').value = 17;
+                    }
+
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                    }, 2000);
+                }, 1500);
+            });
+        });
+
+        // AI Generate button
+        document.getElementById('aiGenerateBtn').addEventListener('click', function() {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Generating...';
+
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-check"></i> Generated!';
+
+                // Add a new AI-generated indicator
+                const aiCategory = document.querySelector('.indicator-category:last-child');
+                const newIndicator = document.createElement('div');
+                newIndicator.className = 'indicator-item';
+                newIndicator.setAttribute('data-indicator', 'ai-custom');
+                newIndicator.innerHTML = `
+                    <div class="indicator-name">AI-Custom Indicator</div>
+                    <div class="indicator-desc">Generated by AI at ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                `;
+
+                aiCategory.appendChild(newIndicator);
+
+                // Add click event to new indicator
+                newIndicator.addEventListener('click', function() {
+                    indicatorItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    currentIndicator = 'ai-custom';
+                    updateIndicatorParameters('rsi'); // Default to RSI params
+                    updateIndicatorOutput('neural-trend'); // Use neural trend output
+                });
+
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                }, 2000);
+            }, 2000);
+        });
+
+        // Search functionality
+        document.getElementById('indicatorSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+
+            indicatorItems.forEach(item => {
+                const name = item.querySelector('.indicator-name').textContent.toLowerCase();
+                const desc = item.querySelector('.indicator-desc').textContent.toLowerCase();
+
+                if (name.includes(searchTerm) || desc.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateIndicatorParameters(currentIndicator);
+            updateIndicatorOutput(currentIndicator);
+
+            // Update real-time data
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    updateIndicatorOutput(currentIndicator);
+                }
+            }, 10000);
+        });
+    </script>
+</body>
+</html>

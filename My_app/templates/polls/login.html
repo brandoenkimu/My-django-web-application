@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login || BOLDTRADER::</title>
+    <link rel="stylesheet" href="{% static 'css/loginreisen.css' %}">
+
+    <!-- Add this minimal style block for autofill protection -->
+    <style>
+        /* Minimal autofill fix that won't affect your styles */
+        input:-webkit-autofill {
+            -webkit-text-fill-color: currentColor !important;
+            -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+            transition: background-color 5000s ease-in-out 0s !important;
+        }
+
+        /* Optional: Add this class to your CSS file instead */
+        .autofill-fix {
+            animation-name: autofill-fix;
+            animation-duration: 1ms;
+        }
+
+        @keyframes autofill-fix {
+            from { color: inherit; background: transparent; }
+            to { color: inherit; background: transparent; }
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <div class="login-box">
+            <form method="post" autocomplete="off" id="loginForm">
+                {% csrf_token %}
+                <h2>Login</h2>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="mail-outline"></ion-icon></span>
+                    <input type="text" name="username" id="username" required
+                           class="autofill-fix"
+                           autocomplete="username">
+                    <label for="username">Username</label>
+                </div>
+
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="eye-off-outline"></ion-icon></span>
+                    <input type="password" name="password" id="password" required
+                           class="autofill-fix"
+                           autocomplete="current-password">
+                    <label for="password">Password</label>
+                </div>
+
+                <div class="remember-forgot">
+                    <label for="remember">
+                        <input type="checkbox" name="remember" id="remember" checked>
+                        Remember me
+                    </label>
+                    <a href="#">Forgot password?</a>
+                </div>
+
+                <button type="submit">Sign In</button>
+            </form>
+
+            <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+            <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+            <div class="register-link">
+                <p>Don't have Account? <a href="{% url 'signup' %}">Register</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Add this minimal JavaScript for autofill handling -->
+    <script>
+        // Minimal fix for autofill - only handles the visual aspect
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fix autofill colors without changing styles
+            const fixAutofill = function() {
+                const inputs = document.querySelectorAll('input');
+                inputs.forEach(input => {
+                    if (input.matches(':-webkit-autofill')) {
+                        // Keep original text color
+                        input.style.color = getComputedStyle(input).color;
+                        // Remove any browser-added background
+                        input.style.backgroundColor = 'transparent';
+                    }
+                });
+            };
+
+            // Check on page load
+            setTimeout(fixAutofill, 100);
+
+            // Check periodically for delayed autofill
+            setInterval(fixAutofill, 500);
+
+            // Also fix when form is interacted with
+            document.getElementById('loginForm').addEventListener('input', fixAutofill);
+        });
+    </script>
+</body>
+</html>

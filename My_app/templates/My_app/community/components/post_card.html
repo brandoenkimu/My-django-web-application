@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Card - TradingHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #7209b7;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .post-card-header {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .post-author {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .post-category {
+            background: #f0f7ff;
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .post-follow-btn {
+            background: none;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .post-follow-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .post-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .post-preview {
+            padding: 0 1rem;
+            margin: 0.75rem 0;
+        }
+
+        .post-content-preview {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-media {
+            position: relative;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        .post-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .video-overlay i {
+            font-size: 24px;
+        }
+
+        .trading-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .post-stats {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #f0f0f0;
+            background: #fafafa;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #666;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stat-item i {
+            font-size: 14px;
+        }
+
+        .stat-item.liked {
+            color: #ef4444;
+        }
+
+        .post-actions {
+            display: flex;
+            padding: 0.75rem 1rem;
+            gap: 0.5rem;
+        }
+
+        .post-action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            color: #666;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .post-action-btn:hover {
+            background: #f0f7ff;
+            color: var(--primary);
+        }
+
+        .post-action-btn.liked {
+            color: #ef4444;
+        }
+
+        .post-action-btn.saved {
+            color: var(--primary);
+        }
+
+        .post-trading-info {
+            padding: 0.75rem 1rem;
+            background: #f8f9ff;
+            border-top: 1px solid #eef2ff;
+        }
+
+        .trading-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 12px;
+        }
+
+        .trading-label {
+            color: #666;
+        }
+
+        .trading-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .trading-value.positive {
+            color: #10b981;
+        }
+
+        .trading-value.negative {
+            color: #ef4444;
+        }
+
+        .view-post-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0 0 12px 12px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .view-post-btn:hover {
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        .trending-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Post Card -->
+    <div class="post-card">
+        <!-- Header -->
+        <div class="post-card-header">
+            <div class="post-author">
+                <img src="{{ post.author.profile.get_avatar_url }}"
+                     class="author-avatar"
+                     alt="{{ post.author.username }}"
+                     onclick="window.location.href='{% url 'profile' post.author.username %}'"
+                     style="cursor: pointer;">
+                <div class="author-info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="author-name">{{ post.author.username }}</h4>
+                        {% if not user == post.author %}
+                        <button class="post-follow-btn" data-user-id="{{ post.author.id }}">
+                            Follow
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="post-meta">
+                        <span>{{ post.created_at|timesince }} ago</span>
+                        <span class="post-category">{{ post.get_category_display }}</span>
+                        {% if post.is_analysis %}
+                        <span class="badge bg-info">Analysis</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="post-title">{{ post.title|truncatechars:60 }}</h5>
+        </div>
+
+        <!-- Content Preview -->
+        <div class="post-preview">
+            <p class="post-content-preview">{{ post.content|striptags|truncatechars:120 }}</p>
+        </div>
+
+        <!-- Media -->
+        {% if post.image or post.video %}
+        <div class="post-media">
+            {% if post.image %}
+                <img src="{{ post.image.url }}"
+                     class="post-image"
+                     alt="Post image"
+                     onclick="window.location.href='{% url 'post_detail' post.id %}'"
+                     style="cursor: pointer;">
+            {% elif post.video %}
+                <img src="{% if post.thumbnail %}{{ post.thumbnail.url }}{% else %}https://via.placeholder.com/400x200/4361ee/ffffff?text=Video{% endif %}"
+                     class="post-image"
+                     alt="Video thumbnail"
+                     onclick="window.location.href='{% url 'post_detail' post.id %}'"
+                     style="cursor: pointer;">
+                <div class="video-overlay">
+                    <i class="fas fa-play"></i>
+                </div>
+            {% endif %}
+
+            {% if post.trading_symbol %}
+            <div class="trading-badge">
+                <i class="fas fa-chart-line"></i>
+                {{ post.trading_symbol }}
+            </div>
+            {% endif %}
+
+            {% if post.is_trending %}
+            <div class="trending-badge">
+                <i class="fas fa-fire"></i> Trending
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Trading Info (if applicable) -->
+        {% if post.trading_symbol or post.entry_price %}
+        <div class="post-trading-info">
+            {% if post.trading_symbol %}
+            <div class="trading-row">
+                <span class="trading-label">Symbol</span>
+                <span class="trading-value">{{ post.trading_symbol }}</span>
+            </div>
+            {% endif %}
+
+            {% if post.trade_direction %}
+            <div class="trading-row">
+                <span class="trading-label">Direction</span>
+                <span class="trading-value {% if post.trade_direction == 'long' %}positive{% else %}negative{% endif %}">
+                    {{ post.trade_direction|title }}
+                </span>
+            </div>
+            {% endif %}
+
+            {% if post.entry_price %}
+            <div class="trading-row">
+                <span class="trading-label">Entry</span>
+                <span class="trading-value">${{ post.entry_price }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Stats -->
+        <div class="post-stats">
+            <div class="stat-item {% if user in post.likes.all %}liked{% endif %}">
+                <i class="fas fa-heart"></i>
+                {{ post.likes_count }}
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-comment"></i>
+                {{ post.comments_count }}
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-eye"></i>
+                {{ post.views_count }}
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-share"></i>
+                {{ post.shares_count }}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="post-actions">
+            <button class="post-action-btn {% if user in post.likes.all %}liked{% endif %}"
+                    data-post-id="{{ post.id }}"
+                    data-action="like">
+                <i class="fas fa-heart"></i> Like
+            </button>
+
+            <button class="post-action-btn"
+                    onclick="window.location.href='{% url 'post_detail' post.id %}#comments'">
+                <i class="fas fa-comment"></i> Comment
+            </button>
+
+            <button class="post-action-btn {% if user in post.saves.all %}saved{% endif %}"
+                    data-post-id="{{ post.id }}"
+                    data-action="save">
+                <i class="fas fa-bookmark"></i> Save
+            </button>
+        </div>
+
+        <!-- View Button -->
+        <a href="{% url 'post_detail' post.id %}" class="view-post-btn">
+            View Full Analysis
+        </a>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Follow functionality
+        $('.post-follow-btn').click(function(e) {
+            e.stopPropagation();
+            const $btn = $(this);
+            const userId = $btn.data('user-id');
+
+            $.ajax({
+                url: '{% url "api_follow_user" %}',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify({
+                    'user_id': userId
+                }),
+                success: function(response) {
+                    if (response.status === 'following') {
+                        $btn.text('Following').css({
+                            'background': 'var(--primary)',
+                            'color': 'white'
+                        });
+                    } else {
+                        $btn.text('Follow').css({
+                            'background': 'none',
+                            'color': 'var(--primary)'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Follow error:', error);
+                }
+            });
+        });
+
+        // Like functionality
+        $('.post-action-btn[data-action="like"]').click(function(e) {
+            e.stopPropagation();
+            const $btn = $(this);
+            const postId = $btn.data('post-id');
+
+            $.ajax({
+                url: '{% url "api_like_post" %}',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify({
+                    'post_id': postId
+                }),
+                success: function(response) {
+                    if (response.status === 'liked') {
+                        $btn.addClass('liked');
+                        $btn.html('<i class="fas fa-heart"></i> Liked');
+                    } else {
+                        $btn.removeClass('liked');
+                        $btn.html('<i class="fas fa-heart"></i> Like');
+                    }
+
+                    // Update stats
+                    const $stats = $btn.closest('.post-card').find('.stat-item:first-child');
+                    $stats.find('i').toggleClass('fas far');
+                    $stats.text(response.likes_count);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Like error:', error);
+                }
+            });
+        });
+
+        // Save functionality
+        $('.post-action-btn[data-action="save"]').click(function(e) {
+            e.stopPropagation();
+            const $btn = $(this);
+            const postId = $btn.data('post-id');
+
+            $.ajax({
+                url: '{% url "api_save_post" %}',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                },
+                data: JSON.stringify({
+                    'post_id': postId
+                }),
+                success: function(response) {
+                    if (response.status === 'saved') {
+                        $btn.addClass('saved');
+                        $btn.html('<i class="fas fa-bookmark"></i> Saved');
+                    } else {
+                        $btn.removeClass('saved');
+                        $btn.html('<i class="fas fa-bookmark"></i> Save');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Save error:', error);
+                }
+            });
+        });
+
+        // Card click (excluding buttons)
+        $('.post-card').click(function(e) {
+            if (!$(e.target).closest('.post-action-btn, .post-follow-btn, .author-avatar').length) {
+                window.location.href = '{% url "post_detail" post.id %}';
+            }
+        });
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Execution Hub | Bentley BoldTrader 2026</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --bentley-black: #0A0A0A;
+            --bentley-dark: #121212;
+            --bentley-gray: #1A1A1A;
+            --bentley-light-gray: #2D2D2D;
+            --bentley-gold: #C9A86A;
+            --bentley-gold-dark: #9C8242;
+            --bentley-gold-light: #E8D9B5;
+            --success: #00C853;
+            --warning: #FF9800;
+            --danger: #FF5252;
+            --info: #2196F3;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --card-bg: #1A1A1A;
+            --border-color: #333333;
+        }
+
+        body {
+            background-color: var(--bentley-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--bentley-black) 0%, #151515 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bentley-gold);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            color: var(--bentley-gold);
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, var(--bentley-gold), var(--bentley-gold-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text span {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 200, 83, 0.1);
+            border-radius: 20px;
+            border: 1px solid var(--success);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        .market-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 140px);
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--bentley-black);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-title {
+            color: var(--bentley-gold);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.8rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(201, 168, 106, 0.1);
+            color: var(--bentley-gold);
+        }
+
+        .nav-item i {
+            width: 20px;
+        }
+
+        .symbol-list {
+            list-style: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .symbol-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .symbol-list::-webkit-scrollbar-thumb {
+            background: var(--bentley-gold);
+            border-radius: 2px;
+        }
+
+        .symbol-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid transparent;
+        }
+
+        .symbol-item:hover {
+            background-color: rgba(201, 168, 106, 0.1);
+        }
+
+        .symbol-item.active {
+            background-color: rgba(201, 168, 106, 0.15);
+            border-left-color: var(--bentley-gold);
+        }
+
+        .symbol-name {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .symbol-type {
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .symbol-price {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 0.9rem;
+        }
+
+        .price-up {
+            color: var(--success);
+        }
+
+        .price-down {
+            color: var(--danger);
+        }
+
+        .content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .execution-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .execution-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .table-container::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        .table-container::-webkit-scrollbar-thumb {
+            background: var(--bentley-gold);
+            border-radius: 2px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: rgba(201, 168, 106, 0.05);
+        }
+
+        .execution-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .execution-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .execution-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            padding: 0.8rem 1rem;
+            background-color: var(--bentley-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--bentley-gold);
+        }
+
+        .order-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-buy, .btn-sell {
+            padding: 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-buy {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-buy:hover {
+            background-color: #00B247;
+        }
+
+        .btn-sell {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-sell:hover {
+            background-color: #FF3838;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close {
+            background-color: rgba(255, 82, 82, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        .btn-close:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-modify {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: var(--info);
+            border: 1px solid var(--info);
+        }
+
+        .btn-modify:hover {
+            background-color: var(--info);
+            color: white;
+        }
+
+        .market-ticker {
+            background-color: var(--bentley-black);
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            height: 60px;
+            overflow: hidden;
+        }
+
+        .ticker-container {
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+        }
+
+        .ticker-content {
+            display: flex;
+            gap: 3rem;
+            white-space: nowrap;
+            animation: tickerScroll 40s linear infinite;
+            padding-right: 3rem;
+        }
+
+        .ticker-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .asset-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 0.5rem;
+        }
+
+        .badge-stock {
+            background: rgba(33, 150, 243, 0.2);
+            color: var(--info);
+        }
+
+        .badge-crypto {
+            background: rgba(255, 152, 0, 0.2);
+            color: var(--warning);
+        }
+
+        .badge-forex {
+            background: rgba(0, 200, 83, 0.2);
+            color: var(--success);
+        }
+
+        .badge-futures {
+            background: rgba(201, 168, 106, 0.2);
+            color: var(--bentley-gold);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-filled {
+            background-color: var(--success);
+        }
+
+        .status-partial {
+            background-color: var(--warning);
+        }
+
+        .status-pending {
+            background-color: var(--info);
+        }
+
+        .status-rejected {
+            background-color: var(--danger);
+        }
+
+        .advanced-options {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bentley-gray);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--bentley-gold);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes tickerScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .market-time {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="logo-text">BENTLEY<span>BOLDTRADER</span></div>
+            </div>
+
+            <div class="nav-controls">
+                <div class="connection-status">
+                    <div class="status-dot"></div>
+                    <span>EXECUTION HUB</span>
+                </div>
+                <div class="market-time">
+                    <i class="far fa-clock"></i> <span id="currentDateTime">January 17, 2026 | 10:42:15 AM EST</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="color: var(--text-secondary);">Account: <strong style="color: var(--bentley-gold);" id="accountBalance">$4,587,320</strong></span>
+                <div class="user-avatar">
+                    {{ user.username|first|upper }}
+                </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Navigation</div>
+                    <ul class="nav-menu">
+                        <li><a href="index.html" class="nav-item"><i class="fas fa-home"></i> Dashboard</a></li>
+                        <li><a href="execution_hub.html" class="nav-item active"><i class="fas fa-rocket"></i> Execution Hub</a></li>
+                        <li><a href="performance_tracker.html" class="nav-item"><i class="fas fa-chart-line"></i> Performance Tracker</a></li>
+                        <li><a href="#" class="nav-item"><i class="fas fa-robot"></i> AI Strategies</a></li>
+                        <li><a href="#" class="nav-item"><i class="fas fa-cog"></i> Settings</a></li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Quick Symbols</div>
+                    <ul class="symbol-list">
+                        <li class="symbol-item active" data-symbol="AAPL" data-type="stock">
+                            <span class="symbol-name">AAPL <span class="symbol-type badge-stock">STK</span></span>
+                            <span class="symbol-price price-up">$312.48 <small>(+1.85%)</small></span>
+                        </li>
+                        <li class="symbol-item" data-symbol="BTC/USD" data-type="crypto">
+                            <span class="symbol-name">BTC <span class="symbol-type badge-crypto">CRYPTO</span></span>
+                            <span class="symbol-price price-up">$92,415 <small>(+2.14%)</small></span>
+                        </li>
+                        <li class="symbol-item" data-symbol="NVDA" data-type="stock">
+                            <span class="symbol-name">NVDA <span class="symbol-type badge-stock">STK</span></span>
+                            <span class="symbol-price price-up">$956.25 <small>(+2.98%)</small></span>
+                        </li>
+                        <li class="symbol-item" data-symbol="EUR/USD" data-type="forex">
+                            <span class="symbol-name">EUR/USD <span class="symbol-type badge-forex">FX</span></span>
+                            <span class="symbol-price price-down">1.1185 <small>(-0.24%)</small></span>
+                        </li>
+                        <li class="symbol-item" data-symbol="GOLD" data-type="futures">
+                            <span class="symbol-name">GOLD <span class="symbol-type badge-futures">FUT</span></span>
+                            <span class="symbol-price price-up">$4,685 <small>(+1.25%)</small></span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Execution Settings</div>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Dark Pool Routing</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="darkPoolToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">AI Optimize</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="aiOptimizeToggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Aggressive Fill</span>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="aggressiveFillToggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="content">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Execution Hub 2026</h1>
+                        <p class="page-subtitle">Multi-asset execution with AI-powered routing • Direct market access • <span id="currentDate">January 17, 2026</span></p>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="form-control" style="background-color: var(--bentley-gold); color: var(--bentley-black); font-weight: 600;">
+                            <i class="fas fa-bolt"></i> Flash Execution
+                        </button>
+                        <button class="form-control" id="massCancelBtn">
+                            <i class="fas fa-ban"></i> Mass Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Execution Grid -->
+                <div class="execution-grid">
+                    <!-- Pending Orders Panel -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Pending Orders</h3>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">8 Active</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="table-container">
+                                <table id="pendingOrdersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Symbol</th>
+                                            <th>Type</th>
+                                            <th>Side</th>
+                                            <th>Qty</th>
+                                            <th>Limit</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="fade-in">
+                                            <td>AAPL</td>
+                                            <td><span class="badge-stock">STK</span></td>
+                                            <td style="color: var(--success);">BUY</td>
+                                            <td>150</td>
+                                            <td>$311.50</td>
+                                            <td><span class="status-indicator status-pending"></span>Pending</td>
+                                            <td>
+                                                <button class="action-btn btn-modify" onclick="modifyOrder('AAPL')">Modify</button>
+                                                <button class="action-btn btn-close" onclick="cancelOrder('AAPL')">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr class="fade-in">
+                                            <td>BTC/USD</td>
+                                            <td><span class="badge-crypto">CRYPTO</span></td>
+                                            <td style="color: var(--success);">BUY</td>
+                                            <td>0.5</td>
+                                            <td>$91,800</td>
+                                            <td><span class="status-indicator status-partial"></span>Partial</td>
+                                            <td>
+                                                <button class="action-btn btn-modify" onclick="modifyOrder('BTC')">Modify</button>
+                                                <button class="action-btn btn-close" onclick="cancelOrder('BTC')">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr class="fade-in">
+                                            <td>TSLA</td>
+                                            <td><span class="badge-stock">STK</span></td>
+                                            <td style="color: var(--danger);">SELL</td>
+                                            <td>75</td>
+                                            <td>$440.00</td>
+                                            <td><span class="status-indicator status-pending"></span>Pending</td>
+                                            <td>
+                                                <button class="action-btn btn-modify" onclick="modifyOrder('TSLA')">Modify</button>
+                                                <button class="action-btn btn-close" onclick="cancelOrder('TSLA')">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr class="fade-in">
+                                            <td>EUR/USD</td>
+                                            <td><span class="badge-forex">FX</span></td>
+                                            <td style="color: var(--danger);">SELL</td>
+                                            <td>100,000</td>
+                                            <td>1.1200</td>
+                                            <td><span class="status-indicator status-pending"></span>Pending</td>
+                                            <td>
+                                                <button class="action-btn btn-modify" onclick="modifyOrder('EUR')">Modify</button>
+                                                <button class="action-btn btn-close" onclick="cancelOrder('EUR')">Cancel</button>
+                                            </td>
+                                        </tr>
+                                        <tr class="fade-in">
+                                            <td>GOLD</td>
+                                            <td><span class="badge-futures">FUT</span></td>
+                                            <td style="color: var(--success);">BUY</td>
+                                            <td>10</td>
+                                            <td>$4,675</td>
+                                            <td><span class="status-indicator status-pending"></span>Pending</td>
+                                            <td>
+                                                <button class="action-btn btn-modify" onclick="modifyOrder('GOLD')">Modify</button>
+                                                <button class="action-btn btn-close" onclick="cancelOrder('GOLD')">Cancel</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Execution Panel -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Multi-Asset Execution</h3>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Real-time</span>
+                        </div>
+                        <div class="card-content">
+                            <div class="execution-panel">
+                                <!-- Market Order Form -->
+                                <div class="execution-form">
+                                    <h4 style="color: var(--bentley-gold); margin-bottom: 1rem; font-size: 1rem;">Market Order</h4>
+                                    <div class="form-group">
+                                        <label class="form-label">Asset</label>
+                                        <select class="form-control" id="executionAsset">
+                                            <option value="AAPL" data-type="stock">AAPL - Apple Inc. (Stock)</option>
+                                            <option value="TSLA" data-type="stock">TSLA - Tesla Inc. (Stock)</option>
+                                            <option value="NVDA" data-type="stock">NVDA - NVIDIA Corp. (Stock)</option>
+                                            <option value="BTC/USD" data-type="crypto">BTC/USD - Bitcoin (Crypto)</option>
+                                            <option value="ETH/USD" data-type="crypto">ETH/USD - Ethereum (Crypto)</option>
+                                            <option value="EUR/USD" data-type="forex">EUR/USD - Euro (Forex)</option>
+                                            <option value="GOLD" data-type="futures">GOLD - Gold Futures</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Current Price</label>
+                                        <input type="text" class="form-control" id="executionPrice" value="$312.48" readonly>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Quantity</label>
+                                        <input type="number" class="form-control" id="executionQuantity" value="100" min="1">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Order Type</label>
+                                        <select class="form-control" id="executionType">
+                                            <option>Market</option>
+                                            <option>Limit</option>
+                                            <option>Stop</option>
+                                            <option>Trailing Stop</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="order-buttons">
+                                        <button type="button" class="btn-buy" onclick="executeMarketOrder('buy')">
+                                            <i class="fas fa-arrow-up"></i> BUY
+                                        </button>
+                                        <button type="button" class="btn-sell" onclick="executeMarketOrder('sell')">
+                                            <i class="fas fa-arrow-down"></i> SELL
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Advanced Order Form -->
+                                <div class="execution-form">
+                                    <h4 style="color: var(--bentley-gold); margin-bottom: 1rem; font-size: 1rem;">Advanced Order</h4>
+                                    <div class="form-group">
+                                        <label class="form-label">Limit Price</label>
+                                        <input type="text" class="form-control" id="limitPrice" placeholder="Enter limit price">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Stop Price</label>
+                                        <input type="text" class="form-control" id="stopPrice" placeholder="Enter stop price">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Time in Force</label>
+                                        <select class="form-control" id="timeInForce">
+                                            <option>Day</option>
+                                            <option>GTC</option>
+                                            <option>IOC</option>
+                                            <option>FOK</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Algo Strategy</label>
+                                        <select class="form-control" id="algoStrategy">
+                                            <option>TWAP</option>
+                                            <option>VWAP</option>
+                                            <option>Iceberg</option>
+                                            <option>Adaptive</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="advanced-options">
+                                        <h5 style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem;">Advanced Options</h5>
+                                        <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <span style="color: var(--text-secondary); font-size: 0.85rem;">Post Only</span>
+                                                <label class="toggle-switch">
+                                                    <input type="checkbox" id="postOnlyToggle">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <span style="color: var(--text-secondary); font-size: 0.85rem;">Reduce Only</span>
+                                                <label class="toggle-switch">
+                                                    <input type="checkbox" id="reduceOnlyToggle">
+                                                    <span class="toggle-slider"></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Executions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Executions</h3>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Last 24 Hours</span>
+                    </div>
+                    <div class="card-content">
+                        <div class="table-container">
+                            <table id="executionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Symbol</th>
+                                        <th>Side</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Value</th>
+                                        <th>Venue</th>
+                                        <th>Latency</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="fade-in">
+                                        <td>10:42:15</td>
+                                        <td>AAPL</td>
+                                        <td style="color: var(--success);">BUY</td>
+                                        <td>100</td>
+                                        <td>$312.48</td>
+                                        <td>$31,248.00</td>
+                                        <td>IEX</td>
+                                        <td>3.2ms</td>
+                                    </tr>
+                                    <tr class="fade-in">
+                                        <td>10:38:42</td>
+                                        <td>BTC/USD</td>
+                                        <td style="color: var(--success);">BUY</td>
+                                        <td>0.25</td>
+                                        <td>$92,415</td>
+                                        <td>$23,103.75</td>
+                                        <td>Coinbase Pro</td>
+                                        <td>18.5ms</td>
+                                    </tr>
+                                    <tr class="fade-in">
+                                        <td>10:35:18</td>
+                                        <td>TSLA</td>
+                                        <td style="color: var(--danger);">SELL</td>
+                                        <td>50</td>
+                                        <td>$438.92</td>
+                                        <td>$21,946.00</td>
+                                        <td>NASDAQ</td>
+                                        <td>2.8ms</td>
+                                    </tr>
+                                    <tr class="fade-in">
+                                        <td>10:32:55</td>
+                                        <td>NVDA</td>
+                                        <td style="color: var(--success);">BUY</td>
+                                        <td>25</td>
+                                        <td>$956.25</td>
+                                        <td>$23,906.25</td>
+                                        <td>NYSE</td>
+                                        <td>4.1ms</td>
+                                    </tr>
+                                    <tr class="fade-in">
+                                        <td>10:30:12</td>
+                                        <td>GOLD</td>
+                                        <td style="color: var(--success);">BUY</td>
+                                        <td>5</td>
+                                        <td>$4,685</td>
+                                        <td>$23,425.00</td>
+                                        <td>CME</td>
+                                        <td>22.3ms</td>
+                                    </tr>
+                                    <tr class="fade-in">
+                                        <td>10:28:33</td>
+                                        <td>EUR/USD</td>
+                                        <td style="color: var(--danger);">SELL</td>
+                                        <td>100,000</td>
+                                        <td>1.1185</td>
+                                        <td>$111,850.00</td>
+                                        <td>FXCM</td>
+                                        <td>15.7ms</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Market Ticker -->
+        <div class="market-ticker">
+            <div class="ticker-container">
+                <div class="ticker-content" id="marketTicker">
+                    <!-- Ticker items will be dynamically generated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Real-time market data for January 17, 2026
+        const marketData2026 = {
+            AAPL: { price: 312.48, change: 1.85, name: "Apple Inc.", type: "stock", volatility: 0.008 },
+            TSLA: { price: 438.92, change: 3.42, name: "Tesla Inc.", type: "stock", volatility: 0.012 },
+            NVDA: { price: 956.25, change: 2.98, name: "NVIDIA Corp.", type: "stock", volatility: 0.015 },
+            MSFT: { price: 512.40, change: 0.92, name: "Microsoft Corp.", type: "stock", volatility: 0.007 },
+            "BTC/USD": { price: 92415, change: 2.14, name: "Bitcoin", type: "crypto", volatility: 0.025 },
+            "ETH/USD": { price: 7128, change: 1.89, name: "Ethereum", type: "crypto", volatility: 0.030 },
+            "EUR/USD": { price: 1.1185, change: -0.24, name: "Euro/US Dollar", type: "forex", volatility: 0.0012 },
+            "GBP/USD": { price: 1.2912, change: 0.18, name: "British Pound/US Dollar", type: "forex", volatility: 0.0010 },
+            GOLD: { price: 4685, change: 1.25, name: "Gold Futures", type: "futures", volatility: 0.010 },
+            OIL: { price: 94.28, change: -0.65, name: "Crude Oil Futures", type: "futures", volatility: 0.015 }
+        };
+
+        let liveUpdateInterval = null;
+        let accountBalance = 4587320;
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTicker();
+            setupEventListeners();
+            startLiveUpdates();
+            updateDateTime();
+        });
+
+        function initializeTicker() {
+            const tickerContainer = document.getElementById('marketTicker');
+            updateTickerContent(tickerContainer);
+
+            // Duplicate for seamless loop
+            const clone = tickerContainer.cloneNode(true);
+            tickerContainer.appendChild(clone);
+        }
+
+        function formatPrice(symbol, price) {
+            if (symbol.includes('BTC') || symbol.includes('ETH')) {
+                return '$' + price.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            } else if (symbol.includes('/USD') || symbol === 'EUR/USD' || symbol === 'GBP/USD') {
+                return price.toFixed(4);
+            } else if (symbol === 'GOLD') {
+                return '$' + price.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            } else if (symbol === 'OIL') {
+                return '$' + price.toFixed(2);
+            } else {
+                return '$' + price.toFixed(2);
+            }
+        }
+
+        function updateTickerContent(container) {
+            container.innerHTML = '';
+
+            const tickerAssets = [
+                { symbol: "AAPL", name: "AAPL" },
+                { symbol: "TSLA", name: "TSLA" },
+                { symbol: "NVDA", name: "NVDA" },
+                { symbol: "BTC/USD", name: "BTC" },
+                { symbol: "ETH/USD", name: "ETH" },
+                { symbol: "GOLD", name: "GOLD" },
+                { symbol: "OIL", name: "OIL" },
+                { symbol: "EUR/USD", name: "EUR/USD" },
+                { symbol: "GBP/USD", name: "GBP/USD" }
+            ];
+
+            tickerAssets.forEach(asset => {
+                const data = marketData2026[asset.symbol];
+                if (data) {
+                    const tickerItem = document.createElement('div');
+                    tickerItem.className = 'ticker-item';
+                    tickerItem.innerHTML = `
+                        <span style="color: var(--text-secondary); font-weight: 500;">${asset.name}</span>
+                        <span class="${data.change >= 0 ? 'price-up' : 'price-down'}" style="font-weight: 600;">
+                            ${formatPrice(asset.symbol, data.price)}
+                            <small style="font-size: 0.8em; opacity: 0.9;">(${data.change >= 0 ? '+' : ''}${data.change.toFixed(2)}%)</small>
+                        </span>
+                    `;
+                    container.appendChild(tickerItem);
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            // Symbol selection
+            document.querySelectorAll('.symbol-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.symbol-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const symbol = this.dataset.symbol;
+                    const assetData = marketData2026[symbol];
+                    if (assetData) {
+                        updateExecutionForm(symbol, assetData);
+                    }
+                });
+            });
+
+            // Asset selection in execution form
+            document.getElementById('executionAsset').addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const symbol = selectedOption.value;
+                const assetData = marketData2026[symbol];
+                if (assetData) {
+                    updateExecutionForm(symbol, assetData);
+
+                    // Update sidebar selection
+                    document.querySelectorAll('.symbol-item').forEach(item => {
+                        item.classList.remove('active');
+                        if (item.dataset.symbol === symbol) {
+                            item.classList.add('active');
+                        }
+                    });
+                }
+            });
+
+            // Mass cancel button
+            document.getElementById('massCancelBtn').addEventListener('click', function() {
+                if (confirm('Cancel all pending orders?')) {
+                    const table = document.querySelector('#pendingOrdersTable tbody');
+                    table.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary); padding: 2rem;">No pending orders</td></tr>';
+                    showNotification('All pending orders cancelled', 'success');
+                }
+            });
+
+            // Quantity input
+            document.getElementById('executionQuantity').addEventListener('input', function() {
+                updateOrderValue();
+            });
+        }
+
+        function updateExecutionForm(symbol, assetData) {
+            document.getElementById('executionPrice').value = formatPrice(symbol, assetData.price);
+            document.getElementById('executionQuantity').value = getDefaultQuantity(symbol, assetData.type);
+            updateOrderValue();
+        }
+
+        function getDefaultQuantity(symbol, type) {
+            switch(type) {
+                case 'crypto':
+                    if (symbol.includes('BTC')) return 0.1;
+                    return 1;
+                case 'forex':
+                    return 50000;
+                case 'futures':
+                    return 5;
+                default:
+                    return 100;
+            }
+        }
+
+        function updateOrderValue() {
+            const qty = parseFloat(document.getElementById('executionQuantity').value) || 0;
+            const priceText = document.getElementById('executionPrice').value;
+
+            let price = 0;
+            if (priceText.includes('$')) {
+                price = parseFloat(priceText.replace(/[^0-9.-]+/g, ''));
+            } else {
+                price = parseFloat(priceText);
+            }
+
+            return qty * price;
+        }
+
+        function startLiveUpdates() {
+            liveUpdateInterval = setInterval(() => {
+                updateMarketPrices();
+                updateDateTime();
+                updateTicker();
+            }, 3000);
+        }
+
+        function updateMarketPrices() {
+            Object.keys(marketData2026).forEach(symbol => {
+                const data = marketData2026[symbol];
+                const volatility = data.volatility || 0.01;
+                const change = (Math.random() - 0.5) * volatility * 0.5;
+
+                data.price *= (1 + change);
+                data.change += change * 100;
+                data.change = Math.max(-8, Math.min(8, data.change));
+
+                // Update sidebar
+                const priceElement = document.querySelector(`.symbol-item[data-symbol="${symbol}"] .symbol-price`);
+                if (priceElement) {
+                    const changeClass = data.change >= 0 ? 'price-up' : 'price-down';
+                    priceElement.className = `symbol-price ${changeClass}`;
+                    priceElement.innerHTML = `${formatPrice(symbol, data.price)} <small>(${data.change >= 0 ? '+' : ''}${data.change.toFixed(2)}%)</small>`;
+                }
+
+                // Update execution form if this is the current asset
+                const currentAsset = document.getElementById('executionAsset').value;
+                if (symbol === currentAsset) {
+                    document.getElementById('executionPrice').value = formatPrice(symbol, data.price);
+                }
+            });
+        }
+
+        function updateDateTime() {
+            const now = new Date(2026, 0, 17, 10, 42, 15);
+            now.setSeconds(now.getSeconds() + Math.floor(Math.random() * 10));
+
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+
+            const dateString = now.toLocaleDateString('en-US', dateOptions);
+            const timeString = now.toLocaleTimeString('en-US', timeOptions);
+
+            document.getElementById('currentDateTime').textContent = `${dateString} | ${timeString} EST`;
+            document.getElementById('currentDate').textContent = dateString;
+        }
+
+        function updateTicker() {
+            const tickerContainer = document.getElementById('marketTicker');
+            updateTickerContent(tickerContainer);
+
+            const clone = tickerContainer.cloneNode(true);
+            tickerContainer.appendChild(clone);
+        }
+
+        function executeMarketOrder(side) {
+            const assetSelect = document.getElementById('executionAsset');
+            const symbol = assetSelect.value;
+            const assetType = assetSelect.options[assetSelect.selectedIndex].dataset.type;
+            const qty = document.getElementById('executionQuantity').value;
+            const price = document.getElementById('executionPrice').value;
+            const orderType = document.getElementById('executionType').value;
+
+            const action = side === 'buy' ? 'BUY' : 'SELL';
+            const color = side === 'buy' ? 'success' : 'danger';
+            const venue = getRandomVenue(assetType);
+
+            const now = new Date();
+            const time = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            const latency = (Math.random() * 20 + 2).toFixed(1) + 'ms';
+            const value = updateOrderValue();
+
+            // Show confirmation
+            const confirmed = confirm(`Execute ${action} order?\n${qty} ${symbol} at ${price}\nOrder Type: ${orderType}\nEstimated Value: $${value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
+
+            if (confirmed) {
+                // Add to executions table
+                const executionsTable = document.querySelector('#executionsTable tbody');
+                const newRow = document.createElement('tr');
+                newRow.className = 'fade-in';
+                newRow.innerHTML = `
+                    <td>${time}</td>
+                    <td>${symbol}</td>
+                    <td style="color: var(--${color});">${action}</td>
+                    <td>${qty}</td>
+                    <td>${price}</td>
+                    <td>$${value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>${venue}</td>
+                    <td>${latency}</td>
+                `;
+                executionsTable.insertBefore(newRow, executionsTable.firstChild);
+
+                // Limit to 10 rows
+                if (executionsTable.children.length > 10) {
+                    executionsTable.removeChild(executionsTable.lastChild);
+                }
+
+                showNotification(`${action} order for ${symbol} executed successfully`, color);
+            }
+        }
+
+        function getRandomVenue(assetType) {
+            const venues = {
+                stock: ['NYSE', 'NASDAQ', 'IEX', 'BATS'],
+                crypto: ['Coinbase Pro', 'Binance', 'Kraken', 'FTX'],
+                forex: ['FXCM', 'OANDA', 'Interactive Brokers', 'Saxo Bank'],
+                futures: ['CME', 'ICE', 'EUREX', 'SGX']
+            };
+
+            const typeVenues = venues[assetType] || ['Direct'];
+            return typeVenues[Math.floor(Math.random() * typeVenues.length)];
+        }
+
+        function modifyOrder(symbol) {
+            const newPrice = prompt(`Enter new limit price for ${symbol}:`, "$0.00");
+            if (newPrice) {
+                showNotification(`Order for ${symbol} modified to ${newPrice}`, 'info');
+            }
+        }
+
+        function cancelOrder(symbol) {
+            if (confirm(`Cancel order for ${symbol}?`)) {
+                // In a real app, this would remove from the table
+                showNotification(`Order for ${symbol} cancelled`, 'success');
+            }
+        }
+
+        function showNotification(message, type) {
+            // Remove existing notifications
+            document.querySelectorAll('.notification').forEach(n => n.remove());
+
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background-color: ${type === 'success' ? 'rgba(0, 200, 83, 0.9)' :
+                                type === 'danger' ? 'rgba(255, 82, 82, 0.9)' :
+                                'rgba(33, 150, 243, 0.9)'};
+                color: white;
+                border-radius: 6px;
+                z-index: 1000;
+                animation: slideIn 0.3s ease-out;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+                max-width: 350px;
+                font-weight: 500;
+            `;
+
+            const icon = type === 'success' ? 'fa-check-circle' :
+                        type === 'danger' ? 'fa-exclamation-circle' :
+                        'fa-info-circle';
+
+            notification.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <div>${message}</div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+
+            // Add animation keyframes if not already present
+            if (!document.querySelector('#notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Trade Development | Bentley-Brand-dev</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* All CSS remains exactly the same */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2d6bc9;
+            --accent-color: #00c9a7;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dark-mode {
+            --light-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-dark: #f1f5f9;
+            --text-light: #94a3b8;
+            --border-color: #334155;
+        }
+
+        .navbar {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .logo-text span {
+            color: var(--accent-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-icon {
+            margin-right: 8px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .sidebar-section h3 {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+        }
+
+        .module-list {
+            list-style: none;
+        }
+
+        .module-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .module-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .module-link:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+            color: var(--accent-color);
+        }
+
+        .module-link.active {
+            background-color: rgba(0, 201, 167, 0.15);
+            color: var(--accent-color);
+            font-weight: 600;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .module-icon {
+            margin-right: 12px;
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .content {
+            flex: 1;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+        }
+
+        .page-subtitle {
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+
+        /* Trade Development specific styles */
+        .development-container {
+            display: flex;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .editor-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .tools-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .code-editor {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 0;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .editor-title {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .editor-content {
+            flex: 1;
+            overflow: auto;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+
+        .code-line {
+            margin-bottom: 0.25rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .tool-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .tool-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .tool-icon {
+            background-color: rgba(0, 201, 167, 0.1);
+            color: var(--accent-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+
+        .tool-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .api-test-container {
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #00b397;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #265cbb;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(0, 201, 167, 0.1);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .debug-console {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .console-line {
+            margin-bottom: 0.25rem;
+        }
+
+        .console-info {
+            color: #569cd6;
+        }
+
+        .console-success {
+            color: #10b981;
+        }
+
+        .console-error {
+            color: #ef4444;
+        }
+
+        .console-warning {
+            color: #f59e0b;
+        }
+
+        .version-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .version-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .version-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .version-item.active {
+            background-color: rgba(0, 201, 167, 0.1);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .version-info {
+            flex: 1;
+        }
+
+        .version-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .version-date {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .version-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .api-endpoints {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .endpoint-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .endpoint-method {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-right: 0.5rem;
+        }
+
+        .method-get {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+        }
+
+        .method-post {
+            background-color: rgba(45, 107, 201, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .endpoint-desc {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+
+        .terminal-output {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.25rem;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 220px;
+            }
+
+            .development-container {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .editor-actions {
+                flex-wrap: wrap;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="logo-text">Bentley-<span>Brand-dev</span></div>
+        </div>
+
+        <div class="nav-links">
+            <a href="{% url 'base' %}" class="nav-link"><i class="fas fa-home nav-icon"></i>Dashboard</a>
+            <a href="{% url 'notifications' %}" class="nav-link"><i class="fas fa-bell nav-icon"></i>Alerts</a>
+            <a href="{% url 'algo_trading_platform' %}" class="nav-link"><i class="fas fa-chart-bar nav-icon"></i>Analytics</a>
+            <a href="{% url 'settings' %}" class="nav-link"><i class="fas fa-cog nav-icon"></i>Settings</a>
+        </div>
+
+        <div class="user-menu">
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="user-avatar">
+                {{ user.username|first|upper }}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <h3>Trading Modules</h3>
+                <ul class="module-list">
+                    <li class="module-item">
+                        <a href="{% url 'strategy_lab' %}" class="module-link">
+                            <i class="fas fa-flask module-icon"></i> Strategy Lab
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trade_builder' %}" class="module-link">
+                            <i class="fas fa-tools module-icon"></i> Trade Builder
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'market_blueprint' %}" class="module-link">
+                            <i class="fas fa-map module-icon"></i> Market Blueprint
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'advanced_trading_tools' %}" class="module-link">
+                            <i class="fas fa-chart-bar module-icon"></i> Advanced Trading Tools
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>Development Tools</h3>
+                <ul class="module-list">
+                    <li class="module-item">
+                        <a href="{% url 'indicator_workshop' %}" class="module-link">
+                            <i class="fas fa-ruler-combined module-icon"></i> Indicator Workshop
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trading_toolkit' %}" class="module-link">
+                            <i class="fas fa-toolbox module-icon"></i> Trading Toolkit
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'backtest_center' %}" class="module-link">
+                            <i class="fas fa-history module-icon"></i> Backtest Center
+                        </a>
+                    </li>
+                    <li class="module-item">
+                        <a href="{% url 'trade_development' %}" class="module-link active">
+                            <i class="fas fa-code-branch module-icon"></i> Quantum Development
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>AI Dev Stats</h3>
+                <div class="card">
+                    <div class="card-content">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span><i class="fas fa-brain"></i> AI Projects</span>
+                            <strong>7</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span><i class="fas fa-code"></i> Last AI Commit</span>
+                            <strong>35 min ago</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <span><i class="fas fa-robot"></i> AI Assistant</span>
+                            <strong style="color: var(--success-color);">Online</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span><i class="fas fa-bolt"></i> Quantum API</span>
+                            <strong style="color: var(--success-color);">Active</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">Quantum Trade Development</h1>
+                    <p class="page-subtitle">AI-powered development environment for quantum trading algorithms and neural integrations | March 18, 2026</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary"><i class="fas fa-plus"></i> New AI Project</button>
+                    <button class="btn btn-outline"><i class="fas fa-terminal"></i> Quantum Terminal</button>
+                </div>
+            </div>
+
+            <div class="development-container fade-in">
+                <div class="editor-panel">
+                    <div class="code-editor">
+                        <div class="editor-header">
+                            <div class="editor-title">QuantumAIMomentum.py</div>
+                            <div class="editor-actions">
+                                <button class="btn btn-primary btn-sm"><i class="fas fa-play fa-spin"></i> AI Run</button>
+                                <button class="btn btn-secondary btn-sm"><i class="fas fa-save"></i> Quantum Save</button>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-robot"></i> AI Debug</button>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-code-branch"></i> AI Commit</button>
+                            </div>
+                        </div>
+                        <div class="editor-content">
+                            <div class="code-line" style="color: #569cd6;">import</div>
+<div class="code-line" style="color: #9cdcfe;">tensorflow</div>
+<div class="code-line" style="color: #569cd6;">as</div>
+<div class="code-line" style="color: #9cdcfe;">tf</div>
+<div class="code-line" style="color: #569cd6;">import</div>
+<div class="code-line" style="color: #9cdcfe;">torch</div>
+<div class="code-line" style="color: #569cd6;">from</div>
+<div class="code-line" style="color: #9cdcfe;">quantumai</div>
+<div class="code-line" style="color: #569cd6;">import</div>
+<div class="code-line" style="color: #9cdcfe;">QuantumProcessor</div>
+<div class="code-line" style="color: #569cd6;">from</div>
+<div class="code-line" style="color: #9cdcfe;">transformers</div>
+<div class="code-line" style="color: #569cd6;">import</div>
+<div class="code-line" style="color: #9cdcfe;">GPTNeuralTrader</div>
+<br>
+<div class="code-line" style="color: #569cd6;">class</div>
+<div class="code-line" style="color: #4ec9b0;">QuantumAIMomentum</div>
+<div class="code-line">:</div>
+<div class="code-line">&nbsp;&nbsp;<span style="color: #569cd6;">def</span> <span style="color: #dcdcaa;">__init__</span>(<span style="color: #9cdcfe;">self</span>, <span style="color: #9cdcfe;">symbol</span>=<span style="color: #ce9178;">"QNTM"</span>, <span style="color: #9cdcfe;">ai_model</span>=<span style="color: #ce9178;">"GPT-Trading-v4"</span>):</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">symbol</span> = <span style="color: #9cdcfe;">symbol</span></div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">quantum_processor</span> = <span style="color: #9cdcfe;">QuantumProcessor</span>(<span style="color: #ce9178;">"qpu_2026"</span>)</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">ai_model</span> = <span style="color: #9cdcfe;">GPTNeuralTrader</span>.<span style="color: #dcdcaa;">from_pretrained</span>(<span style="color: #9cdcfe;">ai_model</span>)</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">position</span> = <span style="color: #b5cea8;">0</span></div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">ai_confidence</span> = <span style="color: #b5cea8;">0.0</span></div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">quantum_risk_score</span> = <span style="color: #b5cea8;">0.0</span></div>
+<br>
+<div class="code-line">&nbsp;&nbsp;<span style="color: #569cd6;">def</span> <span style="color: #dcdcaa;">analyze_with_ai</span>(<span style="color: #9cdcfe;">self</span>, <span style="color: #9cdcfe;">market_data</span>):</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #608b4e;"># Process data through quantum neural network</span></div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">quantum_features</span> = <span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">quantum_processor</span>.<span style="color: #dcdcaa;">extract_features</span>(<span style="color: #9cdcfe;">market_data</span>)</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">ai_prediction</span> = <span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">ai_model</span>.<span style="color: #dcdcaa;">predict</span>(<span style="color: #9cdcfe;">quantum_features</span>)</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">ai_confidence</span> = <span style="color: #9cdcfe;">ai_prediction</span>[<span style="color: #ce9178;">'confidence'</span>]</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">return</span> <span style="color: #9cdcfe;">ai_prediction</span></div>
+<br>
+<div class="code-line">&nbsp;&nbsp;<span style="color: #569cd6;">def</span> <span style="color: #dcdcaa;">calculate_quantum_risk</span>(<span style="color: #9cdcfe;">self</span>, <span style="color: #9cdcfe;">market_volatility</span>, <span style="color: #9cdcfe;">correlation_matrix</span>):</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #608b4e;"># Quantum risk assessment using entanglement principles</span></div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">quantum_state</span> = <span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">quantum_processor</span>.<span style="color: #dcdcaa;">prepare_state</span>(<span style="color: #9cdcfe;">market_volatility</span>)</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">risk_amplitude</span> = <span style="color: #9cdcfe;">quantum_state</span>.<span style="color: #dcdcaa;">measure_risk</span>()</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">quantum_risk_score</span> = <span style="color: #9cdcfe;">risk_amplitude</span> * <span style="color: #b5cea8;">100</span></div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">return</span> <span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">quantum_risk_score</span></div>
+<br>
+<div class="code-line">&nbsp;&nbsp;<span style="color: #569cd6;">def</span> <span style="color: #dcdcaa;">generate_ai_signal</span>(<span style="color: #9cdcfe;">self</span>, <span style="color: #9cdcfe;">market_data</span>):</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">ai_analysis</span> = <span style="color: #9cdcfe;">self</span>.<span style="color: #dcdcaa;">analyze_with_ai</span>(<span style="color: #9cdcfe;">market_data</span>)</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">risk_score</span> = <span style="color: #9cdcfe;">self</span>.<span style="color: #dcdcaa;">calculate_quantum_risk</span>(<span style="color: #9cdcfe;">market_data</span>[<span style="color: #ce9178;">'volatility'</span>], <span style="color: #9cdcfe;">market_data</span>[<span style="color: #ce9178;">'correlations'</span>])</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #608b4e;"># AI decision making with quantum risk constraints</span></div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">if</span> <span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">position</span> == <span style="color: #b5cea8;">0</span>:</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">if</span> <span style="color: #9cdcfe;">ai_analysis</span>[<span style="color: #ce9178;">'signal'</span>] == <span style="color: #ce9178;">"STRONG_BUY"</span> <span style="color: #569cd6;">and</span> <span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">ai_confidence</span> > <span style="color: #b5cea8;">0.85</span> <span style="color: #569cd6;">and</span> <span style="color: #9cdcfe;">risk_score</span> < <span style="color: #b5cea8;">25</span>:</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">position</span> = <span style="color: #b5cea8;">1</span></div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">return</span> {<span style="color: #ce9178;">"action"</span>: <span style="color: #ce9178;">"QUANTUM_BUY"</span>, <span style="color: #ce9178;">"confidence"</span>: <span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">ai_confidence</span>, <span style="color: #ce9178;">"risk"</span>: <span style="color: #9cdcfe;">risk_score</span>}</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #608b4e;"># Quantum exit logic</span></div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">elif</span> <span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">position</span> == <span style="color: #b5cea8;">1</span>:</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">if</span> <span style="color: #9cdcfe;">ai_analysis</span>[<span style="color: #ce9178;">'signal'</span>] == <span style="color: #ce9178;">"STRONG_SELL"</span> <span style="color: #569cd6;">or</span> <span style="color: #9cdcfe;">risk_score</span> > <span style="color: #b5cea8;">75</span>:</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">position</span> = <span style="color: #b5cea8;">0</span></div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">return</span> {<span style="color: #ce9178;">"action"</span>: <span style="color: #ce9178;">"QUANTUM_EXIT"</span>, <span style="color: #ce9178;">"reason"</span>: <span style="color: #ce9178;">"AI Risk Threshold"</span>}</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+<div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #569cd6;">return</span> {<span style="color: #ce9178;">"action"</span>: <span style="color: #ce9178;">"QUANTUM_HOLD"</span>, <span style="color: #ce9178;">"confidence"</span>: <span style="color: #9cdcfe;">self</span>.<span style="color: #9cdcfe;">ai_confidence</span>}</div>
+                        </div>
+                    </div>
+
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon" style="background-color: rgba(147, 51, 234, 0.1); color: #9333ea;">
+                                <i class="fas fa-bug"></i>
+                            </div>
+                            <div>
+                                <h3 class="tool-title">AI Debug Console</h3>
+                            </div>
+                            <div style="margin-left: auto;">
+                                <span class="status-indicator status-active">
+                                    <i class="fas fa-robot"></i> AI Active
+                                </span>
+                            </div>
+                        </div>
+                        <div class="debug-console">
+                            <div class="console-line console-info">[QUANTUM] AI Debug session started at 15:24:35</div>
+                            <div class="console-line console-success">[AI] Quantum strategy loaded successfully</div>
+                            <div class="console-line console-info">[NEURAL] Testing with quantum data: QNTM 15-min</div>
+                            <div class="console-line console-warning">[AI] Quantum processor at 92% capacity</div>
+                            <div class="console-line console-success">[QUANTUM] Backtest completed: 181 trades, +42.8% return</div>
+                            <div class="console-line console-info">[AI] Generating neural performance report...</div>
+                            <div class="console-line console-success">[QUANTUM] AI Confidence: 94% | Risk Score: 18/100</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tools-panel">
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                                <i class="fas fa-code-branch"></i>
+                            </div>
+                            <div>
+                                <h3 class="tool-title">Quantum Version Control</h3>
+                            </div>
+                        </div>
+                        <div class="version-list">
+                            <div class="version-item active">
+                                <div class="version-info">
+                                    <div class="version-name"><i class="fas fa-brain"></i> v3.1.2 - Quantum AI Enhancements</div>
+                                    <div class="version-date">Mar 16, 2026 • AI Assistant</div>
+                                </div>
+                                <div class="version-actions">
+                                    <button class="btn btn-outline btn-sm">Revert</button>
+                                </div>
+                            </div>
+                            <div class="version-item">
+                                <div class="version-info">
+                                    <div class="version-name"><i class="fas fa-bolt"></i> v3.1.1 - Neural Optimization</div>
+                                    <div class="version-date">Mar 14, 2026 • You</div>
+                                </div>
+                                <div class="version-actions">
+                                    <button class="btn btn-outline btn-sm">Revert</button>
+                                </div>
+                            </div>
+                            <div class="version-item">
+                                <div class="version-info">
+                                    <div class="version-name"><i class="fas fa-atom"></i> v3.1.0 - Quantum Processor</div>
+                                    <div class="version-date">Mar 10, 2026 • AI Assistant</div>
+                                </div>
+                                <div class="version-actions">
+                                    <button class="btn btn-outline btn-sm">Revert</button>
+                                </div>
+                            </div>
+                            <div class="version-item">
+                                <div class="version-info">
+                                    <div class="version-name"><i class="fas fa-robot"></i> v3.0.0 - AI Integration</div>
+                                    <div class="version-date">Mar 5, 2026 • You</div>
+                                </div>
+                                <div class="version-actions">
+                                    <button class="btn btn-outline btn-sm">Revert</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <input type="text" class="form-control" placeholder="AI commit message...">
+                            <button class="btn btn-primary btn-sm" style="width: 100%; margin-top: 0.5rem;">
+                                <i class="fas fa-code-branch"></i> AI Commit
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success-color);">
+                                <i class="fas fa-plug"></i>
+                            </div>
+                            <div>
+                                <h3 class="tool-title">Quantum API Integration</h3>
+                            </div>
+                        </div>
+                        <div class="api-endpoints">
+                            <div class="endpoint-item">
+                                <span class="endpoint-method method-get">GET</span>
+                                <span class="endpoint-path">/quantum/api/market-data/{symbol}</span>
+                                <div class="endpoint-desc"><i class="fas fa-bolt"></i> Quantum real-time market data</div>
+                            </div>
+                            <div class="endpoint-item">
+                                <span class="endpoint-method method-post">POST</span>
+                                <span class="endpoint-path">/quantum/api/ai-order</span>
+                                <div class="endpoint-desc"><i class="fas fa-robot"></i> Place AI trade order</div>
+                            </div>
+                            <div class="endpoint-item">
+                                <span class="endpoint-method method-get">GET</span>
+                                <span class="endpoint-path">/quantum/api/quantum-positions</span>
+                                <div class="endpoint-desc"><i class="fas fa-atom"></i> Get quantum positions</div>
+                            </div>
+                            <div class="endpoint-item">
+                                <span class="endpoint-method method-post">POST</span>
+                                <span class="endpoint-path">/quantum/api/neural-execute</span>
+                                <div class="endpoint-desc"><i class="fas fa-brain"></i> Execute neural strategy</div>
+                            </div>
+                        </div>
+                        <div class="api-test-container">
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-network-wired"></i> Quantum Endpoint</label>
+                                <select class="form-control">
+                                    <option>/quantum/api/market-data/{symbol}</option>
+                                    <option>/quantum/api/ai-order</option>
+                                    <option>/quantum/api/quantum-positions</option>
+                                    <option>/quantum/api/neural-execute</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary btn-sm" style="width: 100%;">
+                                <i class="fas fa-play fa-spin"></i> Quantum API Test
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="tool-card">
+                        <div class="tool-header">
+                            <div class="tool-icon" style="background-color: rgba(245, 158, 11, 0.1); color: var(--warning-color);">
+                                <i class="fas fa-terminal"></i>
+                            </div>
+                            <div>
+                                <h3 class="tool-title">Quantum Terminal</h3>
+                            </div>
+                        </div>
+                        <div class="terminal-output">
+                            <div class="terminal-line">$ quantum python QuantumAIMomentum.py --symbol QNTM --quantum-backtest</div>
+                            <div class="terminal-line">Initializing quantum processor...</div>
+                            <div class="terminal-line">Loading neural network model...</div>
+                            <div class="terminal-line">Running quantum backtest 2025-01-01 to 2026-03-18</div>
+                            <div class="terminal-line">Quantum trades: 181</div>
+                            <div class="terminal-line">AI Win rate: 78.4%</div>
+                            <div class="terminal-line">Quantum return: +42.8%</div>
+                            <div class="terminal-line">Sharpe ratio: 2.42</div>
+                            <div class="terminal-line">Max quantum drawdown: -5.7%</div>
+                            <div class="terminal-line">AI Confidence score: 94/100</div>
+                            <div class="terminal-line">$ </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <input type="text" class="form-control" placeholder="Enter quantum command...">
+                            <button class="btn btn-primary btn-sm" style="width: 100%; margin-top: 0.5rem;">
+                                <i class="fas fa-play"></i> Quantum Execute
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card fade-in" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <div class="tool-icon" style="background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div>
+                        <h3 class="tool-title">Quantum Development Projects</h3>
+                        <p class="tool-subtitle">Your AI-powered quantum trading projects | Active: 7</p>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <span class="status-indicator status-active">
+                            <i class="fas fa-sync-alt fa-spin"></i> AI Syncing
+                        </span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                        <div style="padding: 1.5rem; background-color: rgba(0, 0, 0, 0.02); border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                                <div style="width: 40px; height: 40px; background-color: rgba(147, 51, 234, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                    <i class="fas fa-brain" style="color: #9333ea;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 1.1rem;">Quantum AI Momentum</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-light);">Python/QPU • Updated: 35 min ago</div>
+                                    <div style="font-size: 0.75rem; color: var(--success-color); margin-top: 0.25rem;">
+                                        <i class="fas fa-robot"></i> AI Score: 94/100
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="color: var(--text-light); margin-bottom: 1rem;">
+                                Quantum neural network momentum strategy with AI risk management and quantum processing.
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-primary btn-sm"><i class="fas fa-code"></i> Open Quantum</button>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-play fa-spin"></i> AI Run</button>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-share"></i> Quantum Deploy</button>
+                            </div>
+                        </div>
+
+                        <div style="padding: 1.5rem; background-color: rgba(0, 0, 0, 0.02); border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                                <div style="width: 40px; height: 40px; background-color: rgba(16, 185, 129, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                    <i class="fas fa-bolt" style="color: var(--success-color);"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 1.1rem;">Neural Arbitrage v4</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-light);">TensorFlow • Updated: 2 days ago</div>
+                                    <div style="font-size: 0.75rem; color: var(--success-color); margin-top: 0.25rem;">
+                                        <i class="fas fa-robot"></i> AI Score: 92/100
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="color: var(--text-light); margin-bottom: 1rem;">
+                                High-frequency neural arbitrage detection across quantum exchanges with AI execution.
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-primary btn-sm"><i class="fas fa-code"></i> Open Neural</button>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-play fa-spin"></i> AI Run</button>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-share"></i> Deploy AI</button>
+                            </div>
+                        </div>
+
+                        <div style="padding: 1.5rem; background-color: rgba(0, 0, 0, 0.02); border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                                <div style="width: 40px; height: 40px; background-color: rgba(59, 130, 246, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                    <i class="fas fa-robot" style="color: #3b82f6;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; font-size: 1.1rem;">Sentiment AI Trader</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-light);">PyTorch • Updated: 1 week ago</div>
+                                    <div style="font-size: 0.75rem; color: var(--success-color); margin-top: 0.25rem;">
+                                        <i class="fas fa-robot"></i> AI Score: 88/100
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="color: var(--text-light); margin-bottom: 1rem;">
+                                NLP-powered sentiment analysis with quantum-enhanced trading decisions.
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-primary btn-sm"><i class="fas fa-code"></i> Open AI</button>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-play fa-spin"></i> AI Run</button>
+                                <button class="btn btn-outline btn-sm"><i class="fas fa-share"></i> Deploy Quantum</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div style="color: var(--text-light); font-size: 0.9em;">
+                        <i class="fas fa-atom"></i> Quantum AI processing 7 projects | Average AI Score: <strong style="color: var(--success-color);">91/100</strong>
+                    </div>
+                    <button class="btn btn-outline"><i class="fas fa-plus"></i> New AI Project</button>
+                </div>
+            </div>
+
+            <!-- AI Development Assistant -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon" style="background-color: rgba(147, 51, 234, 0.1); color: #9333ea;">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div>
+                            <h3 class="card-title">AI Development Assistant</h3>
+                            <p>Neural code suggestions</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Code Quality:</span>
+                                <strong style="color: var(--success-color);">94%</strong>
+                            </div>
+                            <div style="height: 4px; background-color: rgba(0, 0, 0, 0.1); border-radius: 2px; margin-top: 0.25rem;">
+                                <div style="height: 100%; width: 94%; background-color: var(--success-color); border-radius: 2px;"></div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Performance Score:</span>
+                                <strong style="color: var(--success-color);">91%</strong>
+                            </div>
+                            <div style="height: 4px; background-color: rgba(0, 0, 0, 0.1); border-radius: 2px; margin-top: 0.25rem;">
+                                <div style="height: 100%; width: 91%; background-color: var(--success-color); border-radius: 2px;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>AI Suggestions:</span>
+                                <strong>3 new</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-outline">View AI Suggestions</button>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success-color);">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div>
+                            <h3 class="card-title">Quantum Performance</h3>
+                            <p>Development metrics</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Quantum Compile Time:</span>
+                            <strong>2.4s</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>AI Code Gen:</span>
+                            <strong style="color: var(--success-color);">142 lines/min</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Quantum Speedup:</span>
+                            <strong style="color: var(--success-color);">85x</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>AI Accuracy:</span>
+                            <strong style="color: var(--success-color);">94.2%</strong>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-outline">Performance Report</button>
+                    </div>
+                </div>
+
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon" style="background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="card-title">Quantum Security</h3>
+                            <p>AI threat detection</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>API Security:</strong> <span style="color: var(--success-color);">98% Secure</span>
+                        </div>
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>Quantum Encryption:</strong> <span style="color: var(--success-color);">Enabled</span>
+                        </div>
+                        <div style="margin-bottom: 0.5rem;">
+                            <strong>AI Threat Score:</strong> <span style="color: var(--success-color);">12/100 (Low)</span>
+                        </div>
+                        <div>
+                            <strong>Last Security Scan:</strong> <span style="color: var(--success-color);">15 min ago</span>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-primary">Security Dashboard</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+
+            if (document.body.classList.contains('dark-mode')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        });
+
+        // Version selection
+        document.querySelectorAll('.version-item').forEach(item => {
+            item.addEventListener('click', function() {
+                if (!this.classList.contains('active')) {
+                    document.querySelectorAll('.version-item').forEach(v => v.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+
+        // Simulate terminal input
+        document.querySelectorAll('.terminal-output + .form-group input').forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const command = this.value;
+                    if (command.trim()) {
+                        const terminal = this.closest('.tool-card').querySelector('.terminal-output');
+                        const newLine = document.createElement('div');
+                        newLine.className = 'terminal-line';
+                        newLine.textContent = '$ ' + command;
+                        terminal.appendChild(newLine);
+
+                        // Simulate quantum command output
+                        setTimeout(() => {
+                            const outputLine = document.createElement('div');
+                            outputLine.className = 'terminal-line';
+                            outputLine.textContent = '[QUANTUM] Executing: ' + command;
+                            terminal.appendChild(outputLine);
+
+                            // Add new prompt
+                            const promptLine = document.createElement('div');
+                            promptLine.className = 'terminal-line';
+                            promptLine.textContent = '$ ';
+                            terminal.appendChild(promptLine);
+
+                            // Scroll to bottom
+                            terminal.scrollTop = terminal.scrollHeight;
+                        }, 500);
+
+                        this.value = '';
+                    }
+                    e.preventDefault();
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPage = window.location.pathname.split('/').pop();
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const linkHref = link.getAttribute('href');
+                if (linkHref === currentPage ||
+                   (currentPage === '' && linkHref === 'index.html') ||
+                   (currentPage === 'index.html' && linkHref === 'index.html')) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            const moduleLinks = document.querySelectorAll('.module-link');
+            moduleLinks.forEach(link => {
+                const linkHref = link.getAttribute('href');
+                if (linkHref === currentPage) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Update real-time data
+            function updateRealTimeData() {
+                const date = new Date();
+                const options = { month: 'long', day: 'numeric', year: 'numeric' };
+                const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                // Update the subtitle with real-time info
+                const subtitle = document.querySelector('.page-subtitle');
+                if (subtitle) {
+                    subtitle.textContent = `AI-powered development environment for quantum trading algorithms and neural integrations | ${date.toLocaleDateString('en-US', options)} ${timeString}`;
+                }
+
+                // Update projects subtitle
+                const projectsSubtitle = document.querySelector('.tool-title + p');
+                if (projectsSubtitle && projectsSubtitle.textContent.includes('Active:')) {
+                    projectsSubtitle.textContent = `Your AI-powered quantum trading projects | Active: 7 | Last sync: ${timeString}`;
+                }
+            }
+
+            // Update every minute
+            updateRealTimeData();
+            setInterval(updateRealTimeData, 60000);
+        });
+    </script>
+</body>
+</html>

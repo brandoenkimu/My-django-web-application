@@ -1,0 +1,730 @@
+<!-- templates/community/navbar.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation - TradingHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --success: #4cc9f0;
+        }
+
+        .navbar-tradinghub {
+            background: white;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            padding: 0.75rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.6rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.4em;
+        }
+
+        .nav-search-container {
+            position: relative;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .nav-search {
+            width: 100%;
+            padding: 10px 45px 10px 15px;
+            border: 2px solid #eef2ff;
+            border-radius: 12px;
+            background: #f8f9ff;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-search:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .nav-search-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .nav-search-btn:hover {
+            background: rgba(67, 97, 238, 0.1);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-icon {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            color: #5a6c7d;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none !important;
+            margin: 0 6px;
+        }
+
+        .nav-icon:hover {
+            background: linear-gradient(135deg, #f0f7ff 0%, #eef2ff 100%);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .nav-icon.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: linear-gradient(135deg, var(--accent) 0%, #ff006e 100%);
+            color: white;
+            font-size: 10px;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            font-weight: 700;
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .profile-dropdown-toggle {
+            display: flex;
+            align-items: center;
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .profile-dropdown-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #eef2ff;
+            transition: all 0.3s;
+        }
+
+        .profile-dropdown-toggle:hover .profile-dropdown-img {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .online-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .create-post-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white !important;
+            padding: 10px 20px !important;
+            border-radius: 12px;
+            font-weight: 700;
+            transition: all 0.3s;
+            border: none;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .create-post-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border-radius: 16px;
+            padding: 12px;
+            margin-top: 12px;
+            min-width: 240px;
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            color: #374151;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 4px 0;
+        }
+
+        .dropdown-item i {
+            width: 24px;
+            margin-right: 12px;
+            color: #6b7280;
+            font-size: 18px;
+        }
+
+        .dropdown-item:hover {
+            background: linear-gradient(135deg, #f0f7ff 0%, #eef2ff 100%);
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .dropdown-item:hover i {
+            color: var(--primary);
+        }
+
+        .notification-dropdown {
+            width: 360px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            background: #f9fafb;
+            transition: all 0.3s;
+        }
+
+        .notification-item:hover {
+            background: #f3f4f6;
+            transform: translateX(4px);
+        }
+
+        .notification-item.unread {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-tradinghub">
+        <div class="container">
+            <!-- Brand -->
+            <a class="navbar-brand" href="{% url 'community_feed' %}">
+                <i class="fas fa-chart-network"></i>
+                TradingHub
+            </a>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Navigation Content -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Search Bar -->
+                <div class="nav-search-container mx-lg-3">
+                    <input type="text" class="nav-search" id="globalSearch"
+                           placeholder="Search traders, posts, symbols...">
+                    <button class="nav-search-btn" id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <div class="search-results" id="searchResults"></div>
+                </div>
+
+                <!-- Navigation Icons -->
+                <div class="navbar-nav ms-auto align-items-center">
+                    <!-- Home -->
+                    <a href="{% url 'community_feed' %}" class="nav-icon {% if request.path == '/' %}active{% endif %}">
+                        <i class="fas fa-home fa-lg"></i>
+                    </a>
+
+                    <!-- Explore -->
+                    <a href="{% url 'search_users' %}" class="nav-icon">
+                        <i class="fas fa-compass fa-lg"></i>
+                    </a>
+
+                    <!-- Create Post -->
+                    <a href="{% url 'create_post' %}" class="nav-icon create-post-btn">
+                        <i class="fas fa-plus me-2"></i> Create
+                    </a>
+
+                    <!-- Notifications -->
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-icon position-relative" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell fa-lg"></i>
+                            {% if unread_notifications > 0 %}
+                            <span class="notification-badge" id="notificationBadge">{{ unread_notifications }}</span>
+                            {% endif %}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end notification-dropdown">
+                            <div class="dropdown-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Notifications</h6>
+                                <button class="btn btn-sm btn-link text-primary" id="markAllNotificationsRead">
+                                    Mark all read
+                                </button>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div id="notificationList">
+                                {% for notification in recent_notifications %}
+                                <div class="notification-item {% if not notification.is_read %}unread{% endif %}"
+                                     data-notification-id="{{ notification.id }}">
+                                    <div class="d-flex align-items-start">
+                                        <img src="{{ notification.related_user.profile.get_avatar_url|default:user.profile.get_avatar_url }}"
+                                             class="rounded-circle me-3" width="40" height="40">
+                                        <div style="flex: 1;">
+                                            <p class="mb-1 small">{{ notification.message }}</p>
+                                            <small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-3">
+                                    <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                                    <p class="text-muted mb-0">No notifications</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                                    <div class="dropdown-footer text-center">
+                                        <a href="{% url 'notifications' %}" class="text-primary small">
+                                            View all notifications
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages -->
+                    <div class="nav-item dropdown">
+                        <a href="{% url 'chat_list' %}" class="nav-icon position-relative">
+                            <i class="fas fa-paper-plane fa-lg"></i>
+                            {% if unread_messages > 0 %}
+                            <span class="notification-badge" id="messageBadge">{{ unread_messages }}</span>
+                            {% endif %}
+                        </a>
+                    </div>
+
+                    <!-- Profile Dropdown -->
+                    <div class="nav-item dropdown">
+                        <button class="profile-dropdown-toggle" data-bs-toggle="dropdown">
+                            <div class="position-relative">
+                                <img src="{{ user.profile.get_avatar_url }}"
+                                     class="profile-dropdown-img"
+                                     alt="{{ user.username }}">
+                                {% if user.profile.online_status %}
+                                <span class="online-status"></span>
+                                {% endif %}
+                            </div>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <div class="dropdown-header">
+                                <h6 class="mb-0">{{ user.username }}</h6>
+                                <small class="text-muted">{{ user.email }}</small>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a href="{% url 'user_profile' user.username %}" class="dropdown-item">
+                                <i class="fas fa-user-circle"></i> Profile
+                            </a>
+                            <a href="{% url 'user_trades' user.username %}" class="dropdown-item">
+                                <i class="fas fa-chart-line"></i> My Trades
+                            </a>
+                            <a href="{% url 'user_posts' user.username %}" class="dropdown-item">
+                                <i class="fas fa-newspaper"></i> My Posts
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{% url 'wallet' %}" class="dropdown-item">
+                                <i class="fas fa-wallet"></i> Wallet
+                            </a>
+                            <a href="{% url 'settings' %}" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="{% url 'logout' %}" class="dropdown-item text-danger">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // CSRF Token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // Live search functionality
+        let searchTimeout;
+        const searchInput = document.getElementById('globalSearch');
+        const searchResults = document.getElementById('searchResults');
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+
+            if (query.length < 2) {
+                searchResults.innerHTML = '';
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`{% url 'api_search_users' %}?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySearchResults(data.results, query);
+                    })
+                    .catch(error => console.error('Search error:', error));
+            }, 300);
+        });
+
+        function displaySearchResults(results, query) {
+            searchResults.innerHTML = '';
+
+            if (results.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="search-result-item">
+                        <div class="text-center py-3">
+                            <i class="fas fa-search fa-lg text-muted mb-2"></i>
+                            <p class="text-muted mb-0">No results found for "${query}"</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                results.forEach(result => {
+                    const item = document.createElement('div');
+                    item.className = 'search-result-item';
+                    item.innerHTML = `
+                        <div class="d-flex align-items-center p-3">
+                            <img src="${result.avatar}"
+                                 class="rounded-circle me-3"
+                                 width="40" height="40">
+                            <div style="flex: 1;">
+                                <h6 class="mb-0">${result.display_name}</h6>
+                                <small class="text-muted">@${result.username}</small>
+                                <div class="mt-1">
+                                    <small class="text-muted">
+                                        <i class="fas fa-users me-1"></i>
+                                        ${result.followers_count} followers
+                                    </small>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm ${result.is_following ? 'btn-outline-secondary' : 'btn-primary'} follow-btn"
+                                    data-user-id="${result.id}">
+                                ${result.is_following ? 'Following' : 'Follow'}
+                            </button>
+                        </div>
+                    `;
+                    item.addEventListener('click', function(e) {
+                        if (!e.target.closest('.follow-btn')) {
+                            window.location.href = `/profile/${result.username}/`;
+                        }
+                    });
+                    searchResults.appendChild(item);
+                });
+            }
+
+            searchResults.style.display = 'block';
+        }
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Follow functionality in search results
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('follow-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const button = e.target;
+                const userId = button.dataset.userId;
+
+                fetch('{% url "api_follow_user" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'following') {
+                        button.textContent = 'Following';
+                        button.classList.remove('btn-primary');
+                        button.classList.add('btn-outline-secondary');
+                    } else if (data.status === 'unfollowed') {
+                        button.textContent = 'Follow';
+                        button.classList.remove('btn-outline-secondary');
+                        button.classList.add('btn-primary');
+                    }
+                })
+                .catch(error => console.error('Follow error:', error));
+            }
+        });
+
+        // Real-time notifications with WebSocket
+        function setupNotificationWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/notifications/`;
+
+            try {
+                const ws = new WebSocket(wsUrl);
+
+                ws.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+
+                    if (data.type === 'new_notification') {
+                        // Update badge count
+                        const badge = document.getElementById('notificationBadge');
+                        const currentCount = parseInt(badge.textContent) || 0;
+                        badge.textContent = currentCount + 1;
+                        badge.style.display = 'flex';
+
+                        // Add to notification list
+                        const notificationList = document.getElementById('notificationList');
+                        const notificationHTML = `
+                            <div class="notification-item unread" data-notification-id="${data.id}">
+                                <div class="d-flex align-items-start">
+                                    <img src="${data.sender_avatar}"
+                                         class="rounded-circle me-3"
+                                         width="40" height="40">
+                                    <div style="flex: 1;">
+                                        <p class="mb-1 small">${data.message}</p>
+                                        <small class="text-muted">just now</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        if (notificationList.firstChild) {
+                            notificationList.insertBefore(
+                                document.createRange().createContextualFragment(notificationHTML),
+                                notificationList.firstChild
+                            );
+                        }
+
+                        // Show toast notification
+                        showToast(data.message);
+                    }
+                };
+
+                ws.onclose = function() {
+                    console.log('Notifications WebSocket closed. Reconnecting...');
+                    setTimeout(setupNotificationWebSocket, 3000);
+                };
+
+            } catch (error) {
+                console.error('WebSocket error:', error);
+            }
+        }
+
+        function showToast(message) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas fa-bell text-primary me-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            // Remove toast after 5 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // Mark all notifications as read
+        document.getElementById('markAllNotificationsRead').addEventListener('click', function() {
+            fetch('{% url "mark_notifications_read" %}', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update badge
+                    document.getElementById('notificationBadge').style.display = 'none';
+
+                    // Remove unread styling
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                    });
+                }
+            });
+        });
+
+        // Click notification to mark as read
+        document.addEventListener('click', function(e) {
+            const notificationItem = e.target.closest('.notification-item');
+            if (notificationItem) {
+                const notificationId = notificationItem.dataset.notificationId;
+
+                fetch(`{% url "mark_notification_read" 0 %}`.replace('0', notificationId), {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrftoken }
+                });
+
+                notificationItem.classList.remove('unread');
+            }
+        });
+
+        // Initialize WebSocket connection
+        setupNotificationWebSocket();
+
+        // Update online status
+        function updateOnlineStatus() {
+            fetch('/api/update-online-status/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken }
+            });
+        }
+
+        // Update status every 5 minutes
+        setInterval(updateOnlineStatus, 300000);
+
+        // Update on page visibility change
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                updateOnlineStatus();
+            }
+        });
+
+        // Style for search results
+        const style = document.createElement('style');
+        style.textContent = `
+            .search-results {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+                margin-top: 8px;
+                display: none;
+                max-height: 400px;
+                overflow-y: auto;
+                z-index: 1000;
+            }
+
+            .search-result-item {
+                border-bottom: 1px solid #f0f0f0;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+
+            .search-result-item:last-child {
+                border-bottom: none;
+            }
+
+            .search-result-item:hover {
+                background: #f8f9ff;
+            }
+
+            .toast-notification {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+                display: flex;
+                align-items: center;
+                animation: slideIn 0.3s ease;
+                z-index: 9999;
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            .toast-content {
+                display: flex;
+                align-items: center;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Position Control | Bentley BoldTrader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        :root {
+            --bentley-black: #0A0A0A;
+            --bentley-dark: #121212;
+            --bentley-gray: #1A1A1A;
+            --bentley-light-gray: #2D2D2D;
+            --bentley-gold: #C9A86A;
+            --bentley-gold-dark: #9C8242;
+            --bentley-gold-light: #E8D9B5;
+            --success: #00C853;
+            --warning: #FF9800;
+            --danger: #FF5252;
+            --info: #2196F3;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --card-bg: #1A1A1A;
+            --border-color: #333333;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            background-color: var(--bentley-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bentley-black) 0%, #151515 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--bentley-gold);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .logo-icon {
+            color: var(--bentley-gold);
+            font-size: 2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, var(--bentley-gold), var(--bentley-gold-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-text span {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--bentley-gold);
+            position: relative;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--bentley-gold);
+        }
+
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Position Dashboard */
+        .position-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--bentley-gold), var(--bentley-gold-light));
+            transform: scaleX(0);
+            transition: transform var(--transition-speed) ease;
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: var(--bentley-gold);
+        }
+
+        .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(201, 168, 106, 0.1), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--bentley-gold);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Position Metrics */
+        .position-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, var(--bentley-gray), var(--bentley-light-gray));
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent, rgba(201, 168, 106, 0.05));
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .metric-card:hover::before {
+            opacity: 1;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--bentley-gold);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-name {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-family: 'Source Code Pro', monospace;
+            position: relative;
+        }
+
+        .metric-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            transition: transform var(--transition-speed) ease;
+            position: relative;
+        }
+
+        .metric-status:hover {
+            transform: scale(1.05);
+        }
+
+        .status-safe {
+            background-color: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .status-warning {
+            background-color: rgba(255, 152, 0, 0.1);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        .status-danger {
+            background-color: rgba(255, 82, 82, 0.1);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
+        /* Position Calculator */
+        .position-calculator {
+            background-color: var(--bentley-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            transition: border-color var(--transition-speed) ease;
+        }
+
+        .position-calculator:hover {
+            border-color: var(--bentley-gold);
+        }
+
+        .calculator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calculator-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            padding: 0.8rem 1rem;
+            background-color: var(--bentley-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--bentley-gold);
+            box-shadow: 0 0 0 2px rgba(201, 168, 106, 0.1);
+        }
+
+        /* Calculator Result */
+        .calculator-result {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background-color: var(--bentley-dark);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .calculator-result:hover {
+            border-color: var(--bentley-gold);
+        }
+
+        .result-header {
+            color: var(--bentley-gold-light);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            transition: color var(--transition-speed) ease;
+        }
+
+        /* Position Limits */
+        .position-limits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .limit-group {
+            background-color: var(--bentley-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-speed) ease;
+        }
+
+        .limit-group:hover {
+            border-color: var(--bentley-gold);
+        }
+
+        .limit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .limit-title {
+            color: var(--bentley-gold-light);
+            font-weight: 600;
+        }
+
+        /* Progress Bars */
+        .progress-container {
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: var(--bentley-light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease-in-out, background-color var(--transition-speed) ease;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: border-color var(--transition-speed) ease;
+        }
+
+        .table-container:hover {
+            border-color: var(--bentley-gold);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--bentley-gold-light);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            transition: all var(--transition-speed) ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: rgba(201, 168, 106, 0.05);
+            color: var(--text-primary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            background-color: var(--bentley-gold);
+            color: var(--bentley-black);
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        .btn:hover {
+            background-color: var(--bentley-gold-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 168, 106, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--bentley-gold);
+            border: 1px solid var(--bentley-gold);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(201, 168, 106, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #FF3838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 82, 82, 0.3);
+        }
+
+        .btn-small {
+            padding: 0.3rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+        }
+
+        .alert:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .alert-warning {
+            background-color: rgba(255, 152, 0, 0.1);
+            border-left-color: var(--warning);
+        }
+
+        .alert-danger {
+            background-color: rgba(255, 82, 82, 0.1);
+            border-left-color: var(--danger);
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-message {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 1;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .position-dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .position-limits {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+
+            .position-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .calculator-form {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .position-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bentley-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bentley-gold);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--bentley-gold-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo" onclick="window.location.href='/'">
+            <div class="logo-icon">
+                <i class="fas fa-compress-alt"></i>
+            </div>
+            <div class="logo-text">BENTLEY<span>BOLDTRADER</span></div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 20px; border: 1px solid var(--success); transition: all var(--transition-speed) ease; cursor: pointer;"
+                 onclick="toggleAutoRebalance()" id="rebalanceIndicator">
+                <div id="rebalanceDot" style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--success);"></div>
+                <span id="rebalanceText">AUTO-REBALANCE: ON</span>
+            </div>
+            <div style="color: var(--text-secondary); font-family: 'Source Code Pro', monospace;">
+                <span id="currentDateTime">January 17, 2026 14:30:45</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Position Control</h1>
+                <p class="page-subtitle">Advanced position sizing, exposure management, and risk controls for 2026</p>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button class="btn" onclick="rebalancePortfolio()" id="rebalanceBtn">
+                    <i class="fas fa-balance-scale"></i> Smart Rebalance
+                </button>
+                <button class="btn-secondary" onclick="showAIRecommendations()">
+                    <i class="fas fa-robot"></i> AI Advisor
+                </button>
+                <button class="btn-secondary" onclick="exportPositionData()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Position Alerts -->
+        <div class="alerts-container fade-in" id="alertsContainer">
+            <!-- Alerts will be populated dynamically -->
+        </div>
+
+        <!-- Position Metrics -->
+        <div class="position-metrics fade-in" id="positionMetrics">
+            <!-- Metrics will be populated dynamically -->
+        </div>
+
+        <!-- Position Dashboard -->
+        <div class="position-dashboard fade-in">
+            <!-- Position Calculator -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-calculator"></i> Smart Position Calculator</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">AI-Optimized</span>
+                        <i class="fas fa-bolt" style="color: var(--warning); cursor: pointer;" onclick="optimizeCalculator()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="position-calculator">
+                        <div class="calculator-form">
+                            <div class="form-group">
+                                <label class="form-label">Account Size ($)</label>
+                                <input type="text" class="form-control" id="accountSize" value="4,250,500">
+                                <div style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.3rem;">2026 Portfolio Value</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Risk per Trade (%)</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="range" min="0.5" max="5" step="0.1" value="1.5" class="form-control" id="riskPerTradeSlider" style="flex: 1; padding: 0;">
+                                    <input type="text" class="form-control" id="riskPerTrade" value="1.5" style="width: 80px;">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Stop Loss Distance (%)</label>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="range" min="1" max="10" step="0.5" value="3" class="form-control" id="stopLossSlider" style="flex: 1; padding: 0;">
+                                    <input type="text" class="form-control" id="stopLossDistance" value="3" style="width: 80px;">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Entry Price ($)</label>
+                                <input type="text" class="form-control" id="entryPrice" value="485.20">
+                                <div style="display: flex; gap: 0.3rem; margin-top: 0.3rem;">
+                                    <button class="btn-secondary btn-small" onclick="setEntryPrice('AAPL', 245.80)">AAPL</button>
+                                    <button class="btn-secondary btn-small" onclick="setEntryPrice('NVDA', 485.20)">NVDA</button>
+                                    <button class="btn-secondary btn-small" onclick="setEntryPrice('TSLA', 385.20)">TSLA</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="calculator-result">
+                            <div class="result-header">AI-Optimized Position Size</div>
+                            <div class="result-value" id="positionSizeResult">1,845 shares</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                Maximum position value: <span id="positionValue" style="color: var(--bentley-gold); font-weight: 600;">$895,440</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem;">
+                                <span style="color: var(--text-secondary); font-size: 0.8rem;">Risk: <span id="riskAmount" style="color: var(--warning);">$63,758</span></span>
+                                <span style="color: var(--text-secondary); font-size: 0.8rem;">Reward/Risk: <span id="rrRatio" style="color: var(--success);">2.8:1</span></span>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 1.5rem;">
+                            <button class="btn" onclick="calculatePosition()" style="width: 100%;">
+                                <i class="fas fa-calculator"></i> Calculate & Apply
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exposure Analysis -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-chart-pie"></i> Exposure Analysis 2026</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Target: 65%</span>
+                        <i class="fas fa-sync-alt" style="color: var(--bentley-gold); cursor: pointer;" onclick="refreshExposureData()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="chart-container">
+                        <canvas id="exposureChart"></canvas>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1.5rem;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--info);">42%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">AI & Tech</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--success);">18%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Quantum Finance</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.2rem; font-weight: bold; color: var(--warning);">15%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Space & BioTech</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Position Limits -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-sliders-h"></i> Smart Position Limits</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--success); font-size: 0.9rem;">Auto-Adjusting</span>
+                        <i class="fas fa-brain" style="color: var(--info); cursor: pointer;" onclick="showLimitAI()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="position-limits">
+                        <div class="limit-group">
+                            <div class="limit-header">
+                                <div class="limit-title">Position Size Limits</div>
+                                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                                    <span style="color: var(--success); font-size: 0.9rem;">Adaptive</span>
+                                    <i class="fas fa-robot" style="color: var(--info); font-size: 0.8rem;"></i>
+                                </div>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-label">
+                                    <span>Max per Trade</span>
+                                    <span>$75,000 / $75,000</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="maxTradeProgress" style="width: 85%; background-color: var(--success);"></div>
+                                </div>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-label">
+                                    <span>Max per Symbol (AI)</span>
+                                    <span>15% / 15%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="maxSymbolProgress" style="width: 92%; background-color: var(--success);"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="limit-group">
+                            <div class="limit-header">
+                                <div class="limit-title">Portfolio Limits 2026</div>
+                                <div style="display: flex; align-items: center; gap: 0.3rem;">
+                                    <span style="color: var(--success); font-size: 0.9rem;">Live</span>
+                                    <div id="portfolioStatusDot" style="width: 6px; height: 6px; border-radius: 50%; background-color: var(--success);"></div>
+                                </div>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-label">
+                                    <span>Total Exposure</span>
+                                    <span>68% / 80%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="exposureProgress" style="width: 85%; background-color: var(--success);"></div>
+                                </div>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-label">
+                                    <span>AI Sector Concentration</span>
+                                    <span>42% / 45%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="sectorProgress" style="width: 93%; background-color: var(--warning);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <button class="btn-secondary" style="width: 100%;" onclick="configureSmartLimits()">
+                            <i class="fas fa-cog"></i> Configure Smart Limits
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Position Risk Analysis -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-shield-alt"></i> Quantum Risk Analysis</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Real-time</span>
+                        <i class="fas fa-satellite-dish" style="color: var(--info); cursor: pointer;" onclick="runQuantumAnalysis()"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-secondary);">Quantum Risk Score</span>
+                            <span style="color: var(--success); font-weight: 600;">82/100</span>
+                        </div>
+                        <div style="height: 8px; background-color: var(--bentley-light-gray); border-radius: 4px; overflow: hidden;">
+                            <div style="width: 82%; height: 100%; background: linear-gradient(to right, var(--success), var(--warning));"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-secondary);">Concentration Risk</span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--warning); font-weight: 600;">Medium-High</span>
+                                <i class="fas fa-exclamation-triangle" style="color: var(--warning); font-size: 0.8rem;"></i>
+                            </div>
+                        </div>
+                        <div style="height: 8px; background-color: var(--bentley-light-gray); border-radius: 4px; overflow: hidden;">
+                            <div style="width: 65%; height: 100%; background: linear-gradient(to right, var(--warning), var(--danger));"></div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-secondary);">Liquidity Risk</span>
+                            <span style="color: var(--success); font-weight: 600;">Low</span>
+                        </div>
+                        <div style="height: 8px; background-color: var(--bentley-light-gray); border-radius: 4px; overflow: hidden;">
+                            <div style="width: 25%; height: 100%; background-color: var(--success);"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="color: var(--text-secondary);">Black Swan Risk</span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: var(--warning); font-weight: 600;">Medium</span>
+                                <i class="fas fa-radiation" style="color: var(--warning); font-size: 0.8rem;"></i>
+                            </div>
+                        </div>
+                        <div style="height: 8px; background-color: var(--bentley-light-gray); border-radius: 4px; overflow: hidden;">
+                            <div style="width: 55%; height: 100%; background-color: var(--warning);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Position Analysis Table -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-table"></i> AI Position Analysis</h3>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span style="color: var(--text-secondary); font-size: 0.9rem;">Quantum-Sorted</span>
+                    <button class="btn-secondary btn-small" onclick="runAIReanalysis()">
+                        <i class="fas fa-sync-alt"></i> Reanalyze
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Position Size</th>
+                                <th>% of Portfolio</th>
+                                <th>Sector</th>
+                                <th>Risk Level</th>
+                                <th>AI Recommendation</th>
+                                <th>Confidence</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positionAnalysisTable">
+                            <!-- Positions will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                        <i class="fas fa-robot" style="color: var(--info);"></i> AI Analysis updated: Just now
+                    </div>
+                    <button class="btn-secondary btn-small" onclick="applyAllAIRecommendations()">
+                        <i class="fas fa-bolt"></i> Apply All AI Recommendations
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantum Rebalancing Engine -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-atom"></i> Quantum Rebalancing Engine</h3>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.3rem;">
+                        <span id="engineStatus" style="color: var(--success); font-size: 0.9rem;">OPTIMAL</span>
+                        <div id="engineStatusDot" style="width: 6px; height: 6px; border-radius: 50%; background-color: var(--success);"></div>
+                    </div>
+                    <button class="btn-secondary btn-small" onclick="runQuantumRebalancing()">
+                        <i class="fas fa-play"></i> Quantum Optimize
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="metric-card" onclick="showRebalanceDetail('tech')">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--danger);" id="techAdjustment">-$42,500</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Reduce AI & Tech</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--warning);">-2.8% portfolio risk</div>
+                    </div>
+
+                    <div class="metric-card" onclick="showRebalanceDetail('healthcare')">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);" id="healthcareAdjustment">+$28,200</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Increase BioTech</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--success);">+1.2% expected return</div>
+                    </div>
+
+                    <div class="metric-card" onclick="showRebalanceDetail('space')">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);" id="spaceAdjustment">+$14,300</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Add Space Sector</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--info);">New: 8% allocation</div>
+                    </div>
+
+                    <div class="metric-card" onclick="showRebalanceDetail('risk')">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: var(--success);" id="riskReduction">-2.4%</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">Portfolio Risk</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--success);">Sharpe Ratio: +0.18</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                    <h4 style="color: var(--bentley-gold-light); margin-bottom: 0.5rem;">Quantum Optimization Strategy</h4>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.6;">
+                        Quantum algorithm suggests rebalancing to capitalize on emerging space economy while reducing AI concentration risk. Expected portfolio improvement: <span style="color: var(--success); font-weight: 600;">+3.2% annual return</span> with <span style="color: var(--success); font-weight: 600;">-2.4% reduced risk</span>.
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn-secondary" style="flex: 1;" onclick="showQuantumDetails()">
+                            <i class="fas fa-chart-bar"></i> Quantum Analysis
+                        </button>
+                        <button class="btn" style="flex: 1;" onclick="executeQuantumRebalancing()" id="executeQuantumBtn">
+                            <i class="fas fa-atom"></i> Execute Quantum Rebalance
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historical Position Analytics -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-history"></i> Position Analytics Timeline</h3>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn-secondary btn-small active" onclick="setTimeframe('1W')">1W</button>
+                    <button class="btn-secondary btn-small" onclick="setTimeframe('1M')">1M</button>
+                    <button class="btn-secondary btn-small" onclick="setTimeframe('3M')">3M</button>
+                    <button class="btn-secondary btn-small" onclick="setTimeframe('1Y')">1Y</button>
+                    <button class="btn-secondary btn-small" onclick="setTimeframe('ALL')">
+                        <i class="fas fa-infinity"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="chart-container">
+                    <canvas id="historicalChart"></canvas>
+                </div>
+
+                <div class="table-container" style="margin-top: 1.5rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Total Exposure</th>
+                                <th>Max Position</th>
+                                <th>AI Sector Conc.</th>
+                                <th>Risk Score</th>
+                                <th>AI Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historicalTable">
+                            <!-- Historical data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global variables
+        let autoRebalanceEnabled = true;
+        let liveUpdatesInterval = null;
+        let exposureChart = null;
+        let historicalChart = null;
+        let currentTimeframe = '1W';
+        let portfolioData = {
+            totalValue: 4250500,
+            exposure: 68,
+            maxPosition: 18,
+            sectorConcentration: 42,
+            riskScore: 82,
+            aiStatus: 'OPTIMAL'
+        };
+
+        // 2026 Portfolio Data
+        const PORTFOLIO_DATA_2026 = {
+            positions: [
+                { symbol: 'NVDA', size: 895440, percent: 21, sector: 'AI Technology', risk: 'High', recommendation: 'Reduce by 25%', confidence: 92, aiAction: 'reduce' },
+                { symbol: 'AAPL', size: 625200, percent: 15, sector: 'Quantum Tech', risk: 'Medium', recommendation: 'Hold', confidence: 85, aiAction: 'hold' },
+                { symbol: 'MSFT', size: 515600, percent: 12, sector: 'AI Technology', risk: 'Medium', recommendation: 'Hold', confidence: 78, aiAction: 'hold' },
+                { symbol: 'SPACEX', size: 425600, percent: 10, sector: 'Space Exploration', risk: 'High', recommendation: 'Increase by 15%', confidence: 88, aiAction: 'increase' },
+                { symbol: 'QUANTUM', size: 298400, percent: 7, sector: 'Quantum Finance', risk: 'Medium', recommendation: 'Increase by 10%', confidence: 82, aiAction: 'increase' },
+                { symbol: 'BIOTECH', size: 256800, percent: 6, sector: 'BioTech', risk: 'Low', recommendation: 'Increase by 20%', confidence: 91, aiAction: 'increase' },
+                { symbol: 'GREEN', size: 185200, percent: 4, sector: 'Green Energy', risk: 'Low', recommendation: 'Hold', confidence: 76, aiAction: 'hold' }
+            ],
+
+            historicalData: [
+                { date: '2026-01-17', exposure: 68, maxPosition: 21, sectorConc: 42, riskScore: 82, status: 'OPTIMAL' },
+                { date: '2026-01-16', exposure: 65, maxPosition: 18, sectorConc: 38, riskScore: 84, status: 'OPTIMAL' },
+                { date: '2026-01-15', exposure: 62, maxPosition: 16, sectorConc: 35, riskScore: 86, status: 'OPTIMAL' },
+                { date: '2026-01-14', exposure: 72, maxPosition: 22, sectorConc: 48, riskScore: 68, status: 'WARNING' },
+                { date: '2026-01-13', exposure: 78, maxPosition: 25, sectorConc: 52, riskScore: 58, status: 'DANGER' },
+                { date: '2026-01-12', exposure: 75, maxPosition: 24, sectorConc: 50, riskScore: 62, status: 'WARNING' },
+                { date: '2026-01-11', exposure: 70, maxPosition: 20, sectorConc: 45, riskScore: 75, status: 'OPTIMAL' }
+            ],
+
+            alerts: [
+                {
+                    type: 'warning',
+                    title: 'AI Sector Concentration High',
+                    message: 'AI & Technology exposure at 42%, exceeding optimal 40% target. Consider diversification into space and biotech sectors.',
+                    timestamp: '2026-01-17 14:25'
+                },
+                {
+                    type: 'warning',
+                    title: 'Large Position Size Detected',
+                    message: 'NVDA position is 21% of portfolio. Maximum AI-recommended limit is 15%.',
+                    timestamp: '2026-01-17 14:20'
+                },
+                {
+                    type: 'info',
+                    title: 'Quantum Optimization Available',
+                    message: 'AI analysis suggests portfolio can be optimized for 3.2% better risk-adjusted returns.',
+                    timestamp: '2026-01-17 14:15'
+                }
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePositionControl();
+            startLiveUpdates();
+            setupDateTime();
+        });
+
+        function initializePositionControl() {
+            // Initialize position metrics
+            updatePositionMetrics();
+
+            // Initialize alerts
+            updateAlerts();
+
+            // Initialize position analysis table
+            populatePositionAnalysis();
+
+            // Initialize charts
+            initializeCharts();
+
+            // Initialize calculator
+            setupCalculator();
+
+            // Initialize historical data
+            populateHistoricalData();
+        }
+
+        function setupDateTime() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        }
+
+        function updateDateTime() {
+            const now = luxon.DateTime.now();
+            const dateTimeString = now.toFormat('MMMM dd, yyyy HH:mm:ss');
+            document.getElementById('currentDateTime').textContent = dateTimeString;
+        }
+
+        function updatePositionMetrics() {
+            const metrics = [
+                { name: 'Total Exposure', value: `${portfolioData.exposure}%`, status: portfolioData.exposure > 70 ? 'warning' : 'safe', trend: '+2%' },
+                { name: 'Max Position Size', value: `${portfolioData.maxPosition}%`, status: portfolioData.maxPosition > 15 ? 'danger' : 'safe', trend: 'Exceeded' },
+                { name: 'AI Sector Concentration', value: `${portfolioData.sectorConcentration}%`, status: portfolioData.sectorConcentration > 40 ? 'warning' : 'safe', trend: 'High' },
+                { name: 'Quantum Risk Score', value: `${portfolioData.riskScore}/100`, status: portfolioData.riskScore > 80 ? 'safe' : portfolioData.riskScore > 60 ? 'warning' : 'danger', trend: 'EXCELLENT' }
+            ];
+
+            const metricsContainer = document.getElementById('positionMetrics');
+            metricsContainer.innerHTML = '';
+
+            metrics.forEach(metric => {
+                const metricCard = document.createElement('div');
+                metricCard.className = 'metric-card';
+                metricCard.onclick = () => showMetricDetail(metric.name);
+
+                const statusClass = `status-${metric.status}`;
+                const statusText = metric.status === 'safe' ? 'WITHIN LIMITS' :
+                                 metric.status === 'warning' ? 'WARNING' : 'EXCEEDED';
+
+                metricCard.innerHTML = `
+                    <div class="metric-name">${metric.name}</div>
+                    <div class="metric-value">${metric.value}</div>
+                    <div class="metric-status ${statusClass}">${statusText}</div>
+                    <div style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.8rem;">
+                        <i class="fas fa-chart-line"></i> ${metric.trend}
+                    </div>
+                `;
+
+                metricsContainer.appendChild(metricCard);
+            });
+        }
+
+        function updateAlerts() {
+            const alertsContainer = document.getElementById('alertsContainer');
+            alertsContainer.innerHTML = '';
+
+            PORTFOLIO_DATA_2026.alerts.forEach(alert => {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${alert.type}`;
+                alertDiv.onclick = () => showAlertDetail(alert);
+
+                const icon = alert.type === 'warning' ? 'exclamation-triangle' :
+                            alert.type === 'danger' ? 'exclamation-circle' : 'info-circle';
+
+                alertDiv.innerHTML = `
+                    <div class="alert-title">
+                        <i class="fas fa-${icon}"></i> ${alert.title}
+                    </div>
+                    <div class="alert-message">${alert.message}</div>
+                    <div style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.8rem;">
+                        <i class="far fa-clock"></i> ${alert.timestamp}
+                    </div>
+                `;
+
+                alertsContainer.appendChild(alertDiv);
+            });
+        }
+
+        function populatePositionAnalysis() {
+            const tableBody = document.getElementById('positionAnalysisTable');
+            tableBody.innerHTML = '';
+
+            PORTFOLIO_DATA_2026.positions.forEach(pos => {
+                const riskColor = pos.risk === 'High' ? 'var(--danger)' :
+                                 pos.risk === 'Medium' ? 'var(--warning)' : 'var(--success)';
+
+                const aiActionColor = pos.aiAction === 'reduce' ? 'var(--danger)' :
+                                    pos.aiAction === 'increase' ? 'var(--success)' : 'var(--warning)';
+
+                const actionIcon = pos.aiAction === 'reduce' ? 'arrow-down' :
+                                 pos.aiAction === 'increase' ? 'arrow-up' : 'pause';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${pos.symbol}</strong></td>
+                    <td>$${(pos.size / 1000).toFixed(0)}K</td>
+                    <td>${pos.percent}%</td>
+                    <td>${pos.sector}</td>
+                    <td><span style="color: ${riskColor}; font-weight: 600;">${pos.risk}</span></td>
+                    <td style="color: ${aiActionColor}; font-weight: 600;">
+                        <i class="fas fa-${actionIcon}"></i> ${pos.recommendation}
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 40px; height: 6px; background: var(--bentley-light-gray); border-radius: 3px; overflow: hidden;">
+                                <div style="width: ${pos.confidence}%; height: 100%; background: linear-gradient(90deg, var(--success), var(--info));"></div>
+                            </div>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">${pos.confidence}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 0.3rem;">
+                            <button class="btn-secondary btn-small" onclick="adjustPositionAI('${pos.symbol}', '${pos.aiAction}')">
+                                <i class="fas fa-robot"></i> AI Adjust
+                            </button>
+                            <button class="btn-danger btn-small" onclick="closePositionAI('${pos.symbol}')">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function initializeCharts() {
+            // Exposure Chart
+            const exposureCtx = document.getElementById('exposureChart').getContext('2d');
+            if (exposureChart) exposureChart.destroy();
+
+            exposureChart = new Chart(exposureCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['AI Technology', 'Quantum Finance', 'Space & BioTech', 'Green Energy', 'Other'],
+                    datasets: [{
+                        data: [42, 18, 15, 8, 17],
+                        backgroundColor: [
+                            '#C9A86A',
+                            '#2196F3',
+                            '#9C27B0',
+                            '#00C853',
+                            '#FF9800'
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#B0B0B0',
+                                padding: 20,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(26, 26, 26, 0.9)',
+                            titleColor: 'var(--bentley-gold)',
+                            bodyColor: 'var(--text-primary)',
+                            borderColor: 'var(--bentley-gold)',
+                            borderWidth: 1
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            // Historical Chart
+            const historicalCtx = document.getElementById('historicalChart').getContext('2d');
+            if (historicalChart) historicalChart.destroy();
+
+            historicalChart = new Chart(historicalCtx, {
+                type: 'line',
+                data: {
+                    labels: PORTFOLIO_DATA_2026.historicalData.map(d => d.date.split('-').slice(1).join('/')),
+                    datasets: [
+                        {
+                            label: 'Exposure %',
+                            data: PORTFOLIO_DATA_2026.historicalData.map(d => d.exposure),
+                            borderColor: '#C9A86A',
+                            backgroundColor: 'rgba(201, 168, 106, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Risk Score',
+                            data: PORTFOLIO_DATA_2026.historicalData.map(d => d.riskScore),
+                            borderColor: '#2196F3',
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                            tension: 0.4,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#B0B0B0'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setupCalculator() {
+            // Link sliders with inputs
+            const riskSlider = document.getElementById('riskPerTradeSlider');
+            const riskInput = document.getElementById('riskPerTrade');
+            const stopSlider = document.getElementById('stopLossSlider');
+            const stopInput = document.getElementById('stopLossDistance');
+
+            riskSlider.addEventListener('input', () => {
+                riskInput.value = riskSlider.value;
+                calculatePosition();
+            });
+
+            riskInput.addEventListener('input', () => {
+                riskSlider.value = riskInput.value;
+                calculatePosition();
+            });
+
+            stopSlider.addEventListener('input', () => {
+                stopInput.value = stopSlider.value;
+                calculatePosition();
+            });
+
+            stopInput.addEventListener('input', () => {
+                stopSlider.value = stopInput.value;
+                calculatePosition();
+            });
+
+            // Setup other inputs
+            const inputs = ['accountSize', 'entryPrice'];
+            inputs.forEach(id => {
+                const input = document.getElementById(id);
+                input.addEventListener('input', calculatePosition);
+            });
+
+            // Initial calculation
+            calculatePosition();
+        }
+
+        function calculatePosition() {
+            const accountSize = parseFloat(document.getElementById('accountSize').value.replace(/[^0-9.-]+/g, '')) || 4250500;
+            const riskPerTrade = parseFloat(document.getElementById('riskPerTrade').value) || 1.5;
+            const stopLossDistance = parseFloat(document.getElementById('stopLossDistance').value) || 3;
+            const entryPrice = parseFloat(document.getElementById('entryPrice').value.replace(/[^0-9.-]+/g, '')) || 485.20;
+
+            // Calculate position size
+            const riskAmount = accountSize * (riskPerTrade / 100);
+            const riskPerShare = entryPrice * (stopLossDistance / 100);
+            const shares = Math.floor(riskAmount / riskPerShare);
+            const positionValue = shares * entryPrice;
+
+            // AI optimization: adjust for market conditions
+            const marketConditionFactor = 0.95; // Simulating AI adjustment
+            const optimizedShares = Math.floor(shares * marketConditionFactor);
+            const optimizedValue = optimizedShares * entryPrice;
+
+            // Calculate reward/risk ratio (simulated)
+            const rrRatio = (2.5 + Math.random() * 1).toFixed(1);
+
+            // Update results with AI optimization
+            document.getElementById('positionSizeResult').textContent = optimizedShares.toLocaleString() + ' shares';
+            document.getElementById('positionValue').textContent = '$' + optimizedValue.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+            document.getElementById('riskAmount').textContent = '$' + (riskAmount * marketConditionFactor).toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+            document.getElementById('rrRatio').textContent = rrRatio + ':1';
+
+            // Color code based on optimization
+            const resultValue = document.querySelector('.result-value');
+            if (rrRatio >= 2.5) {
+                resultValue.style.color = 'var(--success)';
+            } else if (rrRatio >= 1.5) {
+                resultValue.style.color = 'var(--warning)';
+            } else {
+                resultValue.style.color = 'var(--danger)';
+            }
+        }
+
+        function populateHistoricalData() {
+            const tableBody = document.getElementById('historicalTable');
+            tableBody.innerHTML = '';
+
+            PORTFOLIO_DATA_2026.historicalData.forEach(data => {
+                const statusColor = data.status === 'OPTIMAL' ? 'var(--success)' :
+                                  data.status === 'WARNING' ? 'var(--warning)' : 'var(--danger)';
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${data.date.split('-').slice(1).join('/')}</td>
+                    <td>${data.exposure}%</td>
+                    <td>${data.maxPosition}%</td>
+                    <td>${data.sectorConc}%</td>
+                    <td>${data.riskScore}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <div style="width: 6px; height: 6px; border-radius: 50%; background-color: ${statusColor};"></div>
+                            <span style="color: ${statusColor}; font-weight: 600;">${data.status}</span>
+                        </div>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function startLiveUpdates() {
+            if (liveUpdatesInterval) clearInterval(liveUpdatesInterval);
+
+            liveUpdatesInterval = setInterval(() => {
+                updateLiveData();
+                updateProgressBars();
+            }, 5000); // Update every 5 seconds
+        }
+
+        function updateLiveData() {
+            // Simulate live market data updates
+            const change = (Math.random() - 0.5) * 0.5;
+            portfolioData.exposure = Math.max(50, Math.min(85, portfolioData.exposure + change));
+
+            // Update metrics
+            updatePositionMetrics();
+
+            // Update exposure chart with new data
+            const newData = [portfolioData.sectorConcentration, 18, 15, 8, 17];
+            exposureChart.data.datasets[0].data = newData;
+            exposureChart.update('none');
+        }
+
+        function updateProgressBars() {
+            // Update progress bars with simulated data
+            const bars = ['maxTradeProgress', 'maxSymbolProgress', 'exposureProgress', 'sectorProgress'];
+
+            bars.forEach(id => {
+                const bar = document.getElementById(id);
+                if (bar) {
+                    const currentWidth = parseFloat(bar.style.width);
+                    const change = (Math.random() - 0.5) * 2;
+                    let newWidth = Math.max(0, Math.min(100, currentWidth + change));
+
+                    // For sector progress, make it dance around 93%
+                    if (id === 'sectorProgress') {
+                        newWidth = 93 + (Math.random() - 0.5) * 4;
+                    }
+
+                    bar.style.width = newWidth + '%';
+
+                    // Update color based on thresholds
+                    if (newWidth > 100) {
+                        bar.style.backgroundColor = 'var(--danger)';
+                    } else if (newWidth > 90) {
+                        bar.style.backgroundColor = 'var(--warning)';
+                    } else {
+                        bar.style.backgroundColor = 'var(--success)';
+                    }
+                }
+            });
+
+            // Update status dot
+            const statusDot = document.getElementById('portfolioStatusDot');
+            if (portfolioData.exposure > 75) {
+                statusDot.style.backgroundColor = 'var(--danger)';
+                statusDot.style.animation = 'pulse 1s infinite';
+            } else if (portfolioData.exposure > 70) {
+                statusDot.style.backgroundColor = 'var(--warning)';
+                statusDot.style.animation = 'pulse 2s infinite';
+            } else {
+                statusDot.style.backgroundColor = 'var(--success)';
+                statusDot.style.animation = 'none';
+            }
+        }
+
+        function toggleAutoRebalance() {
+            autoRebalanceEnabled = !autoRebalanceEnabled;
+
+            const indicator = document.getElementById('rebalanceIndicator');
+            const dot = document.getElementById('rebalanceDot');
+            const text = document.getElementById('rebalanceText');
+
+            if (autoRebalanceEnabled) {
+                indicator.style.backgroundColor = 'rgba(0, 200, 83, 0.1)';
+                indicator.style.borderColor = 'var(--success)';
+                dot.style.backgroundColor = 'var(--success)';
+                text.textContent = 'AUTO-REBALANCE: ON';
+                showNotification('Auto-rebalance enabled', 'success');
+            } else {
+                indicator.style.backgroundColor = 'rgba(158, 158, 158, 0.1)';
+                indicator.style.borderColor = 'var(--text-secondary)';
+                dot.style.backgroundColor = 'var(--text-secondary)';
+                text.textContent = 'AUTO-REBALANCE: OFF';
+                showNotification('Auto-rebalance disabled', 'warning');
+            }
+        }
+
+        function rebalancePortfolio() {
+            const btn = document.getElementById('rebalanceBtn');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Quantum Optimizing...';
+            btn.disabled = true;
+
+            showNotification('Running quantum portfolio optimization...', 'info');
+
+            setTimeout(() => {
+                // Simulate rebalancing success
+                portfolioData.exposure = 65;
+                portfolioData.maxPosition = 15;
+                portfolioData.sectorConcentration = 38;
+                portfolioData.riskScore = 87;
+                portfolioData.aiStatus = 'OPTIMAL';
+
+                updatePositionMetrics();
+                populatePositionAnalysis();
+
+                // Update rebalancing suggestions
+                document.getElementById('techAdjustment').textContent = '-$42,500';
+                document.getElementById('healthcareAdjustment').textContent = '+$28,200';
+                document.getElementById('spaceAdjustment').textContent = '+$14,300';
+                document.getElementById('riskReduction').textContent = '-2.4%';
+
+                // Update engine status
+                document.getElementById('engineStatus').textContent = 'OPTIMAL';
+                document.getElementById('engineStatus').style.color = 'var(--success)';
+                document.getElementById('engineStatusDot').style.backgroundColor = 'var(--success)';
+
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+
+                showNotification('Portfolio quantum-optimized successfully! Risk score improved to 87', 'success');
+            }, 3000);
+        }
+
+        function showAIRecommendations() {
+            showNotification('Loading AI advisor recommendations...', 'info');
+
+            const modalContent = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                    <div style="background: var(--card-bg); padding: 2rem; border-radius: 10px; border: 2px solid var(--bentley-gold); max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                            <h2 style="color: var(--bentley-gold);"><i class="fas fa-robot"></i> Quantum AI Advisor</h2>
+                            <button onclick="this.closest('div').remove()" style="background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer;">×</button>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">Portfolio Analysis - 2026 Outlook</h3>
+                            <div style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem;">
+                                <p>Quantum AI analysis identifies significant opportunities in space economy and biotech sectors while recommending reduction in over-concentrated AI technology positions.</p>
+                                <p><strong>Expected Outcome:</strong> +3.2% annual return with -2.4% reduced portfolio volatility.</p>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1.5rem;">
+                            <h3 style="color: var(--bentley-gold-light); margin-bottom: 1rem;">Top Recommendations</h3>
+                            <div style="display: grid; gap: 1rem;">
+                                <div style="padding: 1rem; background: rgba(0, 200, 83, 0.1); border-radius: 6px; border-left: 4px solid var(--success);">
+                                    <div style="font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">Allocate 8% to Space Sector</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Space tourism and asteroid mining show 45% projected growth in 2026.</div>
+                                </div>
+                                <div style="padding: 1rem; background: rgba(255, 82, 82, 0.1); border-radius: 6px; border-left: 4px solid var(--danger);">
+                                    <div style="font-weight: 600; color: var(--danger); margin-bottom: 0.5rem;">Reduce AI Technology by 25%</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Regulatory headwinds expected in H2 2026, profit-taking recommended.</div>
+                                </div>
+                                <div style="padding: 1rem; background: rgba(33, 150, 243, 0.1); border-radius: 6px; border-left: 4px solid var(--info);">
+                                    <div style="font-weight: 600; color: var(--info); margin-bottom: 0.5rem;">Increase BioTech Allocation</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">Gene editing breakthroughs driving 30%+ growth potential.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+                            <button onclick="this.closest('div').remove()" class="btn-secondary">Close</button>
+                            <button onclick="applyAIRecommendations()" class="btn">Apply AI Recommendations</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const modal = document.createElement('div');
+            modal.innerHTML = modalContent;
+            document.body.appendChild(modal);
+        }
+
+        function applyAIRecommendations() {
+            showNotification('Applying AI recommendations to portfolio...', 'info');
+
+            setTimeout(() => {
+                showNotification('AI recommendations applied successfully', 'success');
+                document.querySelector('div[style*="position: fixed"]').remove();
+            }, 2000);
+        }
+
+        function exportPositionData() {
+            showNotification('Exporting quantum position data for 2026...', 'info');
+
+            setTimeout(() => {
+                showNotification('Position data exported in Quantum-AI format', 'success');
+            }, 1500);
+        }
+
+        function optimizeCalculator() {
+            showNotification('Running AI optimization for position calculator...', 'info');
+
+            // Simulate AI optimization
+            setTimeout(() => {
+                const riskSlider = document.getElementById('riskPerTradeSlider');
+                const stopSlider = document.getElementById('stopLossSlider');
+
+                // Set optimal values based on AI analysis
+                riskSlider.value = 1.2;
+                document.getElementById('riskPerTrade').value = 1.2;
+                stopSlider.value = 2.5;
+                document.getElementById('stopLossDistance').value = 2.5;
+
+                calculatePosition();
+                showNotification('Calculator optimized by AI. Risk reduced, reward/risk improved.', 'success');
+            }, 1000);
+        }
+
+        function setEntryPrice(symbol, price) {
+            document.getElementById('entryPrice').value = price;
+            calculatePosition();
+            showNotification(`Entry price set for ${symbol}: $${price}`, 'info');
+        }
+
+        function refreshExposureData() {
+            showNotification('Refreshing exposure analysis...', 'info');
+
+            setTimeout(() => {
+                // Simulate data refresh
+                exposureChart.data.datasets[0].data = [42 + (Math.random() - 0.5) * 2, 18, 15, 8, 17];
+                exposureChart.update();
+                showNotification('Exposure analysis updated with latest 2026 data', 'success');
+            }, 1000);
+        }
+
+        function showLimitAI() {
+            showNotification('Showing AI limit analysis...', 'info');
+        }
+
+        function configureSmartLimits() {
+            showNotification('Opening quantum limit configuration...', 'info');
+        }
+
+        function runQuantumAnalysis() {
+            const btn = document.querySelector('.fa-satellite-dish').parentElement;
+            btn.classList.add('shake');
+
+            showNotification('Running quantum risk analysis...', 'info');
+
+            setTimeout(() => {
+                portfolioData.riskScore = Math.min(100, portfolioData.riskScore + 3);
+                updatePositionMetrics();
+                btn.classList.remove('shake');
+                showNotification('Quantum analysis complete. Risk score improved.', 'success');
+            }, 2000);
+        }
+
+        function runAIReanalysis() {
+            showNotification('Running AI reanalysis of all positions...', 'info');
+
+            setTimeout(() => {
+                populatePositionAnalysis();
+                showNotification('AI reanalysis complete. Recommendations updated.', 'success');
+            }, 1500);
+        }
+
+        function adjustPositionAI(symbol, action) {
+            showNotification(`Applying AI adjustment to ${symbol}: ${action}`, 'info');
+        }
+
+        function closePositionAI(symbol) {
+            const confirmed = confirm(`Quantum AI recommends closing ${symbol} position. Continue?`);
+            if (confirmed) {
+                showNotification(`${symbol} position closed via AI recommendation`, 'success');
+            }
+        }
+
+        function applyAllAIRecommendations() {
+            const confirmed = confirm('Apply all AI recommendations to portfolio? This will execute multiple trades.');
+            if (confirmed) {
+                showNotification('Applying all AI recommendations...', 'info');
+
+                setTimeout(() => {
+                    showNotification('All AI recommendations applied successfully', 'success');
+                }, 3000);
+            }
+        }
+
+        function runQuantumRebalancing() {
+            showNotification('Starting quantum rebalancing engine...', 'info');
+
+            setTimeout(() => {
+                showNotification('Quantum optimization complete. New portfolio ready.', 'success');
+            }, 2500);
+        }
+
+        function showRebalanceDetail(type) {
+            const details = {
+                tech: 'Reduce AI technology exposure by $42,500 to manage regulatory risk and concentration.',
+                healthcare: 'Increase biotech allocation by $28,200 to capture gene editing growth.',
+                space: 'Add $14,300 to space sector for emerging space tourism opportunities.',
+                risk: 'Portfolio risk reduced by 2.4% through optimal diversification.'
+            };
+
+            showNotification(details[type], 'info');
+        }
+
+        function showQuantumDetails() {
+            showNotification('Opening quantum optimization details...', 'info');
+        }
+
+        function executeQuantumRebalancing() {
+            const btn = document.getElementById('executeQuantumBtn');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = '<i class="fas fa-atom fa-spin"></i> Executing...';
+            btn.disabled = true;
+
+            showNotification('Executing quantum rebalancing trades...', 'info');
+
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showNotification('Quantum rebalancing executed successfully', 'success');
+            }, 4000);
+        }
+
+        function setTimeframe(timeframe) {
+            currentTimeframe = timeframe;
+
+            // Update button states
+            document.querySelectorAll('.btn-secondary.btn-small').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            showNotification(`Showing ${timeframe} timeframe data`, 'info');
+
+            // In a real implementation, this would update the chart data
+        }
+
+        function showMetricDetail(metricName) {
+            showNotification(`Opening detailed analysis for ${metricName}`, 'info');
+        }
+
+        function showAlertDetail(alert) {
+            showNotification(`Alert: ${alert.title} - ${alert.message}`, 'info');
+        }
+
+        function showNotification(message, type) {
+            // Remove existing notifications
+            document.querySelectorAll('.notification').forEach(n => n.remove());
+
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background-color: ${type === 'success' ? 'rgba(0, 200, 83, 0.9)' :
+                                  type === 'warning' ? 'rgba(255, 152, 0, 0.9)' :
+                                  type === 'danger' ? 'rgba(255, 82, 82, 0.9)' :
+                                  'rgba(33, 150, 243, 0.9)'};
+                color: white;
+                border-radius: 6px;
+                z-index: 1000;
+                animation: slideInRight 0.3s ease-out;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                max-width: 400px;
+                word-wrap: break-word;
+                cursor: pointer;
+            `;
+
+            // Add icon based on type
+            const icon = type === 'success' ? 'check-circle' :
+                        type === 'warning' ? 'exclamation-triangle' :
+                        type === 'danger' ? 'exclamation-circle' : 'info-circle';
+
+            notification.innerHTML = `
+                <i class="fas fa-${icon}" style="font-size: 1.2rem;"></i>
+                <span>${message}</span>
+            `;
+
+            notification.onclick = () => {
+                notification.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            };
+
+            document.body.appendChild(notification);
+
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOutRight 0.3s ease-out';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // Clean up on page hide
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                if (liveUpdatesInterval) {
+                    clearInterval(liveUpdatesInterval);
+                    liveUpdatesInterval = null;
+                }
+            } else {
+                startLiveUpdates();
+            }
+        });
+    </script>
+</body>
+</html>
