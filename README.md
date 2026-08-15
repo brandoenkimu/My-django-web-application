@@ -1,3 +1,4 @@
+## Deployment: Vercel
 # Trading Websites Collection
 
 A collection of web-based trading applications and platforms developed for financial market analysis, trading simulations, and investment management.
@@ -23,3 +24,4 @@ This repository contains multiple trading websites and applications designed to 
 - **Version Control**: Git
 
 ## 📁 Repository Structure
+
