@@ -184,11 +184,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# Create static directory if it doesn't exist
-static_dir = BASE_DIR / 'static'
-if not static_dir.exists():
-    static_dir.mkdir(exist_ok=True)
-
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
