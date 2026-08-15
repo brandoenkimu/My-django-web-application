@@ -57,7 +57,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Added for static files on Vercel
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -89,12 +89,21 @@ TEMPLATES = [
 WSGI_APPLICATION = 'bentely_boldtrader.wsgi.application'
 ASGI_APPLICATION = 'bentely_boldtrader.asgi.application'
 
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             "hosts": [('127.0.0.1', 6379)],
+#         },
+#     },
+# }
+
 # File upload settings
 MAX_UPLOAD_SIZE = 25 * 1024 * 1024  # 25MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE
 DATA_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE
 
-# Channel layers
+# Or use in-memory layer for development
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
@@ -106,6 +115,7 @@ WS_URL = os.environ.get('WS_URL', "ws://localhost:8000/ws/chat/")
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
 if os.environ.get('DATABASE_URL'):
     import dj_database_url
     DATABASES = {
@@ -141,6 +151,8 @@ SIMPLE_JWT = {
 }
 
 # Password validation
+# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -157,12 +169,19 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
+# https://docs.djangoproject.com/en/5.2/topics/i18n/
+
 LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'UTC'
+
 USE_I18N = True
+
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.2/howto/static-files/
+
 STATIC_URL = '/static/'
 
 # Create static directory if it doesn't exist
@@ -175,12 +194,14 @@ STATICFILES_DIRS = [
 ]
 
 # Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # API Keys
 TWELVE_DATA_API_KEY = os.environ.get('TWELVE_DATA_API_KEY', "b0e7b04c7af942f7883ede7d5cce7459")
 
-# Cache configuration
+# Cache configuration (add if not present)
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -210,10 +231,10 @@ ACCOUNT_SIGNUP_FIELDS = [
     "password2*",
 ]
 
-# Email
+# For development - email goes to console
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 
-# Social Account settings
+# Social Account settings - Simplified
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
