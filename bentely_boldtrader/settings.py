@@ -12,9 +12,17 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
-from dotenv import load_dotenv
-load_dotenv()
 
+# Try to import dotenv, but don't fail if it's not available (e.g., on Vercel)
+try:
+    from dotenv import load_dotenv
+    # Load .env file only if it exists (local development)
+    env_file = Path(__file__).resolve().parent.parent / '.env'
+    if env_file.exists():
+        load_dotenv(env_file)
+except ImportError:
+    # On Vercel, environment variables are set in the dashboard
+    pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,12 +32,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-b&t+fi$j-y1#efs0%k^05u0^8(z2(0(h@bxk+=e%ite796lr8n'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-b&t+fi$j-y1#efs0%k^05u0^8(z2(0(h@bxk+=e%ite796lr8n')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else ['*']
 
 
 # Application definition
@@ -66,6 +74,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Added for static files on Vercel
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -119,18 +128,29 @@ CHANNEL_LAYERS = {
     }
 }
 # WebSocket URL
-WS_URL = "ws://localhost:8000/ws/chat/"
+WS_URL = os.getenv('WS_URL', "ws://localhost:8000/ws/chat/")
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-   'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Use PostgreSQL on Vercel if DATABASE_URL is set, otherwise SQLite
+if os.getenv('DATABASE_URL'):
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
+            'NAME': os.getenv('DB_NAME', BASE_DIR / 'db.sqlite3'),
+            'USER': os.getenv('DB_USER', ''),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', ''),
+            'PORT': os.getenv('DB_PORT', ''),
+        }
+    }
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -194,7 +214,6 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -202,7 +221,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Add
-TWELVE_DATA_API_KEY = "b0e7b04c7af942f7883ede7d5cce7459"
+TWELVE_DATA_API_KEY = os.getenv('TWELVE_DATA_API_KEY', "b0e7b04c7af942f7883ede7d5cce7459")
 
 # Cache configuration (add if not present)
 CACHES = {
@@ -213,8 +232,8 @@ CACHES = {
 }
 
 # Stripe Configuration
-STRIPE_PUBLIC_KEY = "pk_test_xxxxxxxxxxxxxxxxx"
-STRIPE_SECRET_KEY = "sk_test_xxxxxxxxxxxxxxxxx"
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', "pk_test_xxxxxxxxxxxxxxxxx")
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', "sk_test_xxxxxxxxxxxxxxxxx")
 
 
 LOGIN_REDIRECT_URL = "base"
@@ -241,7 +260,7 @@ ACCOUNT_SIGNUP_FIELDS = [
 
 
 # For development - email goes to console
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 
 # Social Account settings - Simplified
 SOCIALACCOUNT_PROVIDERS = {
@@ -288,4 +307,3 @@ ACCOUNT_LOGOUT_REDIRECT_URL = 'login'  # Where to redirect after logout
 ACCOUNT_EMAIL_VERIFICATION = 'optional'  # 'mandatory', 'optional', or 'none'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # Users can login with username or email
-
