@@ -13,32 +13,19 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
-# Try to import dotenv, but don't fail if it's not available (e.g., on Vercel)
-try:
-    from dotenv import load_dotenv
-    # Load .env file only if it exists (local development)
-    env_file = Path(__file__).resolve().parent.parent / '.env'
-    if env_file.exists():
-        load_dotenv(env_file)
-except ImportError:
-    # On Vercel, environment variables are set in the dashboard
-    pass
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-b&t+fi$j-y1#efs0%k^05u0^8(z2(0(h@bxk+=e%ite796lr8n')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-b&t+fi$j-y1#efs0%k^05u0^8(z2(0(h@bxk+=e%ite796lr8n')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else ['*']
-
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else ['*']
 
 # Application definition
 
@@ -55,7 +42,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
 
-
     # Allauth apps
     'allauth',
     'allauth.account',
@@ -65,16 +51,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
 
-    # Note: Telegram provider might not be available in allauth by default
-    # We'll handle it differently if needed
-
     # Your app
     'My_app',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Added for static files on Vercel
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -98,7 +81,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-
             ],
         },
     },
@@ -107,54 +89,38 @@ TEMPLATES = [
 WSGI_APPLICATION = 'bentely_boldtrader.wsgi.application'
 ASGI_APPLICATION = 'bentely_boldtrader.asgi.application'
 
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
-#         'CONFIG': {
-#             "hosts": [('127.0.0.1', 6379)],
-#         },
-#     },
-# }
-
 # File upload settings
 MAX_UPLOAD_SIZE = 25 * 1024 * 1024  # 25MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE
 DATA_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE
 
-# Or use in-memory layer for development
+# Channel layers
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
     }
 }
-# WebSocket URL
-WS_URL = os.getenv('WS_URL', "ws://localhost:8000/ws/chat/")
 
+# WebSocket URL
+WS_URL = os.environ.get('WS_URL', "ws://localhost:8000/ws/chat/")
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# Use PostgreSQL on Vercel if DATABASE_URL is set, otherwise SQLite
-if os.getenv('DATABASE_URL'):
+if os.environ.get('DATABASE_URL'):
     import dj_database_url
     DATABASES = {
-        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
     }
 else:
     DATABASES = {
         'default': {
-            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
-            'NAME': os.getenv('DB_NAME', BASE_DIR / 'db.sqlite3'),
-            'USER': os.getenv('DB_USER', ''),
-            'PASSWORD': os.getenv('DB_PASSWORD', ''),
-            'HOST': os.getenv('DB_HOST', ''),
-            'PORT': os.getenv('DB_PORT', ''),
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
@@ -175,8 +141,6 @@ SIMPLE_JWT = {
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -192,25 +156,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = '/static/'
 
-# Check if static directory exists, if not create it
+# Create static directory if it doesn't exist
 static_dir = BASE_DIR / 'static'
 if not static_dir.exists():
     static_dir.mkdir(exist_ok=True)
@@ -220,15 +175,12 @@ STATICFILES_DIRS = [
 ]
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# API Keys
+TWELVE_DATA_API_KEY = os.environ.get('TWELVE_DATA_API_KEY', "b0e7b04c7af942f7883ede7d5cce7459")
 
-# Add
-TWELVE_DATA_API_KEY = os.getenv('TWELVE_DATA_API_KEY', "b0e7b04c7af942f7883ede7d5cce7459")
-
-# Cache configuration (add if not present)
+# Cache configuration
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -237,23 +189,18 @@ CACHES = {
 }
 
 # Stripe Configuration
-STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', "pk_test_xxxxxxxxxxxxxxxxx")
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', "sk_test_xxxxxxxxxxxxxxxxx")
-
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', "pk_test_xxxxxxxxxxxxxxxxx")
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', "sk_test_xxxxxxxxxxxxxxxxx")
 
 LOGIN_REDIRECT_URL = "base"
 LOGOUT_REDIRECT_URL = "login"
 LOGIN_URL = "login"
 
-
 # Authentication backends
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
-
-
 ]
-
 
 ACCOUNT_LOGIN_METHODS = {"username", "email"}
 ACCOUNT_SIGNUP_FIELDS = [
@@ -263,11 +210,10 @@ ACCOUNT_SIGNUP_FIELDS = [
     "password2*",
 ]
 
+# Email
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 
-# For development - email goes to console
-EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
-
-# Social Account settings - Simplified
+# Social Account settings
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['profile', 'email'],
@@ -283,32 +229,14 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-# Note: Instagram and Telegram providers are not standard in allauth
-# We'll implement them as custom
-
-# settings.py - Add these allauth settings
-
-# Disable allauth's signup to use your custom view
-ACCOUNT_SIGNUP_REDIRECT_URL = 'base'  # Redirect to your dashboard after signup
-SOCIALACCOUNT_AUTO_SIGNUP = False  # Don't auto create users from social auth
-
-# Or completely disable allauth signup if you want only your custom view
+# Allauth settings
+ACCOUNT_SIGNUP_REDIRECT_URL = 'base'
+SOCIALACCOUNT_AUTO_SIGNUP = False
 ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
 ACCOUNT_FORMS = {
     'signup': 'allauth.account.forms.SignupForm',
 }
-
-# settings.py - Add these settings to fix the issue
-# Site ID
-
-
-# Allauth settings
- # Where to redirect after login
-ACCOUNT_LOGOUT_REDIRECT_URL = 'login'  # Where to redirect after logout
-
-# Fix the deprecated warnings by updating these settings:
-
-# Optional: Email verification settings
-ACCOUNT_EMAIL_VERIFICATION = 'optional'  # 'mandatory', 'optional', or 'none'
+ACCOUNT_LOGOUT_REDIRECT_URL = 'login'
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # Users can login with username or email
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
